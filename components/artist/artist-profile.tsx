@@ -121,6 +121,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
       </div>
 
+      <div className="artist-profile-main mx-auto w-full max-w-[720px] lg:max-w-[760px]">
       {/* ── Profile head ──────────────────────────────────── */}
       <div className="profile-head">
         {artist.instagram_handle && (
@@ -314,6 +315,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
       {/* ── URL footer ────────────────────────────────────── */}
       <div className="profile-footer">
         inkspot.cr · /artist/{artist.handle}
+      </div>
       </div>
 
       {/* ── Save toast (pre-Stage 5.3) ────────────────────── */}

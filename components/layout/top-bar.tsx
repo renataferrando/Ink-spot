@@ -14,18 +14,7 @@ export function TopBar() {
   const tag = TAGS[pathname] ?? "";
 
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "14px 18px 10px",
-        position: "sticky",
-        top: 0,
-        zIndex: 5,
-        background: "var(--bg)",
-      }}
-    >
+    <header className="sticky top-0 z-[5] flex items-center justify-between bg-[var(--bg)] px-[18px] pb-[10px] pt-[14px] lg:hidden">
       {/* Wordmark */}
       <div
         style={{

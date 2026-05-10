@@ -41,6 +41,9 @@ export default function SearchPage() {
     if (image?.url) URL.revokeObjectURL(image.url);
   }, [image]);
 
+  // FE gap: only `q` hits `/api/artists`. Backend already supports `styles` (comma-separated
+  // ArtistStyle slugs → Supabase overlaps on primary_styles). When StyleFilterBar is added,
+  // append selected styles here — do not filter the returned list only on the client.
   async function fetchResults(q: string) {
     setLoading(true);
     try {
@@ -153,7 +156,7 @@ export default function SearchPage() {
   const showStreamCard = mode === "assistant" && (stage === "streaming" || (stage === "results" && stream));
 
   return (
-    <div className="mx-auto flex w-full max-w-[760px] flex-1 flex-col pb-24">
+    <div className="dt-tab-shell mx-auto flex w-full max-w-[760px] flex-1 flex-col pb-24 lg:max-w-[960px] lg:pb-8">
       {/* Hero */}
       <div className="search-hero pt-6">
         <h1 className="title">

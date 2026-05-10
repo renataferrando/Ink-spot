@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { ArtistCard } from "@/components/artist/artist-card";
 import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
+import { ArtistRowDesktop } from "@/components/artist/artist-row-desktop";
 import { MapContainer } from "@/components/map/map-container";
 import { STYLE_LABELS, type ArtistPublic, type ArtistStyle } from "@/types/artist";
 
@@ -76,13 +77,27 @@ async function getArtists(styles?: string): Promise<ArtistPublic[]> {
 
   return (data ?? []).map((row) => {
     const locs = Array.isArray(row.artist_locations) ? row.artist_locations : [];
+    const now = Date.now();
     const current = locs.find((l: Record<string, unknown>) => l.is_current) ?? locs[0] ?? null;
+    const upcoming = locs
+      .filter((l: Record<string, unknown>) => {
+        if (l.is_current) return false;
+        const start = l.starts_at as string | null | undefined;
+        if (!start) return false;
+        return new Date(start).getTime() > now;
+      })
+      .sort(
+        (a: Record<string, unknown>, b: Record<string, unknown>) =>
+          new Date(a.starts_at as string).getTime() -
+          new Date(b.starts_at as string).getTime(),
+      ) as ArtistPublic["upcoming_locations"];
     return {
       id: row.id as string,
       handle: row.handle as string,
       display_name: row.display_name as string,
       bio: row.bio as string | null,
       current_location: current as ArtistPublic["current_location"],
+      upcoming_locations: upcoming,
       instagram_handle: row.instagram_handle as string | null,
       profile_image_url: row.profile_image_url as string | null,
       cover_image_url: row.cover_image_url as string | null,
@@ -114,69 +129,80 @@ export default async function ExplorePage({ searchParams }: Props) {
   const styleLabel = activeStyle ? STYLE_LABELS[activeStyle as ArtistStyle] : null;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col">
-      {/* Map */}
-      <div className="h-[42vh] min-h-48 w-full shrink-0">
-        <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
-          <MapContainer artists={artists} />
-        </Suspense>
-      </div>
+    <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col lg:mx-0 lg:max-w-none lg:min-h-0 lg:flex-1">
+      <div className="dt-stream lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto">
+        <div className="dt-stream-inner lg:mx-auto lg:w-full lg:max-w-[960px] lg:px-6 lg:pb-10">
+          {/* Map */}
+          <div className="dt-map-block h-[42vh] min-h-48 w-full shrink-0 lg:h-[360px] lg:min-h-0">
+            <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
+              <MapContainer artists={artists} />
+            </Suspense>
+          </div>
 
-      {/* Style filter chip rail */}
-      <div className="filter-bar mt-4">
-        {FILTER_CHIPS.map(({ label, value }) => {
-          const isActive = value === activeStyle || (value === null && !activeStyle);
-          const href = value ? `/explore?styles=${value}` : "/explore";
-          return (
-            <Link
-              key={label}
-              href={href}
-              className={`chip${isActive ? " active" : ""}`}
+          {/* Style filter chip rail */}
+          <div className="filter-bar dt-filter-row mt-4">
+            {FILTER_CHIPS.map(({ label, value }) => {
+              const isActive = value === activeStyle || (value === null && !activeStyle);
+              const href = value ? `/explore?styles=${value}` : "/explore";
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  className={`chip${isActive ? " active" : ""}`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Section header — design's title + count */}
+          <div className="section-head">
+            <h2 className="title h1-flat">
+              {styleLabel ? (
+                <em>{styleLabel}</em>
+              ) : (
+                <>
+                  Within <em>50&nbsp;km</em>
+                </>
+              )}
+            </h2>
+            <span className="count">
+              {artists.length} ARTIST{artists.length !== 1 ? "S" : ""}
+              {styleLabel ? "" : ` · ${locationLabel.toUpperCase()}`}
+            </span>
+          </div>
+
+          {/* Artist list — mobile cards / desktop dt rows */}
+          <div className="dt-list flex flex-col pb-24 lg:pb-0">
+            <Suspense
+              fallback={
+                <>
+                  <ArtistCardSkeleton />
+                  <ArtistCardSkeleton />
+                  <ArtistCardSkeleton />
+                </>
+              }
             >
-              {label}
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Section header — design's title + count */}
-      <div className="section-head">
-        <h2 className="title">
-          {styleLabel ? (
-            <em>{styleLabel}</em>
-          ) : (
-            <>
-              Within <em>50&nbsp;km</em>
-            </>
-          )}
-        </h2>
-        <span className="count">
-          {artists.length} ARTIST{artists.length !== 1 ? "S" : ""}
-          {styleLabel ? "" : ` · ${locationLabel.toUpperCase()}`}
-        </span>
-      </div>
-
-      {/* Artist list — flush stack with hairline dividers */}
-      <div className="flex flex-col pb-24">
-        <Suspense
-          fallback={
-            <>
-              <ArtistCardSkeleton />
-              <ArtistCardSkeleton />
-              <ArtistCardSkeleton />
-            </>
-          }
-        >
-          {artists.length === 0 ? (
-            <p className="text-muted-foreground px-[18px] py-12 text-center text-sm">
-              No studios found for this style yet.
-            </p>
-          ) : (
-            artists.map((artist, i) => (
-              <ArtistCard key={artist.id} artist={artist} priority={i < 2} />
-            ))
-          )}
-        </Suspense>
+              {artists.length === 0 ? (
+                <p className="text-muted-foreground px-[18px] py-12 text-center text-sm">
+                  No studios found for this style yet.
+                </p>
+              ) : (
+                artists.map((artist, i) => (
+                  <div key={artist.id}>
+                    <div className="lg:hidden">
+                      <ArtistCard artist={artist} priority={i < 2} />
+                    </div>
+                    <div className="hidden lg:block">
+                      <ArtistRowDesktop artist={artist} priority={i < 2} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </Suspense>
+          </div>
+        </div>
       </div>
     </div>
   );

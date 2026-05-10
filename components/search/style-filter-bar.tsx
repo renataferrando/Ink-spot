@@ -1,5 +1,8 @@
 "use client";
 
+// Not wired to Search yet. Intended: parent passes `onChange` → Search adds `styles` to
+// `/api/artists` (BE filter). Avoid client-only filtering of the full artist list here.
+
 import { cn } from "@/lib/utils";
 import { ALL_STYLES, STYLE_LABELS, type ArtistStyle } from "@/types/artist";
 

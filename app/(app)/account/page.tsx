@@ -23,10 +23,9 @@ export default async function AccountPage() {
   if (!user) {
     return (
       <div
-        className="flex-1 overflow-y-auto scrollbar-none"
+        className="dt-tab-shell flex-1 overflow-y-auto scrollbar-none"
         style={{ padding: "0 18px 32px" }}
       >
-        {/* Heading */}
         <div style={{ marginTop: 12, marginBottom: 8 }}>
           <h1
             style={{
@@ -117,7 +116,7 @@ export default async function AccountPage() {
   if (!artist) {
     return (
       <div
-        className="flex-1 overflow-y-auto scrollbar-none"
+        className="dt-tab-shell flex-1 overflow-y-auto scrollbar-none"
         style={{ padding: "0 18px 32px" }}
       >
         <div style={{ marginTop: 12 }}>
@@ -158,7 +157,7 @@ export default async function AccountPage() {
   // ── Authenticated, has artist ─────────────────────
   return (
     <div
-      className="flex-1 overflow-y-auto scrollbar-none"
+      className="dt-tab-shell flex-1 overflow-y-auto scrollbar-none"
       style={{ padding: "0 18px 32px" }}
     >
       {/* Mini profile header */}
