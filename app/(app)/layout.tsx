@@ -1,3 +1,5 @@
+import "./desktop.css";
+
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { DesktopNav } from "@/components/layout/desktop-nav";
 import { TopBar } from "@/components/layout/top-bar";

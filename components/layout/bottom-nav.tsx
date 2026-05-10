@@ -1,5 +1,7 @@
 "use client";
 
+import "./bottom-nav.css";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

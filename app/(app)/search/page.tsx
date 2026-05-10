@@ -1,5 +1,7 @@
 "use client";
 
+import "./search.css";
+
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 

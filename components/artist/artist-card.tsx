@@ -1,3 +1,5 @@
+import "./artist-card.css";
+
 import Image from "next/image";
 import Link from "next/link";
 
