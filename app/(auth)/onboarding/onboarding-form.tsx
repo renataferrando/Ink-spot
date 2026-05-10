@@ -26,10 +26,24 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 8,
 };
 
-function FocusInput({ id, name, placeholder, required, minLength, maxLength, disabled, type }: {
-  id: string; name: string; placeholder: string;
-  required?: boolean; minLength?: number; maxLength?: number;
-  disabled: boolean; type?: string;
+function FocusInput({
+  id,
+  name,
+  placeholder,
+  required,
+  minLength,
+  maxLength,
+  disabled,
+  type,
+}: {
+  id: string;
+  name: string;
+  placeholder: string;
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  disabled: boolean;
+  type?: string;
 }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -50,20 +64,18 @@ function FocusInput({ id, name, placeholder, required, minLength, maxLength, dis
 }
 
 export function OnboardingForm() {
-  const [state, action, pending] = useActionState<CreateProfileState, FormData>(
-    createProfile,
-    {},
-  );
-  const [igFocused, setIgFocused]       = useState(false);
-  const [bioFocused, setBioFocused]     = useState(false);
+  const [state, action, pending] = useActionState<CreateProfileState, FormData>(createProfile, {});
+  const [igFocused, setIgFocused] = useState(false);
+  const [bioFocused, setBioFocused] = useState(false);
 
   return (
     <form action={action} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
       {/* Studio name */}
       <div>
         <div style={labelStyle}>
-          <label htmlFor="studio_name" className="label">Studio name</label>
+          <label htmlFor="studio_name" className="label">
+            Studio name
+          </label>
           <span style={{ color: "#f87171", fontSize: 10 }}>*</span>
         </div>
         <FocusInput
@@ -80,8 +92,20 @@ export function OnboardingForm() {
       {/* Instagram handle */}
       <div>
         <div style={labelStyle}>
-          <label htmlFor="instagram_handle" className="label">Instagram handle</label>
-          <span style={{ fontFamily: "var(--font-jetbrains, ui-monospace)", fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--faint)" }}>(optional)</span>
+          <label htmlFor="instagram_handle" className="label">
+            Instagram handle
+          </label>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains, ui-monospace)",
+              fontSize: 9,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--faint)",
+            }}
+          >
+            (optional)
+          </span>
         </div>
         <div style={{ position: "relative" }}>
           <span
@@ -95,7 +119,9 @@ export function OnboardingForm() {
               color: "var(--dim)",
               pointerEvents: "none",
             }}
-          >@</span>
+          >
+            @
+          </span>
           <input
             id="instagram_handle"
             name="instagram_handle"
@@ -117,8 +143,20 @@ export function OnboardingForm() {
       {/* Bio */}
       <div>
         <div style={labelStyle}>
-          <label htmlFor="bio" className="label">Short bio</label>
-          <span style={{ fontFamily: "var(--font-jetbrains, ui-monospace)", fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--faint)" }}>(optional, max 200)</span>
+          <label htmlFor="bio" className="label">
+            Short bio
+          </label>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains, ui-monospace)",
+              fontSize: 9,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--faint)",
+            }}
+          >
+            (optional, max 200)
+          </span>
         </div>
         <textarea
           id="bio"
@@ -140,8 +178,20 @@ export function OnboardingForm() {
       {/* Years of experience */}
       <div>
         <div style={labelStyle}>
-          <label htmlFor="years_experience" className="label">Years of experience</label>
-          <span style={{ fontFamily: "var(--font-jetbrains, ui-monospace)", fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--faint)" }}>(optional)</span>
+          <label htmlFor="years_experience" className="label">
+            Years of experience
+          </label>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains, ui-monospace)",
+              fontSize: 9,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--faint)",
+            }}
+          >
+            (optional)
+          </span>
         </div>
         <FocusInput
           id="years_experience"
@@ -152,12 +202,17 @@ export function OnboardingForm() {
         />
       </div>
 
-      {state.error && (
-        <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{state.error}</p>
-      )}
+      {state.error && <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{state.error}</p>}
 
       <button type="submit" className="btn-primary" disabled={pending}>
-        {pending ? "Creating profile…" : <><span>Continue</span><ArrowRight size={14} /></>}
+        {pending ? (
+          "Creating profile…"
+        ) : (
+          <>
+            <span>Continue</span>
+            <ArrowRight size={14} />
+          </>
+        )}
       </button>
     </form>
   );

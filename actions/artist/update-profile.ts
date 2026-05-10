@@ -8,9 +8,9 @@ import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/s
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const Schema = z.object({
-  bio:              z.string().max(200).optional(),
-  website_url:      z.string().url().optional().or(z.literal("")),
-  contact_email:    z.string().email().optional().or(z.literal("")),
+  bio: z.string().max(200).optional(),
+  website_url: z.string().url().optional().or(z.literal("")),
+  contact_email: z.string().email().optional().or(z.literal("")),
   years_experience: z.coerce.number().int().min(0).max(60).optional().or(z.literal("")),
 });
 
@@ -21,7 +21,9 @@ export async function updateProfile(
   formData: FormData,
 ): Promise<UpdateProfileState> {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const parsed = Schema.safeParse(Object.fromEntries(formData));
@@ -38,12 +40,15 @@ export async function updateProfile(
     .single();
   if (!artist) return { error: "Artist not found." };
 
-  await admin.from("artists").update({
-    bio:              bio || null,
-    website_url:      website_url || null,
-    contact_email:    contact_email || null,
-    years_experience: typeof years_experience === "number" ? years_experience : null,
-  }).eq("id", artist.id);
+  await admin
+    .from("artists")
+    .update({
+      bio: bio || null,
+      website_url: website_url || null,
+      contact_email: contact_email || null,
+      years_experience: typeof years_experience === "number" ? years_experience : null,
+    })
+    .eq("id", artist.id);
 
   revalidateTag(`artist:${artist.handle}`, "max");
   return { success: true };

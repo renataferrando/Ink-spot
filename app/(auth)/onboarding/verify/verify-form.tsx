@@ -12,8 +12,8 @@ interface Props {
 }
 
 export function VerifyForm({ handle, code }: Props) {
-  const [stage, setStage]         = useState<"paste" | "checking" | "verified">("paste");
-  const [copied, setCopied]       = useState(false);
+  const [stage, setStage] = useState<"paste" | "checking" | "verified">("paste");
+  const [copied, setCopied] = useState(false);
   const [checkError, setCheckError] = useState<string | null>(null);
   const [showManual, setShowManual] = useState(false);
   const [manualSent, setManualSent] = useState(false);
@@ -37,8 +37,10 @@ export function VerifyForm({ handle, code }: Props) {
     setStage("checking");
     setCheckError(null);
     try {
-      const res  = await fetch(`/api/onboarding/check-bio?handle=${encodeURIComponent(handle)}&code=${encodeURIComponent(code)}`);
-      const json = await res.json() as { verified: boolean };
+      const res = await fetch(
+        `/api/onboarding/check-bio?handle=${encodeURIComponent(handle)}&code=${encodeURIComponent(code)}`,
+      );
+      const json = (await res.json()) as { verified: boolean };
       if (json.verified) {
         setStage("verified");
       } else {
@@ -76,9 +78,13 @@ export function VerifyForm({ handle, code }: Props) {
           }}
         >
           {copied ? (
-            <><CheckCircle2 size={12} /> Copied</>
+            <>
+              <CheckCircle2 size={12} /> Copied
+            </>
           ) : (
-            <><Copy size={12} /> Copy</>
+            <>
+              <Copy size={12} /> Copy
+            </>
           )}
         </button>
       </div>
@@ -103,9 +109,7 @@ export function VerifyForm({ handle, code }: Props) {
         </button>
       )}
 
-      {checkError && (
-        <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{checkError}</p>
-      )}
+      {checkError && <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{checkError}</p>}
 
       {/* Manual review link */}
       {stage !== "verified" && (

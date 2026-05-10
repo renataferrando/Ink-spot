@@ -11,7 +11,9 @@ export const metadata: Metadata = { title: "Manage locations" };
 
 export default async function LocationsPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const admin = getSupabaseAdminClient();
@@ -24,23 +26,27 @@ export default async function LocationsPage() {
 
   const { data: locs } = await admin
     .from("artist_locations")
-    .select("id, artist_id, lat, lng, location_name, kind, starts_at, ends_at, is_current, studio_name, notes")
+    .select(
+      "id, artist_id, lat, lng, location_name, kind, starts_at, ends_at, is_current, studio_name, notes",
+    )
     .eq("artist_id", artist.id)
     .order("is_current", { ascending: false })
     .order("starts_at", { ascending: true });
 
   const locations = (locs ?? []) as ArtistLocation[];
-  const current  = locations.find((l) => l.is_current) ?? null;
+  const current = locations.find((l) => l.is_current) ?? null;
   const upcoming = locations.filter((l) => !l.is_current);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 space-y-8">
+    <div className="mx-auto max-w-2xl space-y-8 px-4 py-10">
       <h1 className="text-xl font-medium">Manage locations</h1>
 
       <LocationTimeline currentLocation={current} upcomingLocations={upcoming} />
 
       <div className="space-y-3">
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Add location</h2>
+        <h2 className="text-muted-foreground text-sm font-medium tracking-widest uppercase">
+          Add location
+        </h2>
         <AddLocationForm />
       </div>
     </div>

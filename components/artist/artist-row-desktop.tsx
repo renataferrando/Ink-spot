@@ -29,8 +29,7 @@ function pickNextLocation(upcoming?: ArtistLocation[]) {
     .filter((l) => l.starts_at)
     .sort(
       (a, b) =>
-        new Date(a.starts_at as string).getTime() -
-        new Date(b.starts_at as string).getTime(),
+        new Date(a.starts_at as string).getTime() - new Date(b.starts_at as string).getTime(),
     );
   return future[0] ?? upcoming[0];
 }
@@ -108,8 +107,16 @@ export function ArtistRowDesktop({ artist, priority = false }: Props) {
       </Link>
       <Link href={href} className="dt-list-open">
         Open
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width={14} height={14} aria-hidden>
-          <path d="M5 12h14M13 6l6 6-6 6"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          width={14}
+          height={14}
+          aria-hidden
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
       </Link>
     </article>

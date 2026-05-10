@@ -11,7 +11,7 @@ export function StepDots({ current, totalSteps = 6 }: StepDotsProps) {
       {Array.from({ length: n }, (_, i) => i + 1).map((stepNum) => (
         <div
           key={stepNum}
-          className={`step${stepNum < current ? " done" : stepNum === current ? " now" : ""}`}
+          className={`step${stepNum < current ? "done" : stepNum === current ? "now" : ""}`}
         />
       ))}
     </div>

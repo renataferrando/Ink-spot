@@ -10,7 +10,9 @@ const MAX_BYTES = 5 * 1024 * 1024;
 
 async function getOwnedArtist() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" as const, user: null, artist: null };
 
   const admin = getSupabaseAdminClient();
@@ -43,10 +45,7 @@ export async function syncProfileImageFromPortfolio(): Promise<void> {
 
   if (!first?.image_url) return;
 
-  await admin
-    .from("artists")
-    .update({ profile_image_url: first.image_url })
-    .eq("id", artist.id);
+  await admin.from("artists").update({ profile_image_url: first.image_url }).eq("id", artist.id);
 
   revalidateTag(`artist:${artist.handle}`, "max");
 }
@@ -63,7 +62,7 @@ export async function saveOnboardingAppearance(formData: FormData): Promise<{ er
   const { artist } = ctx;
 
   const avatar = formData.get("avatar");
-  const cover  = formData.get("cover");
+  const cover = formData.get("cover");
 
   const upload = async (file: File, basename: "avatar" | "cover") => {
     if (!file || typeof file === "string" || file.size === 0) return null;
@@ -88,8 +87,7 @@ export async function saveOnboardingAppearance(formData: FormData): Promise<{ er
   try {
     const avatarUrl =
       avatar instanceof File && avatar.size > 0 ? await upload(avatar, "avatar") : null;
-    const coverUrl =
-      cover instanceof File && cover.size > 0 ? await upload(cover, "cover") : null;
+    const coverUrl = cover instanceof File && cover.size > 0 ? await upload(cover, "cover") : null;
 
     const admin = getSupabaseAdminClient();
     const patch: { profile_image_url?: string; cover_image_url?: string } = {};

@@ -29,7 +29,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.95) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0) 30%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
   pointer-events: none;
 }
 .cover .back-btn,
@@ -38,10 +43,10 @@
   top: 14px;
   width: 36px;
   height: 36px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -50,16 +55,22 @@
   z-index: 5;
   transition: background 0.15s;
 }
-.cover .back-btn { left: 14px; }
-.cover .share-btn { right: 14px; }
+.cover .back-btn {
+  left: 14px;
+}
+.cover .share-btn {
+  right: 14px;
+}
 .cover .back-btn:hover,
-.cover .share-btn:hover { background: rgba(0,0,0,0.7); }
+.cover .share-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
 .cover .demo-banner {
   position: absolute;
   bottom: 16px;
   left: 16px;
   z-index: 4;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--hairline);
@@ -100,7 +111,10 @@
   margin: 0 0 6px;
   font-weight: 500;
 }
-.profile-head .name em { font-style: normal; color: var(--accent); }
+.profile-head .name em {
+  font-style: normal;
+  color: var(--accent);
+}
 .profile-head .meta {
   display: flex;
   align-items: center;
@@ -109,7 +123,9 @@
   color: var(--text-2);
   font-size: 13px;
 }
-.profile-head .meta .sep { color: var(--faint); }
+.profile-head .meta .sep {
+  color: var(--faint);
+}
 
 /* ── Now / Next location bar ──────────────────────────── */
 .location-bar {
@@ -123,7 +139,10 @@
   gap: 14px;
   min-width: 0;
 }
-.location-bar .col { flex: 1; min-width: 0; }
+.location-bar .col {
+  flex: 1;
+  min-width: 0;
+}
 .location-bar .col .lbl {
   font-family: var(--font-mono, ui-monospace);
   font-size: 9px;
@@ -145,8 +164,12 @@
   color: var(--dim);
   margin-top: 2px;
 }
-.location-bar .col.now .val { color: var(--text); }
-.location-bar .col.next .val { color: var(--text-2); }
+.location-bar .col.now .val {
+  color: var(--text);
+}
+.location-bar .col.next .val {
+  color: var(--text-2);
+}
 .location-bar .col.now .lbl::before {
   content: "";
   display: inline-block;
@@ -192,9 +215,13 @@
   color: var(--text);
   flex-shrink: 0;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
-.btn-icon:hover { background: var(--surface-3); }
+.btn-icon:hover {
+  background: var(--surface-3);
+}
 .btn-icon.saved {
   color: var(--accent);
   border-color: var(--accent);
@@ -245,8 +272,12 @@
   border-radius: 50%;
   background: var(--accent);
 }
-.section .head .ai-tag.dim { color: var(--dim); }
-.section .head .ai-tag.dim::before { background: var(--dim); }
+.section .head .ai-tag.dim {
+  color: var(--dim);
+}
+.section .head .ai-tag.dim::before {
+  background: var(--dim);
+}
 
 .summary-body {
   font-size: 19px;
@@ -254,7 +285,10 @@
   color: var(--text);
   text-wrap: pretty;
 }
-.summary-body em { font-style: normal; color: var(--accent); }
+.summary-body em {
+  font-style: normal;
+  color: var(--accent);
+}
 
 /* ── Style breakdown bars ─────────────────────────────── */
 .style-breakdown {
@@ -308,26 +342,32 @@
   cursor: pointer;
   background: var(--surface-2);
 }
-.portfolio-grid .tile.tall { aspect-ratio: 0.75; }
+.portfolio-grid .tile.tall {
+  aspect-ratio: 0.75;
+}
 .portfolio-grid .tile img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s var(--e-out);
 }
-.portfolio-grid .tile:hover img { transform: scale(1.05); }
+.portfolio-grid .tile:hover img {
+  transform: scale(1.05);
+}
 .portfolio-grid .tile .overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   padding: 12px;
-  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85));
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.85));
   opacity: 0;
   transition: opacity 0.3s;
   pointer-events: none;
 }
-.portfolio-grid .tile:hover .overlay { opacity: 1; }
+.portfolio-grid .tile:hover .overlay {
+  opacity: 1;
+}
 .portfolio-grid .tile .style-tag {
   font-family: var(--font-mono, ui-monospace);
   font-size: 9px;
@@ -363,7 +403,11 @@
   align-items: center;
   justify-content: space-between;
 }
-.qa-panel .qa-head .lhs { display: flex; align-items: center; gap: 10px; }
+.qa-panel .qa-head .lhs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .qa-panel .qa-head .glow {
   width: 24px;
   height: 24px;
@@ -378,7 +422,9 @@
   background: var(--accent);
   border-radius: 50%;
 }
-.qa-panel .qa-head .ttl { font-size: 17px; }
+.qa-panel .qa-head .ttl {
+  font-size: 17px;
+}
 .qa-panel .qa-head .pill {
   font-family: var(--font-mono, ui-monospace);
   font-size: 9px;
@@ -421,7 +467,10 @@
   padding: 6px 10px;
   background: transparent;
 }
-.qa-suggested button:disabled { opacity: 0.5; cursor: not-allowed; }
+.qa-suggested button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .qa-input {
   display: flex;
   align-items: center;
@@ -437,8 +486,12 @@
   border: 0;
   outline: none;
 }
-.qa-input input::placeholder { color: var(--faint); }
-.qa-input input:disabled { color: var(--dim); }
+.qa-input input::placeholder {
+  color: var(--faint);
+}
+.qa-input input:disabled {
+  color: var(--dim);
+}
 .qa-input button.send {
   width: 32px;
   height: 32px;
@@ -450,7 +503,10 @@
   justify-content: center;
   border: 0;
 }
-.qa-input button.send:disabled { opacity: 0.45; cursor: not-allowed; }
+.qa-input button.send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
 /* ── Footer + toast ───────────────────────────────────── */
 .profile-footer {
@@ -477,7 +533,7 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
   animation: toast-in 0.18s var(--e-out);
 }
 .save-toast a {
@@ -488,6 +544,12 @@
   color: var(--accent);
 }
 @keyframes toast-in {
-  from { opacity: 0; transform: translate(-50%, 8px); }
-  to   { opacity: 1; transform: translate(-50%, 0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }

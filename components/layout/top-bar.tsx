@@ -4,8 +4,8 @@ import { usePathname } from "next/navigation";
 
 const TAGS: Record<string, string> = {
   "/explore": "SANTA TERESA · 12 KM",
-  "/search":  "SEARCH",
-  "/saved":   "SAVED",
+  "/search": "SEARCH",
+  "/saved": "SAVED",
   "/account": "ACCOUNT",
 };
 
@@ -14,7 +14,7 @@ export function TopBar() {
   const tag = TAGS[pathname] ?? "";
 
   return (
-    <header className="sticky top-0 z-[5] flex items-center justify-between bg-[var(--bg)] px-[18px] pb-[10px] pt-[14px] lg:hidden">
+    <header className="sticky top-0 z-[5] flex items-center justify-between bg-[var(--bg)] px-[18px] pt-[14px] pb-[10px] lg:hidden">
       {/* Wordmark */}
       <div
         style={{

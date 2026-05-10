@@ -86,25 +86,13 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
       {/* ── Cover ─────────────────────────────────────────── */}
       <div className="cover">
         {coverSrc ? (
-          <Image
-            src={coverSrc}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            className="object-cover"
-          />
+          <Image src={coverSrc} alt="" fill sizes="100vw" priority className="object-cover" />
         ) : (
           <div className="initials-fallback" aria-hidden>
             {initials}
           </div>
         )}
-        <button
-          type="button"
-          className="back-btn"
-          aria-label="Back"
-          onClick={() => router.back()}
-        >
+        <button type="button" className="back-btn" aria-label="Back" onClick={() => router.back()}>
           <ChevronLeft size={18} aria-hidden />
         </button>
         <button
@@ -124,200 +112,181 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
       </div>
 
       <div className="artist-profile-main mx-auto w-full max-w-[720px] lg:max-w-[760px]">
-      {/* ── Profile head ──────────────────────────────────── */}
-      <div className="profile-head">
-        {artist.instagram_handle && (
-          <div className="handle">@{artist.instagram_handle}</div>
+        {/* ── Profile head ──────────────────────────────────── */}
+        <div className="profile-head">
+          {artist.instagram_handle && <div className="handle">@{artist.instagram_handle}</div>}
+          <h1 className="name">
+            {displayFirst}
+            {displayRest && (
+              <>
+                {" "}
+                <em>{displayRest}</em>
+              </>
+            )}
+          </h1>
+          <div className="meta">
+            {artist.years_experience != null && <span>{artist.years_experience}&nbsp;yrs</span>}
+            {artist.years_experience != null && artist.primary_styles.length > 0 && (
+              <span className="sep">·</span>
+            )}
+            {artist.primary_styles.length > 0 && (
+              <span>
+                {artist.primary_styles
+                  .slice(0, 2)
+                  .map((s) => STYLE_LABELS[s])
+                  .join(" / ")}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* ── Location bar (Now → Next) ─────────────────────── */}
+        {(artist.current_location || upcoming) && (
+          <div className="location-bar" id="travel">
+            <div className="col now">
+              <div className="lbl">Now</div>
+              <div className="val">
+                {artist.current_location?.location_name?.split(",")[0] ?? "—"}
+              </div>
+              <div className="sub">{artist.current_location?.studio_name ?? ""}</div>
+            </div>
+            <div className="arrow" aria-hidden>
+              <ArrowRight size={14} />
+            </div>
+            <div className="col next">
+              <div className="lbl">Next</div>
+              <div className="val">{upcoming?.location_name?.split(",")[0] ?? "Open"}</div>
+              <div className="sub">
+                {upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : ""}
+              </div>
+            </div>
+          </div>
         )}
-        <h1 className="name">
-          {displayFirst}
-          {displayRest && <> <em>{displayRest}</em></>}
-        </h1>
-        <div className="meta">
-          {artist.years_experience != null && (
-            <span>{artist.years_experience}&nbsp;yrs</span>
-          )}
-          {artist.years_experience != null && artist.primary_styles.length > 0 && (
-            <span className="sep">·</span>
-          )}
-          {artist.primary_styles.length > 0 && (
-            <span>
-              {artist.primary_styles
-                .slice(0, 2)
-                .map((s) => STYLE_LABELS[s])
-                .join(" / ")}
-            </span>
-          )}
-        </div>
-      </div>
 
-      {/* ── Location bar (Now → Next) ─────────────────────── */}
-      {(artist.current_location || upcoming) && (
-        <div className="location-bar" id="travel">
-          <div className="col now">
-            <div className="lbl">Now</div>
-            <div className="val">
-              {artist.current_location?.location_name?.split(",")[0] ?? "—"}
-            </div>
-            <div className="sub">
-              {artist.current_location?.studio_name ?? ""}
-            </div>
-          </div>
-          <div className="arrow" aria-hidden>
-            <ArrowRight size={14} />
-          </div>
-          <div className="col next">
-            <div className="lbl">Next</div>
-            <div className="val">
-              {upcoming?.location_name?.split(",")[0] ?? "Open"}
-            </div>
-            <div className="sub">
-              {upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : ""}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── CTA row ───────────────────────────────────────── */}
-      <div className="cta-row">
-        {inquireHref ? (
-          <a
-            className="btn-primary"
-            href={inquireHref}
-            target={inquireHref.startsWith("http") ? "_blank" : undefined}
-            rel={inquireHref.startsWith("http") ? "noopener noreferrer" : undefined}
-          >
-            <MessageSquare size={14} aria-hidden />
-            {inquireLabel}
+        {/* ── CTA row ───────────────────────────────────────── */}
+        <div className="cta-row">
+          {inquireHref ? (
+            <a
+              className="btn-primary"
+              href={inquireHref}
+              target={inquireHref.startsWith("http") ? "_blank" : undefined}
+              rel={inquireHref.startsWith("http") ? "noopener noreferrer" : undefined}
+            >
+              <MessageSquare size={14} aria-hidden />
+              {inquireLabel}
+            </a>
+          ) : (
+            <button type="button" className="btn-primary" disabled title={inquireDisabledReason}>
+              <MessageSquare size={14} aria-hidden />
+              Inquire
+            </button>
+          )}
+          <a className="btn-secondary" href="#travel">
+            <Calendar size={14} aria-hidden />
+            Travel dates
           </a>
-        ) : (
           <button
             type="button"
-            className="btn-primary"
-            disabled
-            title={inquireDisabledReason}
+            className="btn-icon"
+            aria-label="Save artist"
+            onClick={showSaveToast}
           >
-            <MessageSquare size={14} aria-hidden />
-            Inquire
+            <Heart size={18} aria-hidden />
           </button>
+        </div>
+
+        {/* ── Bio ───────────────────────────────────────────── */}
+        {artist.bio && <div className="bio">{artist.bio}</div>}
+
+        {/* ── Style brief (only when AI summary + style_confidence exist) ── */}
+        {styleBreakdown && (
+          <div className="section">
+            <div className="head">
+              <div className="title">Style brief</div>
+              <div className="ai-tag">AI · Auto-generated</div>
+            </div>
+            {artist.style_description && <p className="summary-body">{artist.style_description}</p>}
+            <div style={{ height: 18 }} />
+            <div className="style-breakdown">
+              {styleBreakdown.map(([name, pct]) => (
+                <div className="style-row" key={name}>
+                  <div className="name">{name}</div>
+                  <div className="bar">
+                    <div className="fill" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="pct">{pct}%</div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
-        <a className="btn-secondary" href="#travel">
-          <Calendar size={14} aria-hidden />
-          Travel dates
-        </a>
-        <button
-          type="button"
-          className="btn-icon"
-          aria-label="Save artist"
-          onClick={showSaveToast}
-        >
-          <Heart size={18} aria-hidden />
-        </button>
-      </div>
 
-      {/* ── Bio ───────────────────────────────────────────── */}
-      {artist.bio && <div className="bio">{artist.bio}</div>}
-
-      {/* ── Style brief (only when AI summary + style_confidence exist) ── */}
-      {styleBreakdown && (
+        {/* ── Portfolio masonry ─────────────────────────────── */}
         <div className="section">
           <div className="head">
-            <div className="title">Style brief</div>
-            <div className="ai-tag">AI · Auto-generated</div>
+            <div className="title">Portfolio · {artist.portfolio_items.length}</div>
+            {artist.portfolio_items.length > 0 && <div className="ai-tag dim">Filter</div>}
           </div>
-          {artist.style_description && (
-            <p className="summary-body">{artist.style_description}</p>
-          )}
-          <div style={{ height: 18 }} />
-          <div className="style-breakdown">
-            {styleBreakdown.map(([name, pct]) => (
-              <div className="style-row" key={name}>
-                <div className="name">{name}</div>
-                <div className="bar">
-                  <div className="fill" style={{ width: `${pct}%` }} />
-                </div>
-                <div className="pct">{pct}%</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Portfolio masonry ─────────────────────────────── */}
-      <div className="section">
-        <div className="head">
-          <div className="title">Portfolio · {artist.portfolio_items.length}</div>
-          {artist.portfolio_items.length > 0 && (
-            <div className="ai-tag dim">Filter</div>
-          )}
-        </div>
-        {artist.portfolio_items.length > 0 ? (
-          <div className="portfolio-grid" style={{ marginLeft: -18, marginRight: -18 }}>
-            {artist.portfolio_items.map((item, i) => {
-              const tagStyle = item.detected_styles[0] ?? artist.primary_styles[0];
-              return (
-                <div
-                  key={item.id}
-                  className={"tile" + (i % 3 === 0 ? " tall" : "")}
-                >
-                  <Image
-                    src={item.image_url}
-                    alt={item.alt_text ?? `Tattoo by ${artist.display_name}`}
-                    fill
-                    sizes="(max-width: 640px) 50vw, 320px"
-                    className="object-cover"
-                    loading={i < 2 ? "eager" : "lazy"}
-                  />
-                  {tagStyle && (
-                    <div className="overlay">
-                      <div className="style-tag">{STYLE_LABELS[tagStyle]}</div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="portfolio-empty">No portfolio uploaded yet</div>
-        )}
-      </div>
-
-      {/* ── Q&A panel shell (Stage 5.5.3 wires this) ─────── */}
-      {!artist.is_demo && (
-        <div className="qa-panel">
-          <div className="qa-head">
-            <div className="lhs">
-              <div className="glow" />
-              <div className="ttl">Ask about {displayFirst}</div>
+          {artist.portfolio_items.length > 0 ? (
+            <div className="portfolio-grid" style={{ marginLeft: -18, marginRight: -18 }}>
+              {artist.portfolio_items.map((item, i) => {
+                const tagStyle = item.detected_styles[0] ?? artist.primary_styles[0];
+                return (
+                  <div key={item.id} className={"tile" + (i % 3 === 0 ? " tall" : "")}>
+                    <Image
+                      src={item.image_url}
+                      alt={item.alt_text ?? `Tattoo by ${artist.display_name}`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, 320px"
+                      className="object-cover"
+                      loading={i < 2 ? "eager" : "lazy"}
+                    />
+                    {tagStyle && (
+                      <div className="overlay">
+                        <div className="style-tag">{STYLE_LABELS[tagStyle]}</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div className="pill">AI · Coming soon</div>
-          </div>
-          <div className="qa-body placeholder">
-            Conversational Q&amp;A unlocks in Phase 5.5
-          </div>
-          <div className="qa-suggested">
-            {QA_SUGGESTIONS.map((q) => (
-              <button key={q} type="button" disabled>
-                {q}
-              </button>
-            ))}
-          </div>
-          <div className="qa-input">
-            <input
-              placeholder={`Ask about ${displayFirst}'s work, style, availability…`}
-              disabled
-            />
-            <button className="send" type="button" disabled aria-label="Send">
-              <ArrowUp size={14} aria-hidden />
-            </button>
-          </div>
+          ) : (
+            <div className="portfolio-empty">No portfolio uploaded yet</div>
+          )}
         </div>
-      )}
 
-      {/* ── URL footer ────────────────────────────────────── */}
-      <div className="profile-footer">
-        inkspot.cr · /artist/{artist.handle}
-      </div>
+        {/* ── Q&A panel shell (Stage 5.5.3 wires this) ─────── */}
+        {!artist.is_demo && (
+          <div className="qa-panel">
+            <div className="qa-head">
+              <div className="lhs">
+                <div className="glow" />
+                <div className="ttl">Ask about {displayFirst}</div>
+              </div>
+              <div className="pill">AI · Coming soon</div>
+            </div>
+            <div className="qa-body placeholder">Conversational Q&amp;A unlocks in Phase 5.5</div>
+            <div className="qa-suggested">
+              {QA_SUGGESTIONS.map((q) => (
+                <button key={q} type="button" disabled>
+                  {q}
+                </button>
+              ))}
+            </div>
+            <div className="qa-input">
+              <input
+                placeholder={`Ask about ${displayFirst}'s work, style, availability…`}
+                disabled
+              />
+              <button className="send" type="button" disabled aria-label="Send">
+                <ArrowUp size={14} aria-hidden />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── URL footer ────────────────────────────────────── */}
+        <div className="profile-footer">inkspot.cr · /artist/{artist.handle}</div>
       </div>
 
       {/* ── Save toast (pre-Stage 5.3) ────────────────────── */}

@@ -6,8 +6,8 @@ export const revalidate = 60;
 
 const QuerySchema = z.object({
   styles: z.string().optional(),
-  q:      z.string().max(200).optional(),
-  limit:  z.coerce.number().int().min(1).max(50).default(20),
+  q: z.string().max(200).optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
@@ -39,7 +39,9 @@ export async function GET(request: Request) {
 
     const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
-        getAll() { return cookieStore.getAll(); },
+        getAll() {
+          return cookieStore.getAll();
+        },
         setAll(cookiesToSet: Array<{ name: string; value: string; options?: object }>) {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options ?? {}),
@@ -51,7 +53,8 @@ export async function GET(request: Request) {
     // Fetch artists joined with current location + portfolio items
     let query = supabase
       .from("artists")
-      .select(`
+      .select(
+        `
         id, handle, display_name, bio,
         instagram_handle, profile_image_url, cover_image_url,
         website_url, contact_email, years_experience,
@@ -68,7 +71,8 @@ export async function GET(request: Request) {
           detected_styles, is_featured, sort_order,
           width, height
         )
-      `)
+      `,
+      )
       .eq("is_active", true)
       .eq("artist_locations.is_current", true)
       .range(offset, offset + limit - 1);

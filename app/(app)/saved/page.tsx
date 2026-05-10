@@ -9,9 +9,9 @@ export const metadata: Metadata = { title: "Saved" };
 export default function SavedPage() {
   return (
     <div className="dt-tab-shell flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-      <Bookmark className="size-12 text-muted-foreground" aria-hidden />
+      <Bookmark className="text-muted-foreground size-12" aria-hidden />
       <h1 className="mt-4 text-xl font-semibold">No saved artists yet</h1>
-      <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+      <p className="text-muted-foreground mt-2 max-w-xs text-sm">
         Sign in to save favorite artists and access them across devices.
       </p>
       <Button className="mt-6" asChild>

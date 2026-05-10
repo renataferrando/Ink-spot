@@ -41,18 +41,15 @@ export async function GET(request: Request) {
         .maybeSingle();
 
       if (homeBase) {
-        await admin
-          .from("artist_locations")
-          .update({ is_current: true })
-          .eq("id", homeBase.id);
+        await admin.from("artist_locations").update({ is_current: true }).eq("id", homeBase.id);
         promoted++;
       }
     }
   }
 
   return Response.json({
-    ok:       true,
-    expired:  expiredArtistIds.length,
+    ok: true,
+    expired: expiredArtistIds.length,
     promoted,
   });
 }

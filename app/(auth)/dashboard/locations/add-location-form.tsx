@@ -19,20 +19,21 @@ export function AddLocationForm() {
   );
 
   return (
-    <form action={action} className="space-y-4 rounded-xl border border-border bg-card p-4">
+    <form action={action} className="border-border bg-card space-y-4 rounded-xl border p-4">
       <div className="space-y-2">
         <label className="text-sm font-medium">Location *</label>
-        <PlaceAutocomplete
-          name="address"
-          placeholder="City, country"
-          required
-          disabled={pending}
-        />
+        <PlaceAutocomplete name="address" placeholder="City, country" required disabled={pending} />
       </div>
       <div className="space-y-2">
-        <label htmlFor="loc-kind" className="text-sm font-medium">Type</label>
-        <select name="kind" id="loc-kind" disabled={pending}
-          className="w-full rounded-md border border-border bg-input/30 px-3 py-2 text-sm">
+        <label htmlFor="loc-kind" className="text-sm font-medium">
+          Type
+        </label>
+        <select
+          name="kind"
+          id="loc-kind"
+          disabled={pending}
+          className="border-border bg-input/30 w-full rounded-md border px-3 py-2 text-sm"
+        >
           <option value="home_base">Home base</option>
           <option value="guest_spot">Guest spot</option>
           <option value="traveling">Traveling</option>
@@ -40,11 +41,15 @@ export function AddLocationForm() {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label htmlFor="loc-starts" className="text-xs text-muted-foreground">From</label>
+          <label htmlFor="loc-starts" className="text-muted-foreground text-xs">
+            From
+          </label>
           <Input id="loc-starts" name="starts_at" type="date" disabled={pending} />
         </div>
         <div className="space-y-1">
-          <label htmlFor="loc-ends" className="text-xs text-muted-foreground">To</label>
+          <label htmlFor="loc-ends" className="text-muted-foreground text-xs">
+            To
+          </label>
           <Input id="loc-ends" name="ends_at" type="date" disabled={pending} />
         </div>
       </div>
@@ -52,9 +57,14 @@ export function AddLocationForm() {
         <label htmlFor="loc-studio" className="text-sm font-medium">
           Studio name <span className="text-muted-foreground text-xs">(optional)</span>
         </label>
-        <Input id="loc-studio" name="studio_name" placeholder="Pura Vida Tattoo" disabled={pending} />
+        <Input
+          id="loc-studio"
+          name="studio_name"
+          placeholder="Pura Vida Tattoo"
+          disabled={pending}
+        />
       </div>
-      {state.error && <p className="text-sm text-destructive">{state.error}</p>}
+      {state.error && <p className="text-destructive text-sm">{state.error}</p>}
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Saving…" : "Add location"}
       </Button>

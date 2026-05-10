@@ -9,10 +9,15 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 
 const Schema = z.object({
-  studio_name:       z.string().min(2, "Studio name must be at least 2 characters").max(100),
-  instagram_handle:  z.string().max(30).regex(/^[a-zA-Z0-9_.]*$/, "Invalid Instagram handle").optional().or(z.literal("")),
-  bio:               z.string().max(200).optional(),
-  years_experience:  z.coerce.number().int().min(0).max(60).optional().or(z.literal("")),
+  studio_name: z.string().min(2, "Studio name must be at least 2 characters").max(100),
+  instagram_handle: z
+    .string()
+    .max(30)
+    .regex(/^[a-zA-Z0-9_.]*$/, "Invalid Instagram handle")
+    .optional()
+    .or(z.literal("")),
+  bio: z.string().max(200).optional(),
+  years_experience: z.coerce.number().int().min(0).max(60).optional().or(z.literal("")),
 });
 
 export type CreateProfileState = { error?: string };
@@ -23,7 +28,9 @@ export async function createProfile(
 ): Promise<CreateProfileState> {
   // ── Auth ──────────────────────────────────────────────────────────────────
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   // ── Validate ──────────────────────────────────────────────────────────────
@@ -55,9 +62,17 @@ export async function createProfile(
 
     if (demo) {
       const cookieStore = await cookies();
-      cookieStore.set("inkspot_pending_studio", studio_name, { httpOnly: true, path: "/", maxAge: 3600 });
+      cookieStore.set("inkspot_pending_studio", studio_name, {
+        httpOnly: true,
+        path: "/",
+        maxAge: 3600,
+      });
       cookieStore.set("inkspot_pending_ig", igHandle, { httpOnly: true, path: "/", maxAge: 3600 });
-      cookieStore.set("inkspot_demo_handle", demo.handle, { httpOnly: true, path: "/", maxAge: 3600 });
+      cookieStore.set("inkspot_demo_handle", demo.handle, {
+        httpOnly: true,
+        path: "/",
+        maxAge: 3600,
+      });
       redirect("/onboarding/claim");
     }
   }
@@ -75,13 +90,13 @@ export async function createProfile(
   // ── Create artist ─────────────────────────────────────────────────────────
   const { error: insertError } = await admin.from("artists").insert({
     handle,
-    display_name:      studio_name,
-    bio:               bio || null,
-    instagram_handle:  igHandle,
-    years_experience:  typeof years_experience === "number" ? years_experience : null,
-    is_demo:           false,
-    is_claimed:        false, // always false until verified; artists without IG skip the verify step but remain unverified
-    is_active:         true,
+    display_name: studio_name,
+    bio: bio || null,
+    instagram_handle: igHandle,
+    years_experience: typeof years_experience === "number" ? years_experience : null,
+    is_demo: false,
+    is_claimed: false, // always false until verified; artists without IG skip the verify step but remain unverified
+    is_active: true,
     claimed_by_user_id: user.id,
   });
 

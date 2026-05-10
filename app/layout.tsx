@@ -17,8 +17,7 @@ export const metadata: Metadata = {
     template: "%s · InkSpot",
     default: "InkSpot — Find tattoo artists in Costa Rica",
   },
-  description:
-    "Discover verified studios, styles, and locations for your next tattoo.",
+  description: "Discover verified studios, styles, and locations for your next tattoo.",
 };
 
 export default function RootLayout({
@@ -31,9 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`dark ${GeistSans.variable} ${GeistMono.variable} ${jetbrainsMono.variable} h-full scroll-smooth`}
     >
-      <body className="flex min-h-full flex-col font-sans">
-        {children}
-      </body>
+      <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );
 }

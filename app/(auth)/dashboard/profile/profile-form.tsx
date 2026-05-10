@@ -8,23 +8,20 @@ import { Input } from "@/components/ui/input";
 import { updateProfile, type UpdateProfileState } from "@/actions/artist/update-profile";
 
 interface Props {
-  defaultBio?:     string;
+  defaultBio?: string;
   defaultWebsite?: string;
-  defaultEmail?:   string;
-  defaultYears?:   number;
+  defaultEmail?: string;
+  defaultYears?: number;
 }
 
 export function ProfileForm({ defaultBio, defaultWebsite, defaultEmail, defaultYears }: Props) {
-  const [state, action, pending] = useActionState<UpdateProfileState, FormData>(
-    updateProfile,
-    {},
-  );
+  const [state, action, pending] = useActionState<UpdateProfileState, FormData>(updateProfile, {});
 
   return (
     <form action={action} className="space-y-5">
       <div className="space-y-2">
         <label htmlFor="bio" className="text-sm font-medium">
-          Bio <span className="text-xs text-muted-foreground">(max 200 chars)</span>
+          Bio <span className="text-muted-foreground text-xs">(max 200 chars)</span>
         </label>
         <textarea
           id="bio"
@@ -33,12 +30,14 @@ export function ProfileForm({ defaultBio, defaultWebsite, defaultEmail, defaultY
           maxLength={200}
           rows={3}
           disabled={pending}
-          className="w-full resize-none rounded-md border border-border bg-input/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          className="border-border bg-input/30 placeholder:text-muted-foreground focus:ring-ring w-full resize-none rounded-md border px-3 py-2 text-sm focus:ring-2 focus:outline-none disabled:opacity-50"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="website_url" className="text-sm font-medium">Website</label>
+        <label htmlFor="website_url" className="text-sm font-medium">
+          Website
+        </label>
         <Input
           id="website_url"
           name="website_url"
@@ -50,7 +49,9 @@ export function ProfileForm({ defaultBio, defaultWebsite, defaultEmail, defaultY
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="contact_email" className="text-sm font-medium">Contact email</label>
+        <label htmlFor="contact_email" className="text-sm font-medium">
+          Contact email
+        </label>
         <Input
           id="contact_email"
           name="contact_email"
@@ -63,7 +64,7 @@ export function ProfileForm({ defaultBio, defaultWebsite, defaultEmail, defaultY
 
       <div className="space-y-2">
         <label htmlFor="years_experience" className="text-sm font-medium">
-          Years of experience <span className="text-xs text-muted-foreground">(optional)</span>
+          Years of experience <span className="text-muted-foreground text-xs">(optional)</span>
         </label>
         <Input
           id="years_experience"
@@ -76,9 +77,9 @@ export function ProfileForm({ defaultBio, defaultWebsite, defaultEmail, defaultY
         />
       </div>
 
-      {state.error   && <p className="text-sm text-destructive">{state.error}</p>}
+      {state.error && <p className="text-destructive text-sm">{state.error}</p>}
       {state.success && (
-        <p className="flex items-center gap-1.5 text-sm text-primary">
+        <p className="text-primary flex items-center gap-1.5 text-sm">
           <CheckCircle2 className="size-4" /> Saved.
         </p>
       )}

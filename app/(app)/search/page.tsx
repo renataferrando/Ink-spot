@@ -25,23 +25,26 @@ function buildExplanation(query: string) {
 }
 
 export default function SearchPage() {
-  const [mode, setMode]               = useState<Mode>("assistant");
-  const [query, setQuery]             = useState("");
-  const [image, setImage]             = useState<{ url: string; name: string } | null>(null);
-  const [stage, setStage]             = useState<Stage>("idle");
-  const [stream, setStream]           = useState("");
-  const [recording, setRecording]     = useState(false);
-  const [results, setResults]         = useState<ArtistPublic[]>([]);
-  const [loading, setLoading]         = useState(false);
+  const [mode, setMode] = useState<Mode>("assistant");
+  const [query, setQuery] = useState("");
+  const [image, setImage] = useState<{ url: string; name: string } | null>(null);
+  const [stage, setStage] = useState<Stage>("idle");
+  const [stream, setStream] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [results, setResults] = useState<ArtistPublic[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const recognitionRef = useRef<unknown>(null);
   const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => () => {
-    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
-    if (image?.url) URL.revokeObjectURL(image.url);
-  }, [image]);
+  useEffect(
+    () => () => {
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+      if (image?.url) URL.revokeObjectURL(image.url);
+    },
+    [image],
+  );
 
   // FE gap: only `q` hits `/api/artists`. Backend already supports `styles` (comma-separated
   // ArtistStyle slugs → Supabase overlaps on primary_styles). When StyleFilterBar is added,
@@ -51,8 +54,8 @@ export default function SearchPage() {
     try {
       const params = new URLSearchParams();
       if (q.trim()) params.set("q", q.trim());
-      const res  = await fetch(`/api/artists?${params}`);
-      const json = await res.json() as { artists: ArtistPublic[] };
+      const res = await fetch(`/api/artists?${params}`);
+      const json = (await res.json()) as { artists: ArtistPublic[] };
       setResults(json.artists ?? []);
     } catch {
       setResults([]);
@@ -155,7 +158,8 @@ export default function SearchPage() {
   }
 
   const showSubmitted = stage !== "idle";
-  const showStreamCard = mode === "assistant" && (stage === "streaming" || (stage === "results" && stream));
+  const showStreamCard =
+    mode === "assistant" && (stage === "streaming" || (stage === "results" && stream));
 
   return (
     <div className="dt-tab-shell mx-auto flex w-full max-w-[760px] flex-1 flex-col pb-24 lg:max-w-[960px] lg:pb-8">
@@ -187,33 +191,43 @@ export default function SearchPage() {
           <div className="left">
             <button
               type="button"
-              className={`icon-btn${image ? " active" : ""}`}
+              className={`icon-btn${image ? "active" : ""}`}
               aria-label={image ? "Change reference image" : "Attach reference image"}
               onClick={() => fileInputRef.current?.click()}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden
+              >
                 <path d="M3 7h4l2-3h6l2 3h4v13H3z" />
                 <circle cx="12" cy="13" r="4" />
               </svg>
             </button>
             <button
               type="button"
-              className={`icon-btn${recording ? " active" : ""}`}
+              className={`icon-btn${recording ? "active" : ""}`}
               aria-label={recording ? "Stop recording" : "Search by voice"}
               onClick={toggleMic}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden
+              >
                 <rect x="9" y="3" width="6" height="12" rx="3" />
                 <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
               </svg>
             </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={onFileChange}
-            />
+            <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={onFileChange} />
           </div>
           <button
             type="button"
@@ -222,7 +236,15 @@ export default function SearchPage() {
             disabled={loading}
           >
             Search
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden
+            >
               <path d="M12 19V5M5 12l7-7 7 7" />
             </svg>
           </button>
@@ -233,7 +255,14 @@ export default function SearchPage() {
       {image && (
         <div className="attached-image">
           <div className="thumb">
-            <Image src={image.url} alt={image.name} fill sizes="36px" className="object-cover" unoptimized />
+            <Image
+              src={image.url}
+              alt={image.name}
+              fill
+              sizes="36px"
+              className="object-cover"
+              unoptimized
+            />
           </div>
           <span className="name">{image.name}</span>
           <button
@@ -250,7 +279,7 @@ export default function SearchPage() {
       )}
 
       {/* Segmented Assistant ↔ List only */}
-      <div className={`assistant-toggle${mode === "list" ? " right" : ""}`} role="tablist">
+      <div className={`assistant-toggle${mode === "list" ? "right" : ""}`} role="tablist">
         <div className="pill" aria-hidden />
         <button
           type="button"
@@ -259,7 +288,8 @@ export default function SearchPage() {
           className={mode === "assistant" ? "on" : ""}
           onClick={() => setMode("assistant")}
         >
-          <span className="ai-dot" />Assistant
+          <span className="ai-dot" />
+          Assistant
         </button>
         <button
           type="button"
@@ -280,7 +310,15 @@ export default function SearchPage() {
             <button key={p} type="button" className="suggestion" onClick={() => submit(p)}>
               <span className="q">{p}</span>
               <span className="arrow">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  aria-hidden
+                >
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
               </span>
@@ -329,7 +367,7 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={reset}
-                  className="mt-4 font-mono text-[11px] uppercase tracking-wider text-dim hover:text-(--text)"
+                  className="text-dim mt-4 font-mono text-[11px] tracking-wider uppercase hover:text-(--text)"
                 >
                   Reset search
                 </button>

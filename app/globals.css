@@ -9,25 +9,25 @@
 /* Force-dark: no .dark scoping needed */
 :root {
   /* ── Surfaces ─────────────────────────────────────── */
-  --bg:         #000000;
-  --surface:    #0b0b0b;
-  --surface-2:  #131313;
-  --surface-3:  #1a1a1a;
-  --hairline:   #1f1f1f;
-  --border-ds:  #2a2a2a;
+  --bg: #000000;
+  --surface: #0b0b0b;
+  --surface-2: #131313;
+  --surface-3: #1a1a1a;
+  --hairline: #1f1f1f;
+  --border-ds: #2a2a2a;
 
   /* ── Text ─────────────────────────────────────────── */
-  --text:   #f4f4f4;
+  --text: #f4f4f4;
   --text-2: #b8b8b8;
-  --dim:    #7a7a7a;
-  --faint:  #4a4a4a;
-  --ink:    #050505;
+  --dim: #7a7a7a;
+  --faint: #4a4a4a;
+  --ink: #050505;
 
   /* ── Accent ───────────────────────────────────────── */
-  --accent:      #6467f2;
+  --accent: #6467f2;
   --accent-glow: rgba(100, 103, 242, 0.45);
   --accent-soft: rgba(100, 103, 242, 0.14);
-  --accent-ink:  #ffffff;
+  --accent-ink: #ffffff;
 
   /* ── Type ─────────────────────────────────────────── */
   --mono: var(--font-jetbrains), "SF Mono", ui-monospace, monospace;
@@ -65,68 +65,61 @@
 }
 
 @theme inline {
-  --radius-sm:  calc(var(--radius) - 4px);
-  --radius-md:  calc(var(--radius) - 2px);
-  --radius-lg:  var(--radius);
-  --radius-xl:  calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 
-  --color-background:           hsl(var(--background));
-  --color-foreground:           hsl(var(--foreground));
-  --color-card:                 hsl(var(--card));
-  --color-card-foreground:      hsl(var(--card-foreground));
-  --color-popover:              hsl(var(--popover));
-  --color-popover-foreground:   hsl(var(--popover-foreground));
-  --color-primary:              hsl(var(--primary));
-  --color-primary-foreground:   hsl(var(--primary-foreground));
-  --color-secondary:            hsl(var(--secondary));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted:                hsl(var(--muted));
-  --color-muted-foreground:     hsl(var(--muted-foreground));
-  --color-accent:               hsl(var(--accent-shadcn));
-  --color-accent-foreground:    hsl(var(--accent-shadcn-foreground));
-  --color-destructive:          hsl(var(--destructive));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent-shadcn));
+  --color-accent-foreground: hsl(var(--accent-shadcn-foreground));
+  --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border:               hsl(var(--border));
-  --color-input:                hsl(var(--input));
-  --color-ring:                 hsl(var(--ring));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
   --color-ring-offset-background: hsl(var(--background));
 
   /* InkSpot design tokens as Tailwind utilities */
-  --color-surface:   var(--surface);
+  --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
-  --color-hairline:  var(--hairline);
+  --color-hairline: var(--hairline);
   --color-ds-border: var(--border-ds);
-  --color-text-2:    var(--text-2);
-  --color-dim:       var(--dim);
-  --color-faint:     var(--faint);
-  --color-ink-spot:  var(--accent);
+  --color-text-2: var(--text-2);
+  --color-dim: var(--dim);
+  --color-faint: var(--faint);
+  --color-ink-spot: var(--accent);
   --color-accent-soft: var(--accent-soft);
 
   /* Match badge — sky */
-  --color-match:        #38bdf8;
+  --color-match: #38bdf8;
   --color-match-subtle: rgba(56, 189, 248, 0.08);
   /* Demo badge — amber */
-  --color-demo:        #fbbf24;
+  --color-demo: #fbbf24;
   --color-demo-subtle: rgba(251, 191, 36, 0.08);
 
-  --font-sans:
-    var(--font-geist-sans),
-    ui-sans-serif,
-    system-ui,
-    sans-serif,
-    "Apple Color Emoji";
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji";
 
-  --font-mono:
-    var(--font-jetbrains),
-    "SF Mono",
-    ui-monospace,
-    monospace;
+  --font-mono: var(--font-jetbrains), "SF Mono", ui-monospace, monospace;
 }
 
 /* ── Base ────────────────────────────────────────────── */
 @layer base {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
   }
@@ -164,18 +157,39 @@
     mix-blend-mode: overlay;
   }
 
-  button { font: inherit; color: inherit; cursor: pointer; }
-  input, textarea { font: inherit; color: inherit; }
-  a { color: inherit; text-decoration: none; }
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  input,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 500;
     letter-spacing: -0.02em;
   }
 
   /* Scrollbar — thin dark */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
   ::-webkit-scrollbar-thumb {
     background: var(--hairline);
     border-radius: 4px;
@@ -187,7 +201,9 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
 
 /* Mono label — 10px uppercase tracking */
 .label {
@@ -198,8 +214,12 @@
   color: var(--dim);
 }
 
-.dim   { color: var(--dim); }
-.faint { color: var(--faint); }
+.dim {
+  color: var(--dim);
+}
+.faint {
+  color: var(--faint);
+}
 
 /* Style chip — rounded pill */
 .chip {
@@ -264,8 +284,12 @@
   background: var(--surface-3);
   border-radius: 1px;
 }
-.steps .step.done { background: var(--accent); }
-.steps .step.now  { background: var(--text); }
+.steps .step.done {
+  background: var(--accent);
+}
+.steps .step.now {
+  background: var(--text);
+}
 
 /* Verification code box */
 .code-box {
@@ -305,8 +329,13 @@
   cursor: pointer;
   transition: opacity 0.15s;
 }
-.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn-primary:hover:not(:disabled) { opacity: 0.9; }
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
 
 .btn-secondary {
   height: 48px;
@@ -368,4 +397,6 @@
   padding: 0 18px 4px;
   scrollbar-width: none;
 }
-.filter-bar::-webkit-scrollbar { display: none; }
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}

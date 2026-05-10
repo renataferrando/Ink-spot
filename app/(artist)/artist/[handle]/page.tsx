@@ -20,7 +20,9 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
 
       const supabase = createServerClient(supabaseUrl, supabaseKey, {
         cookies: {
-          getAll() { return cookieStore.getAll(); },
+          getAll() {
+            return cookieStore.getAll();
+          },
           setAll(cookiesToSet: Array<{ name: string; value: string; options?: object }>) {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options ?? {}),
@@ -31,7 +33,8 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
 
       const { data, error } = await supabase
         .from("artists")
-        .select(`
+        .select(
+          `
           id, handle, display_name, bio,
           instagram_handle, profile_image_url, cover_image_url,
           website_url, contact_email, years_experience,
@@ -46,7 +49,8 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
             id, artist_id, image_url, caption, alt_text,
             detected_styles, is_featured, sort_order, width, height
           )
-        `)
+        `,
+        )
         .eq("handle", handle)
         .eq("is_active", true)
         .single()
@@ -77,7 +81,9 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
           is_demo: data.is_demo as boolean,
           is_claimed: data.is_claimed as boolean,
           is_active: data.is_active as boolean,
-          portfolio_items: (Array.isArray(data.portfolio_items) ? data.portfolio_items : []) as ArtistPublic["portfolio_items"],
+          portfolio_items: (Array.isArray(data.portfolio_items)
+            ? data.portfolio_items
+            : []) as ArtistPublic["portfolio_items"],
           created_at: data.created_at as string,
           updated_at: data.updated_at as string,
         } satisfies ArtistPublic;
@@ -102,7 +108,9 @@ async function getAllHandles(): Promise<string[]> {
 
       const supabase = createServerClient(supabaseUrl, supabaseKey, {
         cookies: {
-          getAll() { return cookieStore.getAll(); },
+          getAll() {
+            return cookieStore.getAll();
+          },
           setAll(cookiesToSet: Array<{ name: string; value: string; options?: object }>) {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options ?? {}),
@@ -111,10 +119,7 @@ async function getAllHandles(): Promise<string[]> {
         },
       });
 
-      const { data } = await supabase
-        .from("artists")
-        .select("handle")
-        .eq("is_active", true);
+      const { data } = await supabase.from("artists").select("handle").eq("is_active", true);
 
       if (data) return data.map((r: { handle: string }) => r.handle);
     } catch {
@@ -141,8 +146,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${artist.display_name} — Tattoo artist · ${locationName}`,
-    description:
-      artist.bio?.slice(0, 155) ?? `${artist.display_name} portfolio on InkSpot`,
+    description: artist.bio?.slice(0, 155) ?? `${artist.display_name} portfolio on InkSpot`,
     openGraph: {
       title: artist.display_name,
       description: artist.bio?.slice(0, 155),
@@ -151,10 +155,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : [],
       type: "profile",
     },
-    robots:
-      artist.is_demo && !artist.is_claimed
-        ? { index: false, follow: false }
-        : undefined,
+    robots: artist.is_demo && !artist.is_claimed ? { index: false, follow: false } : undefined,
   };
 }
 

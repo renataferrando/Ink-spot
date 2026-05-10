@@ -11,7 +11,9 @@ export async function addPortfolioItem(
   altText?: string,
 ): Promise<{ error?: string }> {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const admin = getSupabaseAdminClient();
@@ -33,11 +35,11 @@ export async function addPortfolioItem(
   const isFeatured = (count ?? 0) === 0;
 
   await admin.from("portfolio_items").insert({
-    artist_id:     artist.id,
-    image_url:     imageUrl,
-    alt_text:      altText || null,
-    is_featured:   isFeatured,
-    sort_order:    count ?? 0,
+    artist_id: artist.id,
+    image_url: imageUrl,
+    alt_text: altText || null,
+    is_featured: isFeatured,
+    sort_order: count ?? 0,
     detected_styles: [],
   });
 
@@ -55,7 +57,9 @@ export async function addPortfolioItem(
 
 export async function removePortfolioItem(itemId: string): Promise<{ error?: string }> {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const admin = getSupabaseAdminClient();
@@ -66,10 +70,7 @@ export async function removePortfolioItem(itemId: string): Promise<{ error?: str
     .single();
   if (!artist) return { error: "Artist not found." };
 
-  await admin.from("portfolio_items")
-    .delete()
-    .eq("id", itemId)
-    .eq("artist_id", artist.id);
+  await admin.from("portfolio_items").delete().eq("id", itemId).eq("artist_id", artist.id);
 
   revalidateTag(`artist:${artist.handle}`, "max");
   return {};

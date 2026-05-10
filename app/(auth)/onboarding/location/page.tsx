@@ -11,7 +11,9 @@ export const metadata: Metadata = { title: "Where do you tattoo?" };
 
 export default async function LocationPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();
@@ -44,8 +46,7 @@ export default async function LocationPage() {
               margin: 0,
             }}
           >
-            Where do you{" "}
-            <span style={{ color: "var(--accent)" }}>tattoo?</span>
+            Where do you <span style={{ color: "var(--accent)" }}>tattoo?</span>
           </h1>
           <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: 0 }}>
             This puts your studio on the map for clients searching nearby.

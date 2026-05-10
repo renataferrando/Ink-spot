@@ -6,7 +6,9 @@ const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(request: Request) {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const cookieStore = await cookies();
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "File must be under 5 MB" }, { status: 400 });
   }
 
-  const ext  = (file.name.split(".").pop() ?? "jpg").toLowerCase();
+  const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
   const uuid = crypto.randomUUID();
   const path = `${artist.id}/${uuid}.${ext}`;
 
@@ -53,7 +55,9 @@ export async function POST(request: Request) {
     return Response.json({ error: uploadError.message }, { status: 500 });
   }
 
-  const { data: { publicUrl } } = supabase.storage.from("portfolio").getPublicUrl(path);
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("portfolio").getPublicUrl(path);
 
   return Response.json({ url: publicUrl });
 }

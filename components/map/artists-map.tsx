@@ -4,11 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import {
-  DEFAULT_ZOOM,
-  MAP_STYLE_URL,
-  SANTA_TERESA_CENTER,
-} from "@/lib/maplibre/config";
+import { DEFAULT_ZOOM, MAP_STYLE_URL, SANTA_TERESA_CENTER } from "@/lib/maplibre/config";
 import type { ArtistPublic } from "@/types/artist";
 
 import { ArtistMapSheet } from "./artist-map-sheet";
@@ -43,10 +39,7 @@ export function ArtistsMap({ artists, userLocation }: ArtistsMapProps) {
       zoom: DEFAULT_ZOOM,
     });
 
-    map.addControl(
-      new maplibregl.NavigationControl({ showCompass: false }),
-      "top-right",
-    );
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
     mapRef.current = map;
 
@@ -89,10 +82,7 @@ export function ArtistsMap({ artists, userLocation }: ArtistsMapProps) {
   return (
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
-      <ArtistMapSheet
-        artist={selectedArtist}
-        onClose={() => setSelectedArtist(null)}
-      />
+      <ArtistMapSheet artist={selectedArtist} onClose={() => setSelectedArtist(null)} />
     </div>
   );
 }

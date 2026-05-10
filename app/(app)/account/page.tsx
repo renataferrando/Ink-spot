@@ -17,13 +17,15 @@ const STEPS = [
 
 export default async function AccountPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // ── Not authenticated ──────────────────────────────
   if (!user) {
     return (
       <div
-        className="dt-tab-shell flex-1 overflow-y-auto scrollbar-none"
+        className="dt-tab-shell scrollbar-none flex-1 overflow-y-auto"
         style={{ padding: "0 18px 32px" }}
       >
         <div style={{ marginTop: 12, marginBottom: 8 }}>
@@ -37,12 +39,12 @@ export default async function AccountPage() {
               margin: 0,
             }}
           >
-            Are you the{" "}
-            <span style={{ color: "var(--accent)" }}>artist?</span>
+            Are you the <span style={{ color: "var(--accent)" }}>artist?</span>
           </h1>
         </div>
         <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: "8px 0 0" }}>
-          Claim your profile, upload your portfolio, and show up in AI search results across Costa Rica.
+          Claim your profile, upload your portfolio, and show up in AI search results across Costa
+          Rica.
         </p>
 
         {/* Steps */}
@@ -76,9 +78,7 @@ export default async function AccountPage() {
                 {i + 1}
               </div>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 500, color: "var(--text)" }}>
-                  {title}
-                </div>
+                <div style={{ fontSize: 16, fontWeight: 500, color: "var(--text)" }}>{title}</div>
                 <div style={{ fontSize: 12, color: "var(--dim)", marginTop: 2 }}>{sub}</div>
               </div>
             </div>
@@ -91,8 +91,7 @@ export default async function AccountPage() {
           className="btn-primary"
           style={{ marginTop: 24, textDecoration: "none" }}
         >
-          Claim your profile{" "}
-          <ArrowRight size={14} aria-hidden />
+          Claim your profile <ArrowRight size={14} aria-hidden />
         </Link>
 
         <div style={{ height: 16 }} />
@@ -116,7 +115,7 @@ export default async function AccountPage() {
   if (!artist) {
     return (
       <div
-        className="dt-tab-shell flex-1 overflow-y-auto scrollbar-none"
+        className="dt-tab-shell scrollbar-none flex-1 overflow-y-auto"
         style={{ padding: "0 18px 32px" }}
       >
         <div style={{ marginTop: 12 }}>
@@ -136,11 +135,7 @@ export default async function AccountPage() {
         </div>
 
         <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 10 }}>
-          <Link
-            href="/onboarding"
-            className="btn-primary"
-            style={{ textDecoration: "none" }}
-          >
+          <Link href="/onboarding" className="btn-primary" style={{ textDecoration: "none" }}>
             Continue onboarding
             <ArrowRight size={14} aria-hidden />
           </Link>
@@ -157,7 +152,7 @@ export default async function AccountPage() {
   // ── Authenticated, has artist ─────────────────────
   return (
     <div
-      className="dt-tab-shell flex-1 overflow-y-auto scrollbar-none"
+      className="dt-tab-shell scrollbar-none flex-1 overflow-y-auto"
       style={{ padding: "0 18px 32px" }}
     >
       {/* Mini profile header */}
@@ -174,10 +169,7 @@ export default async function AccountPage() {
         <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.01em" }}>
           {artist.display_name ?? `@${artist.handle}`}
         </div>
-        <div
-          className="label"
-          style={{ marginTop: 4 }}
-        >
+        <div className="label" style={{ marginTop: 4 }}>
           @{artist.handle}
         </div>
         {!artist.is_claimed && (
@@ -205,9 +197,9 @@ export default async function AccountPage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {[
           { label: "View public profile", href: `/artist/${artist.handle}` },
-          { label: "Manage portfolio",    href: "/dashboard/portfolio"      },
-          { label: "Manage locations",    href: "/dashboard/locations"      },
-          { label: "Full dashboard",      href: "/dashboard"                },
+          { label: "Manage portfolio", href: "/dashboard/portfolio" },
+          { label: "Manage locations", href: "/dashboard/locations" },
+          { label: "Full dashboard", href: "/dashboard" },
         ].map(({ label, href }) => (
           <Link
             key={href}

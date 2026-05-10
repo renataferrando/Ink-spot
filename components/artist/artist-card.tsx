@@ -36,8 +36,7 @@ function pickNextLocation(upcoming?: ArtistLocation[]) {
     .filter((l) => l.starts_at)
     .sort(
       (a, b) =>
-        new Date(a.starts_at as string).getTime() -
-        new Date(b.starts_at as string).getTime(),
+        new Date(a.starts_at as string).getTime() - new Date(b.starts_at as string).getTime(),
     );
   return future[0] ?? upcoming[0];
 }
@@ -114,7 +113,7 @@ export function ArtistCard({
           {artist.primary_styles.length > 0 && (
             <div className="badges">
               {artist.primary_styles.slice(0, 3).map((s, i) => (
-                <span key={s} className={`chip${i === 0 ? " active" : ""}`}>
+                <span key={s} className={`chip${i === 0 ? "active" : ""}`}>
                   {STYLE_LABELS[s]}
                 </span>
               ))}

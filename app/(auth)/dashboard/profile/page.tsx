@@ -9,7 +9,9 @@ export const metadata: Metadata = { title: "Edit profile" };
 
 export default async function ProfilePage() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const admin = getSupabaseAdminClient();
@@ -21,7 +23,7 @@ export default async function ProfilePage() {
   if (!artist) redirect("/onboarding");
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6 px-4 py-10">
       <h1 className="text-xl font-medium">Edit profile</h1>
       <ProfileForm
         defaultBio={artist.bio ?? ""}

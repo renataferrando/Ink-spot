@@ -44,8 +44,20 @@ export function LocationForm() {
       {/* Studio name */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-          <label htmlFor="studio_name" className="label">Studio name at this location</label>
-          <span style={{ fontFamily: "var(--font-jetbrains, ui-monospace)", fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--faint)" }}>(optional)</span>
+          <label htmlFor="studio_name" className="label">
+            Studio name at this location
+          </label>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains, ui-monospace)",
+              fontSize: 9,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--faint)",
+            }}
+          >
+            (optional)
+          </span>
         </div>
         <input
           id="studio_name"
@@ -72,12 +84,17 @@ export function LocationForm() {
         />
       </div>
 
-      {state.error && (
-        <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{state.error}</p>
-      )}
+      {state.error && <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{state.error}</p>}
 
       <button type="submit" className="btn-primary" disabled={pending}>
-        {pending ? "Saving…" : <><span>Continue</span><ArrowRight size={14} /></>}
+        {pending ? (
+          "Saving…"
+        ) : (
+          <>
+            <span>Continue</span>
+            <ArrowRight size={14} />
+          </>
+        )}
       </button>
     </form>
   );

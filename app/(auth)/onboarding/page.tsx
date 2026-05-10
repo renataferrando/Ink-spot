@@ -11,7 +11,9 @@ export const metadata: Metadata = { title: "Set up your studio" };
 
 export default async function OnboardingPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   // Already has a profile → go to dashboard
@@ -38,8 +40,7 @@ export default async function OnboardingPage() {
               margin: 0,
             }}
           >
-            Set up your{" "}
-            <span style={{ color: "var(--accent)" }}>studio</span>.
+            Set up your <span style={{ color: "var(--accent)" }}>studio</span>.
           </h1>
           <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: 0 }}>
             Tell us about your work. You can update everything later.

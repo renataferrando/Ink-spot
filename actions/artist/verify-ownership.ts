@@ -8,7 +8,9 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function verifyOwnership(): Promise<{ error?: string }> {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();
@@ -45,7 +47,9 @@ export async function verifyOwnership(): Promise<{ error?: string }> {
 
 export async function submitManualReview(formData: FormData): Promise<{ error?: string }> {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();
@@ -61,7 +65,7 @@ export async function submitManualReview(formData: FormData): Promise<{ error?: 
   if (!artist) return { error: "Artist not found." };
 
   const contact = formData.get("contact") as string;
-  const note    = formData.get("note") as string;
+  const note = formData.get("note") as string;
   if (!contact?.trim()) return { error: "Please provide a contact method." };
 
   // Update existing claim or insert new one
@@ -73,16 +77,19 @@ export async function submitManualReview(formData: FormData): Promise<{ error?: 
     .maybeSingle();
 
   if (existing) {
-    await admin.from("claims").update({
-      notes: `Manual review requested. Contact: ${contact}. Note: ${note ?? ""}`,
-    }).eq("id", existing.id);
+    await admin
+      .from("claims")
+      .update({
+        notes: `Manual review requested. Contact: ${contact}. Note: ${note ?? ""}`,
+      })
+      .eq("id", existing.id);
   } else {
     await admin.from("claims").insert({
-      artist_id:         artist.id,
+      artist_id: artist.id,
       instagram_user_id: user.id,
-      instagram_handle:  artist.instagram_handle ?? "",
-      status:            "pending",
-      notes:             `manual_review — Contact: ${contact}. Note: ${note ?? ""}`,
+      instagram_handle: artist.instagram_handle ?? "",
+      status: "pending",
+      notes: `manual_review — Contact: ${contact}. Note: ${note ?? ""}`,
     });
   }
 

@@ -12,7 +12,7 @@ interface Candidate {
 }
 
 interface PlaceAutocompleteProps {
-  name?: string;       // base name used for hidden inputs (default: "address")
+  name?: string; // base name used for hidden inputs (default: "address")
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -26,11 +26,11 @@ export function PlaceAutocomplete({
   disabled,
   onSelect,
 }: PlaceAutocompleteProps) {
-  const [query,      setQuery]      = useState("");
+  const [query, setQuery] = useState("");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [loading,    setLoading]    = useState(false);
-  const [open,       setOpen]       = useState(false);
-  const [selected,   setSelected]   = useState<Candidate | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Candidate | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -46,11 +46,15 @@ export function PlaceAutocomplete({
   }, []);
 
   const fetchCandidates = useCallback(async (q: string) => {
-    if (q.length < 2) { setCandidates([]); setOpen(false); return; }
+    if (q.length < 2) {
+      setCandidates([]);
+      setOpen(false);
+      return;
+    }
     setLoading(true);
     try {
-      const res  = await fetch(`/api/geocoding/autocomplete?q=${encodeURIComponent(q)}`);
-      const data = await res.json() as { candidates: Candidate[] };
+      const res = await fetch(`/api/geocoding/autocomplete?q=${encodeURIComponent(q)}`);
+      const data = (await res.json()) as { candidates: Candidate[] };
       setCandidates(data.candidates ?? []);
       setOpen(data.candidates.length > 0);
     } finally {
@@ -83,7 +87,7 @@ export function PlaceAutocomplete({
       {/* Hidden fields carry the resolved values to the Server Action */}
       {selected && (
         <>
-          <input type="hidden" name={name}      value={selected.formatted} />
+          <input type="hidden" name={name} value={selected.formatted} />
           <input type="hidden" name={`${name}_lat`} value={selected.lat} />
           <input type="hidden" name={`${name}_lng`} value={selected.lng} />
         </>
@@ -91,9 +95,9 @@ export function PlaceAutocomplete({
 
       <div className="relative">
         {loading ? (
-          <Loader2 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 animate-spin" />
         ) : (
-          <MapPin className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <MapPin className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         )}
         <Input
           value={query}
@@ -112,7 +116,7 @@ export function PlaceAutocomplete({
 
       {/* Selected place chip */}
       {selected && (
-        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-primary">
+        <p className="text-primary mt-1.5 flex items-center gap-1.5 text-xs">
           <MapPin className="size-3 shrink-0" />
           <span className="truncate">{selected.formatted}</span>
         </p>
@@ -122,16 +126,16 @@ export function PlaceAutocomplete({
       {open && candidates.length > 0 && (
         <ul
           role="listbox"
-          className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-border bg-card shadow-lg"
+          className="border-border bg-card absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg"
         >
           {candidates.map((c) => (
             <li key={c.id} role="option" aria-selected={selected?.id === c.id}>
               <button
                 type="button"
                 onClick={() => handleSelect(c)}
-                className="flex w-full items-start gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-secondary"
+                className="hover:bg-secondary flex w-full items-start gap-2 px-3 py-2.5 text-left text-sm transition-colors"
               >
-                <MapPin className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                <MapPin className="text-muted-foreground mt-0.5 size-3.5 shrink-0" />
                 <span className="leading-snug">{c.formatted}</span>
               </button>
             </li>

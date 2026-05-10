@@ -2,13 +2,7 @@
 // Once your Supabase project is live, regenerate with:
 //   supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/supabase/types.ts
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
@@ -208,7 +202,13 @@ export interface Database {
           description?: string | null;
           created_at?: string;
         };
-        Update: { id?: string; slug?: string; name?: string; description?: string | null; created_at?: string };
+        Update: {
+          id?: string;
+          slug?: string;
+          name?: string;
+          description?: string | null;
+          created_at?: string;
+        };
       };
       artist_styles: {
         Row: {
@@ -291,7 +291,18 @@ export interface Database {
           session_id?: string | null;
           created_at?: string;
         };
-        Update: { id?: string; query_text?: string | null; query_image_url?: string | null; query_type?: string; user_lat?: number | null; user_lng?: number | null; result_count?: number | null; top_artist_ids?: string[] | null; session_id?: string | null; created_at?: string };
+        Update: {
+          id?: string;
+          query_text?: string | null;
+          query_image_url?: string | null;
+          query_type?: string;
+          user_lat?: number | null;
+          user_lng?: number | null;
+          result_count?: number | null;
+          top_artist_ids?: string[] | null;
+          session_id?: string | null;
+          created_at?: string;
+        };
       };
       saved_artists: {
         Row: {
@@ -323,7 +334,14 @@ export interface Database {
           created_at?: string;
           last_used_at?: string;
         };
-        Update: { query_hash?: string; query_text?: string; embedding?: number[]; hit_count?: number; created_at?: string; last_used_at?: string };
+        Update: {
+          query_hash?: string;
+          query_text?: string;
+          embedding?: number[];
+          hit_count?: number;
+          created_at?: string;
+          last_used_at?: string;
+        };
       };
       ai_artist_summaries: {
         Row: {
@@ -346,7 +364,16 @@ export interface Database {
           generated_at?: string;
           expires_at: string;
         };
-        Update: { id?: string; artist_id?: string; content?: string; model?: string; prompt_hash?: string; is_demo?: boolean; generated_at?: string; expires_at?: string };
+        Update: {
+          id?: string;
+          artist_id?: string;
+          content?: string;
+          model?: string;
+          prompt_hash?: string;
+          is_demo?: boolean;
+          generated_at?: string;
+          expires_at?: string;
+        };
       };
     };
     Functions: {

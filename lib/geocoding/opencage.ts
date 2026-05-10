@@ -13,7 +13,7 @@ export async function geocodeAddress(address: string): Promise<GeoResult | null>
     const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
     if (!res.ok) return null;
 
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       results?: { geometry: { lat: number; lng: number }; formatted: string }[];
     };
 
@@ -21,8 +21,8 @@ export async function geocodeAddress(address: string): Promise<GeoResult | null>
     if (!result) return null;
 
     return {
-      lat:       result.geometry.lat,
-      lng:       result.geometry.lng,
+      lat: result.geometry.lat,
+      lng: result.geometry.lng,
       formatted: result.formatted,
     };
   } catch {

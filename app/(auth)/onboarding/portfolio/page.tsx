@@ -17,41 +17,54 @@ interface UploadedItem {
 
 export default function PortfolioPage() {
   const router = useRouter();
-  const [items, setItems]         = useState<UploadedItem[]>([]);
+  const [items, setItems] = useState<UploadedItem[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver]   = useState(false);
-  const [error, setError]         = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFiles = useCallback(async (files: FileList) => {
-    if (items.length >= MAX_IMAGES) return;
-    setError(null);
+  const handleFiles = useCallback(
+    async (files: FileList) => {
+      if (items.length >= MAX_IMAGES) return;
+      setError(null);
 
-    const toUpload = Array.from(files).slice(0, MAX_IMAGES - items.length);
+      const toUpload = Array.from(files).slice(0, MAX_IMAGES - items.length);
 
-    for (const file of toUpload) {
-      if (!file.type.startsWith("image/")) { setError("Only image files are allowed."); continue; }
-      if (file.size > MAX_MB * 1024 * 1024) { setError(`${file.name} exceeds 5 MB.`); continue; }
+      for (const file of toUpload) {
+        if (!file.type.startsWith("image/")) {
+          setError("Only image files are allowed.");
+          continue;
+        }
+        if (file.size > MAX_MB * 1024 * 1024) {
+          setError(`${file.name} exceeds 5 MB.`);
+          continue;
+        }
 
-      setUploading(true);
-      const fd = new FormData();
-      fd.append("file", file);
+        setUploading(true);
+        const fd = new FormData();
+        fd.append("file", file);
 
-      const res  = await fetch("/api/upload", { method: "POST", body: fd });
-      const json = await res.json() as { url?: string; error?: string };
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const json = (await res.json()) as { url?: string; error?: string };
 
-      if (json.error) { setError(json.error); setUploading(false); continue; }
-      if (json.url) {
-        const dbResult = await addPortfolioItem(json.url, file.name.replace(/\.[^.]+$/, ""));
-        if (dbResult.error) {
-          setError(dbResult.error);
+        if (json.error) {
+          setError(json.error);
           setUploading(false);
           continue;
         }
-        setItems((prev) => [...prev, { url: json.url!, name: file.name }]);
+        if (json.url) {
+          const dbResult = await addPortfolioItem(json.url, file.name.replace(/\.[^.]+$/, ""));
+          if (dbResult.error) {
+            setError(dbResult.error);
+            setUploading(false);
+            continue;
+          }
+          setItems((prev) => [...prev, { url: json.url!, name: file.name }]);
+        }
+        setUploading(false);
       }
-      setUploading(false);
-    }
-  }, [items]);
+    },
+    [items],
+  );
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
@@ -72,8 +85,7 @@ export default function PortfolioPage() {
             margin: "0 0 8px",
           }}
         >
-          Upload your{" "}
-          <span style={{ color: "var(--accent)" }}>portfolio</span>.
+          Upload your <span style={{ color: "var(--accent)" }}>portfolio</span>.
         </h1>
         <p style={{ fontSize: 14, color: "var(--dim)", margin: 0, lineHeight: 1.55 }}>
           Add your best work — up to {MAX_IMAGES} photos, {MAX_MB}&nbsp;MB each.
@@ -83,7 +95,10 @@ export default function PortfolioPage() {
       {/* Drop zone */}
       <label
         onDrop={handleDrop}
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
         onDragLeave={() => setDragOver(false)}
         style={{
           display: "flex",
@@ -105,7 +120,9 @@ export default function PortfolioPage() {
           <p style={{ fontSize: 14, fontWeight: 500, color: "var(--text)", margin: "0 0 4px" }}>
             Drag photos here or click to select
           </p>
-          <span className="label">{items.length}/{MAX_IMAGES} uploaded</span>
+          <span className="label">
+            {items.length}/{MAX_IMAGES} uploaded
+          </span>
         </div>
         <input
           type="file"
@@ -117,11 +134,11 @@ export default function PortfolioPage() {
         />
       </label>
 
-      {error && (
-        <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{error}</p>
-      )}
+      {error && <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{error}</p>}
       {uploading && (
-        <p className="label" style={{ textAlign: "center" }}>Uploading…</p>
+        <p className="label" style={{ textAlign: "center" }}>
+          Uploading…
+        </p>
       )}
 
       {/* Thumbnails */}
@@ -138,7 +155,13 @@ export default function PortfolioPage() {
                 background: "var(--surface-2)",
               }}
             >
-              <Image src={item.url} alt={item.name} fill sizes="120px" style={{ objectFit: "cover" }} />
+              <Image
+                src={item.url}
+                alt={item.name}
+                fill
+                sizes="120px"
+                style={{ objectFit: "cover" }}
+              />
             </div>
           ))}
         </div>
@@ -152,7 +175,9 @@ export default function PortfolioPage() {
         disabled={uploading}
       >
         {items.length > 0 ? (
-          <><CheckCircle2 size={14} /> Continue</>
+          <>
+            <CheckCircle2 size={14} /> Continue
+          </>
         ) : (
           "Skip for now"
         )}

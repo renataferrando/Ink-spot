@@ -25,12 +25,11 @@ export function AvatarForm() {
             margin: 0,
           }}
         >
-          Your{" "}
-          <span style={{ color: "var(--accent)" }}>look</span>
+          Your <span style={{ color: "var(--accent)" }}>look</span>
         </h1>
         <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: 0 }}>
-          Add a profile photo and optional cover for your public page — or skip and we&apos;ll use your
-          first portfolio image where possible.
+          Add a profile photo and optional cover for your public page — or skip and we&apos;ll use
+          your first portfolio image where possible.
         </p>
       </div>
 

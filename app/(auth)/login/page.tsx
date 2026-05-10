@@ -33,10 +33,10 @@ const monoLinkStyle: React.CSSProperties = {
 };
 
 export default function LoginPage() {
-  const [email, setEmail]     = useState("");
-  const [sent, setSent]       = useState(false);
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -108,7 +108,9 @@ export default function LoginPage() {
           </h1>
           <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: "0 0 20px" }}>
             We sent a sign-in link to{" "}
-            <span style={{ color: "var(--text)", fontFamily: "var(--font-jetbrains, ui-monospace)" }}>
+            <span
+              style={{ color: "var(--text)", fontFamily: "var(--font-jetbrains, ui-monospace)" }}
+            >
               {email}
             </span>
             . Click it to continue.
@@ -211,16 +213,16 @@ export default function LoginPage() {
             }}
           />
 
-          {error && (
-            <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{error}</p>
-          )}
+          {error && <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{error}</p>}
 
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={loading || !email.trim()}
-          >
-            {loading ? "Sending…" : <>Continue <ArrowRight size={14} /></>}
+          <button type="submit" className="btn-primary" disabled={loading || !email.trim()}>
+            {loading ? (
+              "Sending…"
+            ) : (
+              <>
+                Continue <ArrowRight size={14} />
+              </>
+            )}
           </button>
         </form>
 

@@ -11,7 +11,10 @@
   color: var(--text);
   margin: 0;
 }
-.search-hero .title em { font-style: normal; color: var(--accent); }
+.search-hero .title em {
+  font-style: normal;
+  color: var(--accent);
+}
 .search-hero .sub {
   font-family: var(--font-mono, ui-monospace);
   font-size: 11px;
@@ -29,7 +32,9 @@
   border-radius: 14px;
   padding: 14px 14px 12px;
   position: relative;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .search-input-wrap:focus-within {
   border-color: var(--accent);
@@ -48,7 +53,9 @@
   min-height: 56px;
   letter-spacing: -0.005em;
 }
-.search-input-wrap textarea::placeholder { color: var(--faint); }
+.search-input-wrap textarea::placeholder {
+  color: var(--faint);
+}
 
 .search-tools {
   display: flex;
@@ -58,7 +65,10 @@
   padding-top: 10px;
   border-top: 1px solid var(--hairline);
 }
-.search-tools .left { display: flex; gap: 4px; }
+.search-tools .left {
+  display: flex;
+  gap: 4px;
+}
 .search-tools .icon-btn {
   width: 32px;
   height: 32px;
@@ -70,11 +80,22 @@
   border: 0;
   color: var(--dim);
   cursor: pointer;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
-.search-tools .icon-btn:hover { color: var(--text); background: var(--surface-3); }
-.search-tools .icon-btn.active { color: var(--accent); background: var(--accent-soft); }
-.search-tools .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.search-tools .icon-btn:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+.search-tools .icon-btn.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.search-tools .icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 .search-tools .submit {
   background: var(--accent);
   color: var(--accent-ink);
@@ -93,8 +114,13 @@
   cursor: pointer;
   transition: opacity 0.15s;
 }
-.search-tools .submit:disabled { opacity: 0.4; cursor: not-allowed; }
-.search-tools .submit:hover:not(:disabled) { opacity: 0.9; }
+.search-tools .submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.search-tools .submit:hover:not(:disabled) {
+  opacity: 0.9;
+}
 
 /* ── Attached image chip ───────────────────────────────── */
 .attached-image {
@@ -136,7 +162,9 @@
   border: 0;
   cursor: pointer;
 }
-.attached-image .remove:hover { color: var(--text); }
+.attached-image .remove:hover {
+  color: var(--text);
+}
 
 /* ── Assistant ↔ List toggle ───────────────────────────── */
 .assistant-toggle {
@@ -170,7 +198,9 @@
   justify-content: center;
   gap: 5px;
 }
-.assistant-toggle button.on { color: var(--text); }
+.assistant-toggle button.on {
+  color: var(--text);
+}
 .assistant-toggle .pill {
   position: absolute;
   top: 3px;
@@ -182,7 +212,9 @@
   transition: transform 0.3s var(--e-out);
   pointer-events: none;
 }
-.assistant-toggle.right .pill { transform: translateX(100%); }
+.assistant-toggle.right .pill {
+  transform: translateX(100%);
+}
 .assistant-toggle button .ai-dot {
   display: inline-block;
   width: 5px;
@@ -190,7 +222,9 @@
   border-radius: 50%;
   background: transparent;
   vertical-align: middle;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
 }
 .assistant-toggle button.on .ai-dot {
   background: var(--accent);
@@ -198,7 +232,9 @@
 }
 
 /* ── Suggestion stack ──────────────────────────────────── */
-.suggestion-stack { padding: 4px 18px 0; }
+.suggestion-stack {
+  padding: 4px 18px 0;
+}
 .suggestion-stack .head {
   font-family: var(--font-mono, ui-monospace);
   font-size: 10px;
@@ -224,7 +260,9 @@
   color: var(--text);
   transition: opacity 0.15s;
 }
-.suggestion:hover { opacity: 0.85; }
+.suggestion:hover {
+  opacity: 0.85;
+}
 .suggestion .q {
   flex: 1;
   font-family: var(--font-sans, ui-sans-serif);
@@ -232,7 +270,11 @@
   line-height: 1.25;
   color: var(--text);
 }
-.suggestion .arrow { color: var(--faint); display: flex; align-items: center; }
+.suggestion .arrow {
+  color: var(--faint);
+  display: flex;
+  align-items: center;
+}
 
 /* ── Assistant stream card ─────────────────────────────── */
 .assistant-stream {
@@ -270,7 +312,10 @@
   color: var(--text);
   letter-spacing: -0.005em;
 }
-.assistant-stream .copy em { color: var(--accent); font-style: normal; }
+.assistant-stream .copy em {
+  color: var(--accent);
+  font-style: normal;
+}
 .assistant-stream .copy .cursor {
   display: inline-block;
   width: 8px;

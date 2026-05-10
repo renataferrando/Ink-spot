@@ -35,7 +35,7 @@ const serverSchema = z.object({
   OPENCAGE_API_KEY: z.string().min(1).optional(),
   ADMIN_USER_ID: z.preprocess(
     (v) => (v === "" || v === undefined ? undefined : v),
-    z.string().uuid().optional()
+    z.string().uuid().optional(),
   ),
   CRON_SECRET: z.string().min(32).optional(),
 });

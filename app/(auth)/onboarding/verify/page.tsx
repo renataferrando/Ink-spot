@@ -22,7 +22,9 @@ function generateCode() {
 
 export default async function VerifyPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();
@@ -55,10 +57,10 @@ export default async function VerifyPage() {
   if (!existing) {
     code = generateCode();
     await admin.from("claims").insert({
-      artist_id:         artist.id,
+      artist_id: artist.id,
       instagram_user_id: user.id,
-      instagram_handle:  artist.instagram_handle,
-      status:            "pending",
+      instagram_handle: artist.instagram_handle,
+      status: "pending",
       verification_code: code,
     });
   }
@@ -78,8 +80,7 @@ export default async function VerifyPage() {
               margin: 0,
             }}
           >
-            Verify your{" "}
-            <span style={{ color: "var(--accent)" }}>handle</span>.
+            Verify your <span style={{ color: "var(--accent)" }}>handle</span>.
           </h1>
           <p
             style={{
@@ -89,15 +90,12 @@ export default async function VerifyPage() {
               margin: 0,
             }}
           >
-            Paste this code anywhere in your Instagram bio. We&apos;ll fetch
-            the page and confirm. You can remove it 60&nbsp;seconds later.
+            Paste this code anywhere in your Instagram bio. We&apos;ll fetch the page and confirm.
+            You can remove it 60&nbsp;seconds later.
           </p>
         </div>
 
-        <VerifyForm
-          handle={artist.instagram_handle}
-          code={code ?? ""}
-        />
+        <VerifyForm handle={artist.instagram_handle} code={code ?? ""} />
       </div>
     </OnboardingShell>
   );

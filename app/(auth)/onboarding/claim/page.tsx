@@ -11,20 +11,26 @@ export const metadata: Metadata = { title: "Claim your studio" };
 async function claimDemo(formData: FormData) {
   "use server";
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();
   const demoHandle = cookieStore.get("inkspot_demo_handle")?.value;
-  const igHandle   = cookieStore.get("inkspot_pending_ig")?.value;
+  const igHandle = cookieStore.get("inkspot_pending_ig")?.value;
   if (!demoHandle) redirect("/onboarding");
 
   const admin = getSupabaseAdminClient();
-  await admin.from("artists").update({
-    is_demo:           false,
-    is_claimed:        false, // will become true after bio verification
-    claimed_by_user_id: user.id,
-  }).eq("handle", demoHandle).eq("is_demo", true);
+  await admin
+    .from("artists")
+    .update({
+      is_demo: false,
+      is_claimed: false, // will become true after bio verification
+      claimed_by_user_id: user.id,
+    })
+    .eq("handle", demoHandle)
+    .eq("is_demo", true);
 
   cookieStore.set("inkspot_handle", demoHandle, { httpOnly: true, path: "/", maxAge: 86400 });
   cookieStore.delete("inkspot_demo_handle");
@@ -44,9 +50,9 @@ async function declineClaim() {
 
 export default async function ClaimPage() {
   const cookieStore = await cookies();
-  const demoHandle   = cookieStore.get("inkspot_demo_handle")?.value;
-  const studioName   = cookieStore.get("inkspot_pending_studio")?.value;
-  const igHandle     = cookieStore.get("inkspot_pending_ig")?.value;
+  const demoHandle = cookieStore.get("inkspot_demo_handle")?.value;
+  const studioName = cookieStore.get("inkspot_pending_studio")?.value;
+  const igHandle = cookieStore.get("inkspot_pending_ig")?.value;
 
   if (!demoHandle || !igHandle) redirect("/onboarding");
 
@@ -124,7 +130,11 @@ export default async function ClaimPage() {
             </button>
           </form>
           <form action={declineClaim}>
-            <button type="submit" className="btn-secondary" style={{ width: "100%", color: "var(--dim)" }}>
+            <button
+              type="submit"
+              className="btn-secondary"
+              style={{ width: "100%", color: "var(--dim)" }}
+            >
               No, use a different handle
             </button>
           </form>

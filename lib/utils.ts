@@ -14,10 +14,7 @@ export function cn(...inputs: ClassValue[]): string {
  * units — under 1 km in meters; longer distances in kilometres with sensible
  * precision.
  */
-export function formatDistance(
-  meters: number,
-  locale: string = "en-US",
-): string {
+export function formatDistance(meters: number, locale: string = "en-US"): string {
   if (!Number.isFinite(meters) || meters < 0) {
     throw new Error(`formatDistance: invalid distance ${meters}`);
   }

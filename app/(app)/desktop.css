@@ -61,15 +61,22 @@
     font-weight: 500;
     color: var(--dim);
     text-decoration: none;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
-  .dt-nav-tab:hover { color: var(--text); }
+  .dt-nav-tab:hover {
+    color: var(--text);
+  }
   .dt-nav-tab.active {
     background: var(--surface);
     color: var(--text);
     border: 1px solid var(--hairline);
   }
-  .dt-nav-tab svg { flex-shrink: 0; opacity: 0.85; }
+  .dt-nav-tab svg {
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
   .dt-nav-right {
     display: flex;
     align-items: center;
@@ -91,9 +98,14 @@
     font-size: 13px;
     color: var(--faint);
     text-decoration: none;
-    transition: border-color 0.15s, color 0.15s;
+    transition:
+      border-color 0.15s,
+      color 0.15s;
   }
-  .dt-search-bar:hover { color: var(--dim); border-color: var(--border-ds); }
+  .dt-search-bar:hover {
+    color: var(--dim);
+    border-color: var(--border-ds);
+  }
   .dt-account {
     flex-shrink: 0;
     width: 40px;
@@ -113,12 +125,16 @@
     border-radius: 999px;
     background: linear-gradient(135deg, var(--surface) 0%, var(--hairline) 100%);
   }
-  .dt-stream { min-height: 0; }
+  .dt-stream {
+    min-height: 0;
+  }
   .dt-stream-inner {
     padding-left: max(18px, env(safe-area-inset-left));
     padding-right: max(18px, env(safe-area-inset-right));
   }
-  .dt-filter-row { max-width: 100%; }
+  .dt-filter-row {
+    max-width: 100%;
+  }
   .dt-map-block {
     border-radius: 14px;
     overflow: hidden;
@@ -153,9 +169,21 @@
     padding: 16px 0;
     border-bottom: 1px solid var(--hairline);
   }
-  .dt-list-primary { display: contents; color: inherit; }
-  .dt-list-avatar-wrap { width: 64px; height: 64px; flex-shrink: 0; }
-  .dt-list-avatar { width: 64px; height: 64px; border-radius: 999px; object-fit: cover; }
+  .dt-list-primary {
+    display: contents;
+    color: inherit;
+  }
+  .dt-list-avatar-wrap {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+  }
+  .dt-list-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    object-fit: cover;
+  }
   .dt-list-avatar-initials {
     display: flex;
     align-items: center;
@@ -167,9 +195,20 @@
     border: 1px solid var(--hairline);
     color: var(--text-2);
   }
-  .dt-list-body { min-width: 0; }
-  .dt-list-name { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
-  .dt-list-handle { font-size: 12px; color: var(--dim); margin-top: 2px; }
+  .dt-list-body {
+    min-width: 0;
+  }
+  .dt-list-name {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .dt-list-handle {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 2px;
+  }
   .dt-list-loc {
     display: flex;
     flex-wrap: wrap;
@@ -180,8 +219,11 @@
     color: var(--text-2);
   }
   .dt-list-loc .dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: #22c55e; flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
   }
   .dt-list-loc .now-lbl,
   .dt-list-loc .next-lbl {
@@ -191,19 +233,31 @@
     text-transform: uppercase;
     color: var(--faint);
   }
-  .dt-list-loc .sep { color: var(--faint); margin: 0 2px; }
-  .dt-list-thumbs { display: flex; gap: 6px; align-items: center; }
+  .dt-list-loc .sep {
+    color: var(--faint);
+    margin: 0 2px;
+  }
+  .dt-list-thumbs {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
   .dt-thumb {
-    width: 56px; height: 56px;
-    border-radius: 10px; overflow: hidden;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    overflow: hidden;
     border: 1px solid var(--hairline);
-    flex-shrink: 0; background: var(--surface-2);
+    flex-shrink: 0;
+    background: var(--surface-2);
   }
   .dt-thumb-empty {
-    width: 56px; height: 56px;
+    width: 56px;
+    height: 56px;
     border-radius: 10px;
     border: 1px dashed var(--hairline);
-    flex-shrink: 0; opacity: 0.45;
+    flex-shrink: 0;
+    opacity: 0.45;
   }
   .dt-list-open {
     display: inline-flex;
@@ -220,10 +274,15 @@
     text-transform: uppercase;
     color: var(--text-2);
     text-decoration: none;
-    transition: border-color 0.15s, color 0.15s;
+    transition:
+      border-color 0.15s,
+      color 0.15s;
     align-self: center;
   }
-  .dt-list-open:hover { color: var(--text); border-color: var(--accent); }
+  .dt-list-open:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
 }
 
 @media (max-width: 1023px) {

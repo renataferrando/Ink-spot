@@ -11,13 +11,13 @@ import { geocodeAddress } from "@/lib/geocoding/opencage";
 const AddLocationSchema = z.object({
   // The autocomplete component writes these when the user selects a candidate.
   // They take precedence over a raw address string.
-  address_lat:  z.coerce.number().optional(),
-  address_lng:  z.coerce.number().optional(),
-  address:      z.string().min(2, "Please select a location from the suggestions"),
-  studio_name:  z.string().max(100).optional(),
-  kind:         z.enum(["home_base", "guest_spot", "traveling"]).default("home_base"),
-  starts_at:    z.string().optional().or(z.literal("")),
-  ends_at:      z.string().optional().or(z.literal("")),
+  address_lat: z.coerce.number().optional(),
+  address_lng: z.coerce.number().optional(),
+  address: z.string().min(2, "Please select a location from the suggestions"),
+  studio_name: z.string().max(100).optional(),
+  kind: z.enum(["home_base", "guest_spot", "traveling"]).default("home_base"),
+  starts_at: z.string().optional().or(z.literal("")),
+  ends_at: z.string().optional().or(z.literal("")),
 });
 
 export type ManageLocationState = { error?: string; success?: boolean };
@@ -27,7 +27,9 @@ export async function addLocation(
   formData: FormData,
 ): Promise<ManageLocationState> {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const parsed = AddLocationSchema.safeParse(Object.fromEntries(formData));
@@ -57,7 +59,9 @@ export async function addLocation(
   } else {
     const geo = await geocodeAddress(address);
     if (!geo) {
-      return { error: "Could not resolve that location. Please select a suggestion from the dropdown." };
+      return {
+        error: "Could not resolve that location. Please select a suggestion from the dropdown.",
+      };
     }
     lat = geo.lat;
     lng = geo.lng;
@@ -74,15 +78,15 @@ export async function addLocation(
   }
 
   await admin.from("artist_locations").insert({
-    artist_id:     artist.id,
+    artist_id: artist.id,
     lat,
     lng,
     location_name: locationName,
     kind,
-    is_current:    kind === "home_base",
-    studio_name:   studio_name || null,
-    starts_at:     starts_at || null,
-    ends_at:       ends_at || null,
+    is_current: kind === "home_base",
+    studio_name: studio_name || null,
+    starts_at: starts_at || null,
+    ends_at: ends_at || null,
   });
 
   return { success: true };
@@ -90,7 +94,9 @@ export async function addLocation(
 
 export async function toggleCurrentLocation(locationId: string) {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const admin = getSupabaseAdminClient();
@@ -101,12 +107,14 @@ export async function toggleCurrentLocation(locationId: string) {
     .single();
   if (!artist) return;
 
-  await admin.from("artist_locations")
+  await admin
+    .from("artist_locations")
     .update({ is_current: false })
     .eq("artist_id", artist.id)
     .eq("is_current", true);
 
-  await admin.from("artist_locations")
+  await admin
+    .from("artist_locations")
     .update({ is_current: true })
     .eq("id", locationId)
     .eq("artist_id", artist.id);

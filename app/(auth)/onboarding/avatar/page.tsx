@@ -12,7 +12,9 @@ export const metadata: Metadata = { title: "Profile photo — onboarding" };
 
 export default async function AvatarPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();

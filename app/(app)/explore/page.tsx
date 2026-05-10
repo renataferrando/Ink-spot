@@ -88,8 +88,7 @@ async function getArtists(styles?: string): Promise<ArtistPublic[]> {
       })
       .sort(
         (a: Record<string, unknown>, b: Record<string, unknown>) =>
-          new Date(a.starts_at as string).getTime() -
-          new Date(b.starts_at as string).getTime(),
+          new Date(a.starts_at as string).getTime() - new Date(b.starts_at as string).getTime(),
       ) as ArtistPublic["upcoming_locations"];
     return {
       id: row.id as string,
@@ -129,7 +128,7 @@ export default async function ExplorePage({ searchParams }: Props) {
   const styleLabel = activeStyle ? STYLE_LABELS[activeStyle as ArtistStyle] : null;
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col lg:mx-0 lg:max-w-none lg:min-h-0 lg:flex-1">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col lg:mx-0 lg:min-h-0 lg:max-w-none lg:flex-1">
       <div className="dt-stream lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto">
         <div className="dt-stream-inner lg:mx-auto lg:w-full lg:max-w-[960px] lg:px-6 lg:pb-10">
           {/* Map */}
@@ -145,11 +144,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               const isActive = value === activeStyle || (value === null && !activeStyle);
               const href = value ? `/explore?styles=${value}` : "/explore";
               return (
-                <Link
-                  key={label}
-                  href={href}
-                  className={`chip${isActive ? " active" : ""}`}
-                >
+                <Link key={label} href={href} className={`chip${isActive ? "active" : ""}`}>
                   {label}
                 </Link>
               );

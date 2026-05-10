@@ -1,10 +1,7 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { ArtistPublic } from "@/types/artist";
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   try {
@@ -12,7 +9,8 @@ export async function GET(
 
     const { data, error } = await supabase
       .from("artists")
-      .select(`
+      .select(
+        `
         id, handle, display_name, bio,
         instagram_handle, profile_image_url, cover_image_url,
         website_url, contact_email, years_experience,
@@ -27,7 +25,8 @@ export async function GET(
           id, artist_id, image_url, caption, alt_text,
           detected_styles, is_featured, sort_order, width, height
         )
-      `)
+      `,
+      )
       .eq("handle", id) // id param is the handle
       .eq("is_active", true)
       .single();
@@ -57,7 +56,9 @@ export async function GET(
       is_demo: row.is_demo as boolean,
       is_claimed: row.is_claimed as boolean,
       is_active: row.is_active as boolean,
-      portfolio_items: (Array.isArray(row.portfolio_items) ? row.portfolio_items : []) as ArtistPublic["portfolio_items"],
+      portfolio_items: (Array.isArray(row.portfolio_items)
+        ? row.portfolio_items
+        : []) as ArtistPublic["portfolio_items"],
       created_at: row.created_at as string,
       updated_at: row.updated_at as string,
     };

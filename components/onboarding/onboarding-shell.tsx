@@ -12,11 +12,19 @@ interface OnboardingShellProps {
   children: React.ReactNode;
 }
 
-export function OnboardingShell({ step, totalSteps = 6, backHref, children }: OnboardingShellProps) {
+export function OnboardingShell({
+  step,
+  totalSteps = 6,
+  backHref,
+  children,
+}: OnboardingShellProps) {
   const total = totalSteps;
   const label = String(total).padStart(2, "0");
   return (
-    <div className="flex min-h-screen flex-col" style={{ background: "var(--bg)", color: "var(--text)" }}>
+    <div
+      className="flex min-h-screen flex-col"
+      style={{ background: "var(--bg)", color: "var(--text)" }}
+    >
       <div
         className="flex items-center px-5"
         style={{
@@ -32,14 +40,21 @@ export function OnboardingShell({ step, totalSteps = 6, backHref, children }: On
               aria-label="Go back"
               style={{ color: "var(--text-2)", display: "flex", alignItems: "center" }}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width={20} height={20}>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                width={20}
+                height={20}
+              >
                 <path d="m15 18-6-6 6-6" />
               </svg>
             </Link>
           ) : null}
         </div>
 
-        <div className="flex-1 text-center label">
+        <div className="label flex-1 text-center">
           Step {String(step).padStart(2, "0")} of {label}
         </div>
 
