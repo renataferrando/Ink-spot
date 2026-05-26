@@ -400,3 +400,52 @@
 .filter-bar::-webkit-scrollbar {
   display: none;
 }
+
+/* Shared shell for the /search /saved /account tab views.
+   Mobile: full-bleed scroll area with bottom-nav clearance.
+   Desktop (≥1024): framed card with breathing room.
+   Lives in @layer components so per-element Tailwind utilities can override. */
+@layer components {
+  .tab-shell {
+    padding-top: 12px;
+    padding-bottom: 96px;
+  }
+  @media (min-width: 1024px) {
+    .tab-shell {
+      max-width: 960px;
+      width: 100%;
+      margin: 16px auto 24px;
+      min-height: min(600px, 82vh);
+      border: 1px solid var(--hairline);
+      border-radius: 18px;
+      background: var(--bg);
+      overflow-x: hidden;
+      padding-top: 32px;
+      padding-bottom: 32px;
+    }
+  }
+}
+
+/* Save toast entrance — used by components/artist/artist-profile.tsx */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Search streaming cursor — used by app/(app)/search/page.tsx */
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}

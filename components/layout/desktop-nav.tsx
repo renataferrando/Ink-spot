@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { cn } from "@/lib/utils";
+
 const NAV = [
   {
     href: "/explore",
@@ -82,21 +84,36 @@ export function DesktopNav() {
   const onExplore = pathname === "/explore" || pathname.startsWith("/explore/");
 
   return (
-    <header className="dt-navbar hidden lg:flex" aria-label="Main">
-      <div className="dt-nav-left">
-        <Link href="/explore" className="dt-wordmark-h">
+    <header
+      aria-label="Main"
+      className="border-hairline sticky top-0 z-20 hidden shrink-0 items-center justify-between gap-6 border-b bg-(--bg) px-7 py-3 lg:flex"
+    >
+      <div className="flex min-w-0 items-center gap-5">
+        <Link
+          href="/explore"
+          className="inline-flex shrink-0 items-baseline font-sans text-[20px] font-medium tracking-[-0.02em] text-(--text)"
+        >
           InkSpot
-          <span className="dot" />
+          <span
+            aria-hidden
+            className="bg-ink-spot ml-1 inline-block size-[5px] -translate-y-1.5 rounded-full shadow-[0_0_10px_var(--accent-glow)]"
+          />
         </Link>
-        <nav className="dt-nav-tabs" aria-label="Primary">
+        <nav
+          aria-label="Primary"
+          className="border-hairline bg-surface-2 flex items-center gap-1 rounded-full border p-1"
+        >
           {NAV.map(({ href, label, icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href}
                 href={href}
-                className={"dt-nav-tab" + (active ? " active" : "")}
                 aria-current={active ? "page" : undefined}
+                className={cn(
+                  "text-dim hover:text-(--text) inline-flex items-center gap-2 rounded-full border border-transparent px-3.5 py-2 text-[13px] font-medium transition-colors [&_svg]:shrink-0 [&_svg]:opacity-85",
+                  active && "bg-surface border-hairline text-(--text)",
+                )}
               >
                 {icon}
                 <span>{label}</span>
@@ -105,9 +122,12 @@ export function DesktopNav() {
           })}
         </nav>
       </div>
-      <div className="dt-nav-right">
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-3.5">
         {onExplore && (
-          <Link href="/search" className="dt-search-bar">
+          <Link
+            href="/search"
+            className="border-hairline bg-surface-2 text-faint hover:text-dim hover:border-ds-border flex max-w-[420px] flex-1 items-center gap-2.5 rounded-full border px-4 py-2.5 text-[13px] transition-colors"
+          >
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -123,8 +143,15 @@ export function DesktopNav() {
             <span>Describe what you&apos;re imagining…</span>
           </Link>
         )}
-        <Link href="/account" className="dt-account" aria-label="Account">
-          <span className="dt-account-placeholder" aria-hidden />
+        <Link
+          href="/account"
+          aria-label="Account"
+          className="border-hairline bg-surface-2 flex size-10 shrink-0 items-center justify-center rounded-full border"
+        >
+          <span
+            aria-hidden
+            className="from-surface to-hairline block size-[22px] rounded-full bg-linear-to-br"
+          />
         </Link>
       </div>
     </header>

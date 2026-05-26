@@ -6,6 +6,7 @@ import { ArtistCard } from "@/components/artist/artist-card";
 import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
 import { ArtistRowDesktop } from "@/components/artist/artist-row-desktop";
 import { MapContainer } from "@/components/map/map-container";
+import { cn } from "@/lib/utils";
 import { STYLE_LABELS, type ArtistPublic, type ArtistStyle } from "@/types/artist";
 
 export const metadata: Metadata = { title: "Explore" };
@@ -128,23 +129,23 @@ export default async function ExplorePage({ searchParams }: Props) {
   const styleLabel = activeStyle ? STYLE_LABELS[activeStyle as ArtistStyle] : null;
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col lg:mx-0 lg:min-h-0 lg:max-w-none lg:flex-1">
-      <div className="dt-stream lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto">
-        <div className="dt-stream-inner lg:mx-auto lg:w-full lg:max-w-[960px] lg:px-6 lg:pb-10">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col lg:mx-0 lg:max-w-none">
+      <div className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto">
+        <div className="lg:mx-auto lg:w-full lg:max-w-[960px] lg:px-7 lg:pb-10">
           {/* Map */}
-          <div className="dt-map-block h-[42vh] min-h-48 w-full shrink-0 lg:h-[360px] lg:min-h-0">
+          <div className="lg:border-hairline h-[42vh] min-h-48 w-full shrink-0 overflow-hidden lg:h-[360px] lg:min-h-0 lg:rounded-[14px] lg:border">
             <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
               <MapContainer artists={artists} />
             </Suspense>
           </div>
 
           {/* Style filter chip rail */}
-          <div className="filter-bar dt-filter-row mt-4">
+          <div className="filter-bar mt-4 max-w-full">
             {FILTER_CHIPS.map(({ label, value }) => {
               const isActive = value === activeStyle || (value === null && !activeStyle);
               const href = value ? `/explore?styles=${value}` : "/explore";
               return (
-                <Link key={label} href={href} className={`chip${isActive ? "active" : ""}`}>
+                <Link key={label} href={href} className={cn("chip", isActive && "active")}>
                   {label}
                 </Link>
               );
@@ -153,7 +154,7 @@ export default async function ExplorePage({ searchParams }: Props) {
 
           {/* Section header — design's title + count */}
           <div className="section-head">
-            <h2 className="title h1-flat">
+            <h2 className="title text-[clamp(26px,2.6vw,34px)] leading-[1.1] font-medium tracking-[-0.03em]">
               {styleLabel ? (
                 <em>{styleLabel}</em>
               ) : (
@@ -169,7 +170,7 @@ export default async function ExplorePage({ searchParams }: Props) {
           </div>
 
           {/* Artist list — mobile cards / desktop dt rows */}
-          <div className="dt-list flex flex-col pb-24 lg:pb-0">
+          <div className="lg:border-hairline flex flex-col pb-24 lg:mt-2 lg:border-t lg:pt-[18px] lg:pb-0">
             <Suspense
               fallback={
                 <>

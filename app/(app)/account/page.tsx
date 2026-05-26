@@ -15,6 +15,8 @@ const STEPS = [
   ["Set your home base + travel dates", "Be visible wherever you're guesting."],
 ] as const;
 
+const SHELL_CLASS = "tab-shell scrollbar-none flex-1 overflow-y-auto px-[18px]";
+
 export default async function AccountPage() {
   const supabase = await getSupabaseServerClient();
   const {
@@ -24,81 +26,40 @@ export default async function AccountPage() {
   // ── Not authenticated ──────────────────────────────
   if (!user) {
     return (
-      <div
-        className="dt-tab-shell scrollbar-none flex-1 overflow-y-auto"
-        style={{ padding: "0 18px 32px" }}
-      >
-        <div style={{ marginTop: 12, marginBottom: 8 }}>
-          <h1
-            style={{
-              fontFamily: "var(--font-sans, ui-sans-serif)",
-              fontSize: 30,
-              fontWeight: 500,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.1,
-              margin: 0,
-            }}
-          >
-            Are you the <span style={{ color: "var(--accent)" }}>artist?</span>
+      <div className={SHELL_CLASS}>
+        <div className="mb-2">
+          <h1 className="m-0 font-sans text-[30px] leading-[1.1] font-medium tracking-[-0.02em]">
+            Are you the <span className="text-ink-spot">artist?</span>
           </h1>
         </div>
-        <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: "8px 0 0" }}>
+        <p className="text-dim mt-2 text-[14px] leading-[1.55]">
           Claim your profile, upload your portfolio, and show up in AI search results across Costa
           Rica.
         </p>
 
         {/* Steps */}
-        <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 0 }}>
+        <div className="mt-6 flex flex-col">
           {STEPS.map(([title, sub], i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                gap: 14,
-                padding: "14px 0",
-                borderBottom: "1px solid var(--hairline)",
-              }}
-            >
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 999,
-                  background: "var(--surface-2)",
-                  border: "1px solid var(--hairline)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  fontSize: 11,
-                  color: "var(--accent)",
-                  flexShrink: 0,
-                }}
-              >
+            <div key={i} className="border-hairline flex gap-3.5 border-b py-3.5">
+              <div className="bg-surface-2 border-hairline text-ink-spot flex size-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px]">
                 {i + 1}
               </div>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 500, color: "var(--text)" }}>{title}</div>
-                <div style={{ fontSize: 12, color: "var(--dim)", marginTop: 2 }}>{sub}</div>
+                <div className="text-(--text) text-[16px] font-medium">{title}</div>
+                <div className="text-dim mt-0.5 text-[12px]">{sub}</div>
               </div>
             </div>
           ))}
         </div>
 
         {/* CTA */}
-        <Link
-          href="/login"
-          className="btn-primary"
-          style={{ marginTop: 24, textDecoration: "none" }}
-        >
+        <Link href="/login" className="btn-primary mt-6 no-underline">
           Claim your profile <ArrowRight size={14} aria-hidden />
         </Link>
 
-        <div style={{ height: 16 }} />
+        <div className="h-4" />
 
-        <div className="label" style={{ textTransform: "uppercase" }}>
-          Or browse as a guest
-        </div>
+        <div className="label">Or browse as a guest</div>
       </div>
     );
   }
@@ -114,33 +75,23 @@ export default async function AccountPage() {
   // ── Authenticated, no artist ──────────────────────
   if (!artist) {
     return (
-      <div
-        className="dt-tab-shell scrollbar-none flex-1 overflow-y-auto"
-        style={{ padding: "0 18px 32px" }}
-      >
-        <div style={{ marginTop: 12 }}>
-          <h1
-            style={{
-              fontSize: 24,
-              fontWeight: 500,
-              letterSpacing: "-0.02em",
-              margin: "0 0 8px",
-            }}
-          >
+      <div className={SHELL_CLASS}>
+        <div>
+          <h1 className="mt-0 mb-2 text-[24px] font-medium tracking-[-0.02em]">
             Complete your profile
           </h1>
-          <p style={{ fontSize: 14, color: "var(--dim)", margin: 0 }}>
+          <p className="text-dim m-0 text-[14px]">
             You&apos;re signed in but haven&apos;t set up your artist profile yet.
           </p>
         </div>
 
-        <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 10 }}>
-          <Link href="/onboarding" className="btn-primary" style={{ textDecoration: "none" }}>
+        <div className="mt-6 flex flex-col gap-2.5">
+          <Link href="/onboarding" className="btn-primary no-underline">
             Continue onboarding
             <ArrowRight size={14} aria-hidden />
           </Link>
           <form action={signOut}>
-            <button type="submit" className="btn-secondary" style={{ width: "100%" }}>
+            <button type="submit" className="btn-secondary w-full">
               Sign out
             </button>
           </form>
@@ -151,50 +102,22 @@ export default async function AccountPage() {
 
   // ── Authenticated, has artist ─────────────────────
   return (
-    <div
-      className="dt-tab-shell scrollbar-none flex-1 overflow-y-auto"
-      style={{ padding: "0 18px 32px" }}
-    >
+    <div className={SHELL_CLASS}>
       {/* Mini profile header */}
-      <div
-        style={{
-          marginTop: 12,
-          padding: "18px",
-          background: "var(--surface)",
-          border: "1px solid var(--hairline)",
-          borderRadius: 14,
-          marginBottom: 16,
-        }}
-      >
-        <div style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.01em" }}>
+      <div className="bg-surface border-hairline mb-4 rounded-[14px] border p-[18px]">
+        <div className="text-[20px] font-medium tracking-[-0.01em]">
           {artist.display_name ?? `@${artist.handle}`}
         </div>
-        <div className="label" style={{ marginTop: 4 }}>
-          @{artist.handle}
-        </div>
+        <div className="label mt-1">@{artist.handle}</div>
         {!artist.is_claimed && (
-          <div
-            style={{
-              marginTop: 10,
-              padding: "6px 10px",
-              background: "rgba(251,191,36,0.08)",
-              border: "1px solid rgba(251,191,36,0.2)",
-              borderRadius: 999,
-              fontSize: 11,
-              color: "#fbbf24",
-              fontFamily: "var(--font-mono, ui-monospace)",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              display: "inline-block",
-            }}
-          >
+          <div className="bg-demo-subtle text-demo mt-2.5 inline-block rounded-full border border-[rgba(251,191,36,0.2)] px-2.5 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase">
             Verification pending
           </div>
         )}
       </div>
 
       {/* Quick links */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <div className="flex flex-col gap-0.5">
         {[
           { label: "View public profile", href: `/artist/${artist.handle}` },
           { label: "Manage portfolio", href: "/dashboard/portfolio" },
@@ -204,39 +127,19 @@ export default async function AccountPage() {
           <Link
             key={href}
             href={href}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "14px 0",
-              borderBottom: "1px solid var(--hairline)",
-              fontSize: 15,
-              color: "var(--text)",
-              textDecoration: "none",
-              transition: "color 0.15s",
-            }}
+            className="border-hairline text-(--text) flex items-center justify-between border-b py-3.5 text-[15px] no-underline transition-colors"
           >
             {label}
-            <ArrowRight size={15} style={{ color: "var(--faint)" }} />
+            <ArrowRight size={15} className="text-faint" />
           </Link>
         ))}
       </div>
 
       {/* Sign out */}
-      <form action={signOut} style={{ marginTop: 24 }}>
+      <form action={signOut} className="mt-6">
         <button
           type="submit"
-          style={{
-            fontFamily: "var(--font-mono, ui-monospace)",
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--faint)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
-          }}
+          className="text-faint cursor-pointer border-0 bg-transparent p-0 font-mono text-[10px] tracking-[0.14em] uppercase"
         >
           Sign out
         </button>

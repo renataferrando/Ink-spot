@@ -34,7 +34,7 @@ function pickNextLocation(upcoming?: ArtistLocation[]) {
   return future[0] ?? upcoming[0];
 }
 
-/** Desktop explore list row — Claude Design `dt-list-row`. */
+/** Desktop explore list row. */
 export function ArtistRowDesktop({ artist, priority = false }: Props) {
   const thumbs = artist.portfolio_items.slice(0, 3);
   const currentIn = artist.current_location?.location_name ?? "—";
@@ -46,12 +46,16 @@ export function ArtistRowDesktop({ artist, priority = false }: Props) {
   const href = `/artist/${artist.handle}`;
 
   return (
-    <article className="dt-list-row">
-      <Link href={href} className="dt-list-primary" aria-label={`View ${artist.display_name}`}>
-        <div className="dt-list-avatar-wrap">
+    <article className="border-hairline grid grid-cols-[64px_minmax(0,1fr)_auto_auto] items-center gap-4 border-b py-4">
+      <Link
+        href={href}
+        aria-label={`View ${artist.display_name}`}
+        className="contents text-inherit"
+      >
+        <div className="size-16 shrink-0">
           {artist.profile_image_url ? (
             <Image
-              className="dt-list-avatar"
+              className="size-16 rounded-full object-cover"
               src={artist.profile_image_url}
               alt=""
               width={64}
@@ -59,25 +63,34 @@ export function ArtistRowDesktop({ artist, priority = false }: Props) {
               priority={priority}
             />
           ) : (
-            <span className="dt-list-avatar dt-list-avatar-initials" aria-hidden>
+            <span
+              aria-hidden
+              className="bg-surface-2 border-hairline text-text-2 flex size-16 items-center justify-center rounded-full border text-[18px] font-semibold tracking-[-0.02em]"
+            >
               {initials(artist.display_name)}
             </span>
           )}
         </div>
-        <div className="dt-list-body">
-          <div className="dt-list-name">{artist.display_name}</div>
-          <div className="dt-list-handle">
+        <div className="min-w-0">
+          <div className="text-[17px] font-semibold tracking-[-0.02em] text-(--text)">
+            {artist.display_name}
+          </div>
+          <div className="text-dim mt-0.5 text-[12px]">
             @{artist.handle} ·{" "}
             {artist.years_experience != null ? `${artist.years_experience} yrs` : "—"}
           </div>
-          <div className="dt-list-loc">
-            <span className="dot" />
-            <span className="now-lbl">Now</span> {currentIn.split(",")[0]}
-            <span className="sep">·</span>
-            <span className="next-lbl">Next:</span> {nextLabel}
+          <div className="text-text-2 mt-2 flex flex-wrap items-center gap-1.5 text-[12px]">
+            <span className="size-1.5 shrink-0 rounded-full bg-[#22c55e]" />
+            <span className="text-faint font-mono text-[10px] tracking-widest uppercase">Now</span>
+            {currentIn.split(",")[0]}
+            <span className="text-faint mx-0.5">·</span>
+            <span className="text-faint font-mono text-[10px] tracking-widest uppercase">
+              Next:
+            </span>{" "}
+            {nextLabel}
           </div>
           {artist.primary_styles.length > 0 && (
-            <div className="badges" style={{ marginTop: 8 }}>
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {artist.primary_styles.slice(0, 3).map((s, i) => (
                 <span key={s} className={"chip" + (i === 0 ? " active" : "")}>
                   {STYLE_LABELS[s]}
@@ -86,12 +99,22 @@ export function ArtistRowDesktop({ artist, priority = false }: Props) {
             </div>
           )}
         </div>
-        <div className="dt-list-thumbs">
+        <div className="flex items-center gap-1.5">
           {[0, 1, 2].map((i) => {
             const item = thumbs[i];
-            if (!item) return <div key={`e-${i}`} className="dt-thumb-empty" />;
+            if (!item) {
+              return (
+                <div
+                  key={`e-${i}`}
+                  className="border-hairline size-14 shrink-0 rounded-[10px] border border-dashed opacity-45"
+                />
+              );
+            }
             return (
-              <div key={item.id} className="dt-thumb">
+              <div
+                key={item.id}
+                className="border-hairline bg-surface-2 size-14 shrink-0 overflow-hidden rounded-[10px] border"
+              >
                 <Image
                   src={item.image_url}
                   alt=""
@@ -105,7 +128,10 @@ export function ArtistRowDesktop({ artist, priority = false }: Props) {
           })}
         </div>
       </Link>
-      <Link href={href} className="dt-list-open">
+      <Link
+        href={href}
+        className="border-ds-border text-text-2 hover:text-(--text) hover:border-ink-spot inline-flex h-9 items-center justify-center gap-1.5 self-center rounded-[10px] border px-3.5 font-mono text-[10px] tracking-[0.12em] uppercase no-underline transition-colors"
+      >
         Open
         <svg
           viewBox="0 0 24 24"

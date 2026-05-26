@@ -1,7 +1,5 @@
 "use client";
 
-import "./artist-profile.css";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -84,50 +82,60 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
   return (
     <>
       {/* ── Cover ─────────────────────────────────────────── */}
-      <div className="cover">
+      <div className="bg-surface-2 relative h-[280px] w-full overflow-hidden after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0)_30%,rgba(0,0,0,0.95)_100%)] after:content-['']">
         {coverSrc ? (
           <Image src={coverSrc} alt="" fill sizes="100vw" priority className="object-cover" />
         ) : (
-          <div className="initials-fallback" aria-hidden>
+          <div
+            aria-hidden
+            className="text-faint absolute inset-0 flex items-center justify-center font-mono text-[64px] tracking-[0.04em] uppercase"
+          >
             {initials}
           </div>
         )}
-        <button type="button" className="back-btn" aria-label="Back" onClick={() => router.back()}>
+        <button
+          type="button"
+          aria-label="Back"
+          onClick={() => router.back()}
+          className="absolute top-3.5 left-3.5 z-5 flex size-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white backdrop-blur-[10px] transition-colors hover:bg-black/70"
+        >
           <ChevronLeft size={18} aria-hidden />
         </button>
         <button
           type="button"
-          className="share-btn"
           aria-label="Share profile"
           onClick={handleShare}
+          className="absolute top-3.5 right-3.5 z-5 flex size-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white backdrop-blur-[10px] transition-colors hover:bg-black/70"
         >
           <Share2 size={16} aria-hidden />
         </button>
         {artist.is_demo && (
-          <div className="demo-banner">
-            <span className="dot" />
+          <div className="border-hairline text-text-2 absolute bottom-4 left-4 z-4 flex items-center gap-1.5 rounded-full border bg-black/70 px-2.5 py-1.5 font-mono text-[10px] tracking-widest uppercase backdrop-blur-[10px]">
+            <span className="size-1.5 rounded-full bg-[#ffb340]" />
             Demo profile · unclaimed
           </div>
         )}
       </div>
 
-      <div className="artist-profile-main mx-auto w-full max-w-[720px] lg:max-w-[760px]">
+      <div className="mx-auto w-full max-w-[720px] lg:max-w-[760px]">
         {/* ── Profile head ──────────────────────────────────── */}
-        <div className="profile-head">
-          {artist.instagram_handle && <div className="handle">@{artist.instagram_handle}</div>}
-          <h1 className="name">
+        <div className="relative z-5 -mt-10 px-[18px]">
+          {artist.instagram_handle && (
+            <div className="text-dim font-mono text-[12px]">@{artist.instagram_handle}</div>
+          )}
+          <h1 className="mb-1.5 text-[44px] leading-[0.95] font-medium tracking-[-0.02em]">
             {displayFirst}
             {displayRest && (
               <>
                 {" "}
-                <em>{displayRest}</em>
+                <em className="text-ink-spot not-italic">{displayRest}</em>
               </>
             )}
           </h1>
-          <div className="meta">
+          <div className="text-text-2 mt-2 flex items-center gap-3 text-[13px]">
             {artist.years_experience != null && <span>{artist.years_experience}&nbsp;yrs</span>}
             {artist.years_experience != null && artist.primary_styles.length > 0 && (
-              <span className="sep">·</span>
+              <span className="text-faint">·</span>
             )}
             {artist.primary_styles.length > 0 && (
               <span>
@@ -142,21 +150,33 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
 
         {/* ── Location bar (Now → Next) ─────────────────────── */}
         {(artist.current_location || upcoming) && (
-          <div className="location-bar" id="travel">
-            <div className="col now">
-              <div className="lbl">Now</div>
-              <div className="val">
+          <div
+            id="travel"
+            className="bg-surface border-hairline m-[18px] flex min-w-0 items-center gap-3.5 rounded-[14px] border px-4 py-3.5"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="text-faint font-mono text-[9px] tracking-[0.14em] uppercase">
+                <span className="bg-ink-spot mr-1.5 inline-block size-1.5 rounded-full align-middle shadow-[0_0_8px_var(--accent-glow)]" />
+                Now
+              </div>
+              <div className="mt-0.5 truncate text-[18px] leading-[1.2] text-(--text)">
                 {artist.current_location?.location_name?.split(",")[0] ?? "—"}
               </div>
-              <div className="sub">{artist.current_location?.studio_name ?? ""}</div>
+              <div className="text-dim mt-0.5 font-mono text-[10px]">
+                {artist.current_location?.studio_name ?? ""}
+              </div>
             </div>
-            <div className="arrow" aria-hidden>
+            <div aria-hidden className="text-faint flex shrink-0 items-center">
               <ArrowRight size={14} />
             </div>
-            <div className="col next">
-              <div className="lbl">Next</div>
-              <div className="val">{upcoming?.location_name?.split(",")[0] ?? "Open"}</div>
-              <div className="sub">
+            <div className="min-w-0 flex-1">
+              <div className="text-faint font-mono text-[9px] tracking-[0.14em] uppercase">
+                Next
+              </div>
+              <div className="text-text-2 mt-0.5 truncate text-[18px] leading-[1.2]">
+                {upcoming?.location_name?.split(",")[0] ?? "Open"}
+              </div>
+              <div className="text-dim mt-0.5 font-mono text-[10px]">
                 {upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : ""}
               </div>
             </div>
@@ -164,10 +184,10 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
 
         {/* ── CTA row ───────────────────────────────────────── */}
-        <div className="cta-row">
+        <div className="mt-1 flex min-w-0 gap-2 px-[18px]">
           {inquireHref ? (
             <a
-              className="btn-primary"
+              className="btn-primary w-auto! min-w-0 flex-1"
               href={inquireHref}
               target={inquireHref.startsWith("http") ? "_blank" : undefined}
               rel={inquireHref.startsWith("http") ? "noopener noreferrer" : undefined}
@@ -176,45 +196,65 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               {inquireLabel}
             </a>
           ) : (
-            <button type="button" className="btn-primary" disabled title={inquireDisabledReason}>
+            <button
+              type="button"
+              className="btn-primary w-auto! min-w-0 flex-1"
+              disabled
+              title={inquireDisabledReason}
+            >
               <MessageSquare size={14} aria-hidden />
               Inquire
             </button>
           )}
-          <a className="btn-secondary" href="#travel">
+          <a className="btn-secondary min-w-0 flex-1" href="#travel">
             <Calendar size={14} aria-hidden />
             Travel dates
           </a>
           <button
             type="button"
-            className="btn-icon"
             aria-label="Save artist"
             onClick={showSaveToast}
+            className="bg-surface-2 border-ds-border hover:bg-surface-3 flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border text-(--text) transition-colors"
           >
             <Heart size={18} aria-hidden />
           </button>
         </div>
 
         {/* ── Bio ───────────────────────────────────────────── */}
-        {artist.bio && <div className="bio">{artist.bio}</div>}
+        {artist.bio && (
+          <div className="text-text-2 px-[18px] pt-5 pb-1 text-[18px] leading-normal">
+            {artist.bio}
+          </div>
+        )}
 
         {/* ── Style brief (only when AI summary + style_confidence exist) ── */}
         {styleBreakdown && (
-          <div className="section">
-            <div className="head">
-              <div className="title">Style brief</div>
-              <div className="ai-tag">AI · Auto-generated</div>
+          <div className="border-hairline mt-7 border-t px-[18px] pt-7 pb-1">
+            <div className="mb-3.5 flex items-baseline justify-between">
+              <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
+                Style brief
+              </div>
+              <div className="text-ink-spot inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:bg-ink-spot before:content-['']">
+                AI · Auto-generated
+              </div>
             </div>
-            {artist.style_description && <p className="summary-body">{artist.style_description}</p>}
-            <div style={{ height: 18 }} />
-            <div className="style-breakdown">
+            {artist.style_description && (
+              <p className="text-[19px] leading-[1.45] text-(--text) text-pretty">
+                {artist.style_description}
+              </p>
+            )}
+            <div className="h-[18px]" />
+            <div className="flex flex-col gap-2.5">
               {styleBreakdown.map(([name, pct]) => (
-                <div className="style-row" key={name}>
-                  <div className="name">{name}</div>
-                  <div className="bar">
-                    <div className="fill" style={{ width: `${pct}%` }} />
+                <div className="flex items-center gap-2.5 font-mono text-[11px]" key={name}>
+                  <div className="text-text-2 w-20 tracking-[0.06em] uppercase">{name}</div>
+                  <div className="bg-surface-3 h-1 flex-1 overflow-hidden rounded-[2px]">
+                    <div
+                      className="bg-ink-spot h-full shadow-[0_0_8px_var(--accent-glow)]"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
-                  <div className="pct">{pct}%</div>
+                  <div className="text-dim w-8 text-right text-[10px]">{pct}%</div>
                 </div>
               ))}
             </div>
@@ -222,28 +262,40 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
 
         {/* ── Portfolio masonry ─────────────────────────────── */}
-        <div className="section">
-          <div className="head">
-            <div className="title">Portfolio · {artist.portfolio_items.length}</div>
-            {artist.portfolio_items.length > 0 && <div className="ai-tag dim">Filter</div>}
+        <div className="border-hairline mt-7 border-t px-[18px] pt-7 pb-1">
+          <div className="mb-3.5 flex items-baseline justify-between">
+            <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
+              Portfolio · {artist.portfolio_items.length}
+            </div>
+            {artist.portfolio_items.length > 0 && (
+              <div className="text-dim inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:bg-dim before:content-['']">
+                Filter
+              </div>
+            )}
           </div>
           {artist.portfolio_items.length > 0 ? (
-            <div className="portfolio-grid" style={{ marginLeft: -18, marginRight: -18 }}>
+            <div className="mx-[-18px] grid grid-cols-2 gap-1 px-1">
               {artist.portfolio_items.map((item, i) => {
                 const tagStyle = item.detected_styles[0] ?? artist.primary_styles[0];
+                const tall = i % 3 === 0;
                 return (
-                  <div key={item.id} className={"tile" + (i % 3 === 0 ? " tall" : "")}>
+                  <div
+                    key={item.id}
+                    className={`bg-surface-2 group relative cursor-pointer overflow-hidden ${tall ? "aspect-[0.75]" : "aspect-square"}`}
+                  >
                     <Image
                       src={item.image_url}
                       alt={item.alt_text ?? `Tattoo by ${artist.display_name}`}
                       fill
                       sizes="(max-width: 640px) 50vw, 320px"
-                      className="object-cover"
+                      className="object-cover transition-transform duration-400 ease-(--e-out) group-hover:scale-105"
                       loading={i < 2 ? "eager" : "lazy"}
                     />
                     {tagStyle && (
-                      <div className="overlay">
-                        <div className="style-tag">{STYLE_LABELS[tagStyle]}</div>
+                      <div className="pointer-events-none absolute right-0 bottom-0 left-0 bg-linear-to-b from-transparent to-black/85 p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <div className="font-mono text-[9px] tracking-[0.12em] text-white uppercase">
+                          {STYLE_LABELS[tagStyle]}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -251,34 +303,51 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               })}
             </div>
           ) : (
-            <div className="portfolio-empty">No portfolio uploaded yet</div>
+            <div className="border-hairline text-dim mx-[18px] rounded-[14px] border border-dashed px-[18px] py-8 text-center font-mono text-[11px] tracking-[0.08em] uppercase">
+              No portfolio uploaded yet
+            </div>
           )}
         </div>
 
         {/* ── Q&A panel shell (Stage 5.5.3 wires this) ─────── */}
         {!artist.is_demo && (
-          <div className="qa-panel">
-            <div className="qa-head">
-              <div className="lhs">
-                <div className="glow" />
-                <div className="ttl">Ask about {displayFirst}</div>
+          <div className="bg-surface border-hairline mx-[18px] mt-7 mb-8 overflow-hidden rounded-[18px] border">
+            <div className="border-hairline flex items-center justify-between border-b px-[18px] py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="relative size-6 rounded-full bg-[radial-gradient(circle,var(--accent)_0%,transparent_70%)] after:absolute after:inset-2 after:rounded-full after:bg-ink-spot after:content-['']" />
+                <div className="text-[17px]">Ask about {displayFirst}</div>
               </div>
-              <div className="pill">AI · Coming soon</div>
+              <div className="text-dim border-hairline rounded-full border px-2 py-1 font-mono text-[9px] tracking-[0.14em] uppercase">
+                AI · Coming soon
+              </div>
             </div>
-            <div className="qa-body placeholder">Conversational Q&amp;A unlocks in Phase 5.5</div>
-            <div className="qa-suggested">
+            <div className="text-dim flex min-h-24 items-center justify-center px-[18px] py-3.5 font-mono text-[13px] tracking-[0.08em] uppercase">
+              Conversational Q&amp;A unlocks in Phase 5.5
+            </div>
+            <div className="flex flex-wrap gap-1.5 px-[18px] pb-3.5">
               {QA_SUGGESTIONS.map((q) => (
-                <button key={q} type="button" disabled>
+                <button
+                  key={q}
+                  type="button"
+                  disabled
+                  className="text-text-2 border-hairline cursor-not-allowed rounded-full border bg-transparent px-2.5 py-1.5 font-mono text-[10px] tracking-[0.06em] opacity-50"
+                >
                   {q}
                 </button>
               ))}
             </div>
-            <div className="qa-input">
+            <div className="border-hairline flex items-center gap-2 border-t px-3.5 py-3">
               <input
                 placeholder={`Ask about ${displayFirst}'s work, style, availability…`}
                 disabled
+                className="placeholder:text-faint disabled:text-dim h-8 flex-1 border-0 bg-transparent text-[14px] outline-none"
               />
-              <button className="send" type="button" disabled aria-label="Send">
+              <button
+                type="button"
+                disabled
+                aria-label="Send"
+                className="flex size-8 cursor-not-allowed items-center justify-center rounded-full border-0 bg-ink-spot text-(--accent-ink) opacity-45"
+              >
                 <ArrowUp size={14} aria-hidden />
               </button>
             </div>
@@ -286,15 +355,26 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
 
         {/* ── URL footer ────────────────────────────────────── */}
-        <div className="profile-footer">inkspot.cr · /artist/{artist.handle}</div>
+        <div className="text-faint px-[18px] pb-8 text-center font-mono text-[10px] tracking-[0.14em] uppercase">
+          inkspot.cr · /artist/{artist.handle}
+        </div>
       </div>
 
       {/* ── Save toast (pre-Stage 5.3) ────────────────────── */}
       {savedToast && (
-        <div className="save-toast" role="status" aria-live="polite">
+        <div
+          role="status"
+          aria-live="polite"
+          className="bg-surface border-ink-spot fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full border px-4 py-3 text-[13px] text-(--text) shadow-[0_12px_30px_rgba(0,0,0,0.5)] animate-[toast-in_0.18s_var(--e-out)]"
+        >
           <Heart size={14} aria-hidden />
           <span>Sign in to save</span>
-          <Link href="/login">Log in</Link>
+          <Link
+            href="/login"
+            className="text-ink-spot font-mono text-[11px] tracking-widest uppercase"
+          >
+            Log in
+          </Link>
         </div>
       )}
     </>

@@ -1,12 +1,11 @@
 "use client";
 
-import "./search.css";
-
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { ArtistCard } from "@/components/artist/artist-card";
 import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
+import { cn } from "@/lib/utils";
 import { type ArtistPublic } from "@/types/artist";
 
 const SEARCH_PHRASES = [
@@ -162,19 +161,21 @@ export default function SearchPage() {
     mode === "assistant" && (stage === "streaming" || (stage === "results" && stream));
 
   return (
-    <div className="dt-tab-shell mx-auto flex w-full max-w-[760px] flex-1 flex-col pb-24 lg:max-w-[960px] lg:pb-8">
+    <div className="tab-shell mx-auto flex w-full max-w-[960px] flex-1 flex-col">
       {/* Hero */}
-      <div className="search-hero pt-6">
-        <h1 className="title">
-          What are you <em>imagining?</em>
+      <div className="px-[18px] pb-1.5">
+        <h1 className="m-0 text-[32px] leading-none font-medium tracking-[-0.02em] text-(--text)">
+          What are you <em className="text-ink-spot not-italic">imagining?</em>
         </h1>
-        <div className="sub">Describe it · drop a reference · or speak it</div>
+        <div className="text-dim mt-2 font-mono text-[11px] tracking-widest uppercase">
+          Describe it · drop a reference · or speak it
+        </div>
       </div>
 
-      <div style={{ height: 16 }} />
+      <div className="h-4" />
 
       {/* Input wrap with tools row */}
-      <div className="search-input-wrap">
+      <div className="bg-surface-2 border-hairline focus-within:border-ink-spot relative mx-[18px] mb-3.5 rounded-[14px] border px-3.5 pt-3.5 pb-3 transition-[border-color,box-shadow] focus-within:shadow-[0_0_0_3px_var(--accent-soft)]">
         <textarea
           rows={2}
           placeholder="A fine-line hibiscus, single needle, palm-sized, on the ribcage…"
@@ -186,14 +187,18 @@ export default function SearchPage() {
               submit();
             }
           }}
+          className="placeholder:text-faint min-h-14 w-full resize-none border-0 bg-transparent font-sans text-[18px] leading-[1.3] tracking-[-0.005em] text-(--text) outline-none"
         />
-        <div className="search-tools">
-          <div className="left">
+        <div className="border-hairline mt-2 flex items-center justify-between border-t pt-2.5">
+          <div className="flex gap-1">
             <button
               type="button"
-              className={`icon-btn${image ? "active" : ""}`}
               aria-label={image ? "Change reference image" : "Attach reference image"}
               onClick={() => fileInputRef.current?.click()}
+              className={cn(
+                "text-dim hover:bg-surface-3 flex size-8 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent transition-colors hover:text-(--text) disabled:cursor-not-allowed disabled:opacity-40",
+                image && "text-ink-spot bg-accent-soft",
+              )}
             >
               <svg
                 width="18"
@@ -210,9 +215,12 @@ export default function SearchPage() {
             </button>
             <button
               type="button"
-              className={`icon-btn${recording ? "active" : ""}`}
               aria-label={recording ? "Stop recording" : "Search by voice"}
               onClick={toggleMic}
+              className={cn(
+                "text-dim hover:bg-surface-3 flex size-8 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent transition-colors hover:text-(--text) disabled:cursor-not-allowed disabled:opacity-40",
+                recording && "text-ink-spot bg-accent-soft",
+              )}
             >
               <svg
                 width="18"
@@ -231,9 +239,9 @@ export default function SearchPage() {
           </div>
           <button
             type="button"
-            className="submit"
             onClick={() => submit(query || SEARCH_PHRASES[0])}
             disabled={loading}
+            className="bg-ink-spot flex h-8 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3.5 font-mono text-[11px] font-medium tracking-[0.12em] text-(--accent-ink) uppercase transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Search
             <svg
@@ -253,8 +261,8 @@ export default function SearchPage() {
 
       {/* Attached image preview */}
       {image && (
-        <div className="attached-image">
-          <div className="thumb">
+        <div className="bg-surface border-hairline mx-[18px] mt-2 flex items-center gap-2.5 rounded-[10px] border px-2.5 py-2">
+          <div className="bg-surface-3 relative size-9 shrink-0 overflow-hidden rounded-[6px]">
             <Image
               src={image.url}
               alt={image.name}
@@ -264,14 +272,16 @@ export default function SearchPage() {
               unoptimized
             />
           </div>
-          <span className="name">{image.name}</span>
+          <span className="text-text-2 flex-1 overflow-hidden font-mono text-[11px] tracking-[0.04em] text-ellipsis whitespace-nowrap">
+            {image.name}
+          </span>
           <button
             type="button"
-            className="remove"
             onClick={() => {
               if (image?.url) URL.revokeObjectURL(image.url);
               setImage(null);
             }}
+            className="text-dim cursor-pointer border-0 bg-transparent font-mono text-[10px] tracking-[0.14em] uppercase hover:text-(--text)"
           >
             Remove
           </button>
@@ -279,24 +289,44 @@ export default function SearchPage() {
       )}
 
       {/* Segmented Assistant ↔ List only */}
-      <div className={`assistant-toggle${mode === "list" ? "right" : ""}`} role="tablist">
-        <div className="pill" aria-hidden />
+      <div
+        role="tablist"
+        className="bg-surface-2 border-hairline relative mx-[18px] mb-3.5 flex cursor-default rounded-full border p-[3px]"
+      >
+        <span
+          aria-hidden
+          className={cn(
+            "bg-surface-3 pointer-events-none absolute top-[3px] left-[3px] h-[30px] w-[calc(50%-3px)] rounded-full transition-transform duration-300 ease-(--e-out)",
+            mode === "list" && "translate-x-full",
+          )}
+        />
         <button
           type="button"
           role="tab"
           aria-selected={mode === "assistant"}
-          className={mode === "assistant" ? "on" : ""}
           onClick={() => setMode("assistant")}
+          className={cn(
+            "text-dim relative z-1 flex h-[30px] flex-1 cursor-pointer items-center justify-center gap-[5px] rounded-full border-0 bg-transparent font-mono text-[10px] tracking-[0.12em] uppercase",
+            mode === "assistant" && "text-(--text)",
+          )}
         >
-          <span className="ai-dot" />
+          <span
+            className={cn(
+              "inline-block size-[5px] rounded-full bg-transparent align-middle transition-[background,box-shadow]",
+              mode === "assistant" && "bg-ink-spot shadow-[0_0_6px_var(--accent-glow)]",
+            )}
+          />
           Assistant
         </button>
         <button
           type="button"
           role="tab"
           aria-selected={mode === "list"}
-          className={mode === "list" ? "on" : ""}
           onClick={() => setMode("list")}
+          className={cn(
+            "text-dim relative z-1 flex h-[30px] flex-1 cursor-pointer items-center justify-center gap-[5px] rounded-full border-0 bg-transparent font-mono text-[10px] tracking-[0.12em] uppercase",
+            mode === "list" && "text-(--text)",
+          )}
         >
           List only
         </button>
@@ -304,12 +334,19 @@ export default function SearchPage() {
 
       {/* Idle: suggestion stack */}
       {!showSubmitted && (
-        <div className="suggestion-stack">
-          <div className="head">Try one of these</div>
+        <div className="px-[18px] pt-1">
+          <div className="text-faint mb-2.5 font-mono text-[10px] tracking-[0.14em] uppercase">
+            Try one of these
+          </div>
           {SEARCH_PHRASES.map((p) => (
-            <button key={p} type="button" className="suggestion" onClick={() => submit(p)}>
-              <span className="q">{p}</span>
-              <span className="arrow">
+            <button
+              key={p}
+              type="button"
+              onClick={() => submit(p)}
+              className="border-hairline flex w-full cursor-pointer items-center gap-2.5 border-x-0 border-t-0 border-b bg-transparent py-3.5 text-left text-(--text) transition-opacity hover:opacity-85"
+            >
+              <span className="flex-1 font-sans text-[17px] leading-tight text-(--text)">{p}</span>
+              <span className="text-faint flex items-center">
                 <svg
                   width="16"
                   height="16"
@@ -329,11 +366,18 @@ export default function SearchPage() {
 
       {/* Streaming card (assistant mode only) */}
       {showSubmitted && showStreamCard && (
-        <div className="assistant-stream">
-          <div className="badge">AI · Search assistant</div>
-          <div className="copy">
+        <div className="border-hairline from-accent-soft relative mx-[18px] mt-3.5 rounded-[14px] border bg-linear-to-b to-transparent p-[18px]">
+          <div className="text-ink-spot before:bg-ink-spot mb-2 inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase before:size-[5px] before:animate-pulse before:rounded-full before:shadow-[0_0_8px_var(--accent-glow)] before:content-['']">
+            AI · Search assistant
+          </div>
+          <div className="font-sans text-[18px] leading-[1.4] tracking-[-0.005em] text-(--text)">
             {stream}
-            {stage === "streaming" && <span className="cursor" aria-hidden />}
+            {stage === "streaming" && (
+              <span
+                aria-hidden
+                className="bg-ink-spot ml-0.5 inline-block h-[18px] w-2 animate-[blink_1s_steps(1)_infinite] align-middle"
+              />
+            )}
           </div>
         </div>
       )}
@@ -341,7 +385,7 @@ export default function SearchPage() {
       {/* Results section */}
       {showSubmitted && (
         <>
-          <div className="section-head" style={{ marginTop: 12 }}>
+          <div className="section-head mt-3">
             <h2 className="title">
               Top <em>matches</em>
             </h2>
@@ -388,8 +432,6 @@ export default function SearchPage() {
           </div>
         </>
       )}
-
-      <div style={{ height: 40 }} />
     </div>
   );
 }

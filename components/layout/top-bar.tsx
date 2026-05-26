@@ -14,49 +14,17 @@ export function TopBar() {
   const tag = TAGS[pathname] ?? "";
 
   return (
-    <header className="sticky top-0 z-[5] flex items-center justify-between bg-[var(--bg)] px-[18px] pt-[14px] pb-[10px] lg:hidden">
-      {/* Wordmark */}
-      <div
-        style={{
-          fontFamily: "var(--font-geist-sans, ui-sans-serif)",
-          fontSize: 22,
-          fontWeight: 500,
-          letterSpacing: "-0.01em",
-          color: "var(--text)",
-          display: "flex",
-          alignItems: "baseline",
-          gap: 0,
-        }}
-      >
+    <header className="sticky top-0 z-5 flex items-center justify-between bg-(--bg) px-[18px] pt-3.5 pb-2.5 lg:hidden">
+      <div className="flex items-baseline font-sans text-[22px] font-medium tracking-[-0.01em] text-(--text)">
         InkSpot
         <span
-          style={{
-            display: "inline-block",
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "var(--accent)",
-            boxShadow: "0 0 12px var(--accent-glow)",
-            marginLeft: 4,
-            transform: "translateY(-8px)",
-            flexShrink: 0,
-          }}
+          aria-hidden
+          className="bg-ink-spot ml-1 inline-block size-1.5 shrink-0 -translate-y-2 rounded-full shadow-[0_0_12px_var(--accent-glow)]"
         />
       </div>
 
-      {/* Tag */}
       {tag && (
-        <span
-          style={{
-            fontFamily: "var(--font-jetbrains, ui-monospace)",
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            color: "var(--dim)",
-            textTransform: "uppercase",
-          }}
-        >
-          {tag}
-        </span>
+        <span className="text-dim font-mono text-[10px] tracking-[0.14em] uppercase">{tag}</span>
       )}
     </header>
   );

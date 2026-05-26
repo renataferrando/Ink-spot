@@ -1,9 +1,9 @@
 "use client";
 
-import "./bottom-nav.css";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { cn } from "@/lib/utils";
 
 const tabs = [
   {
@@ -78,7 +78,10 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="bottomnav" aria-label="Main navigation">
+    <nav
+      aria-label="Main navigation"
+      className="border-hairline sticky inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t bg-black/85 pt-2.5 pb-[calc(env(safe-area-inset-bottom,0)+18px)] backdrop-blur-[14px] lg:hidden"
+    >
       {tabs.map(({ href, label, icon }) => {
         const active = pathname === href || pathname.startsWith(href + "/");
         return (
@@ -86,7 +89,10 @@ export function BottomNav() {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={active ? "active" : ""}
+            className={cn(
+              "text-faint flex flex-col items-center gap-1 py-1.5 font-mono text-[9px] tracking-[0.12em] uppercase transition-colors [&_svg]:transition-colors",
+              active && "text-(--text) [&_svg]:text-ink-spot",
+            )}
           >
             {icon}
             <span>{label}</span>
