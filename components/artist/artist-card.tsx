@@ -58,7 +58,7 @@ export function ArtistCard({
       href={`/artist/${artist.handle}`}
       aria-label={`View ${artist.display_name}`}
       className={cn(
-        "bg-surface border-hairline hover:bg-surface-2 active:bg-surface-2 relative block border-b p-[18px] text-inherit no-underline transition-colors",
+        "bg-surface border-hairline hover:bg-surface-2 active:bg-surface-2 relative block border-b py-[18px] text-inherit no-underline transition-colors",
         className,
       )}
     >

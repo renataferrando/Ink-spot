@@ -5,6 +5,15 @@ import { CheckCircle2, Copy } from "lucide-react";
 
 import { IgPreviewCard } from "@/components/artist/ig-preview-card";
 import { verifyOwnership, submitManualReview } from "@/actions/artist/verify-ownership";
+import {
+  copyCodeButtonClass,
+  fieldErrorClass,
+  fieldInputSmClass,
+  ghostTextButtonClass,
+  surfacePanelClass,
+} from "@/lib/ui/field-classes";
+import { cn } from "@/lib/utils";
+import { btnPrimaryClass, codeBoxClass, codeTextClass, labelClass } from "@/lib/ui/classes";
 
 interface Props {
   handle: string;
@@ -59,113 +68,66 @@ export function VerifyForm({ handle, code }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Code box */}
-      <div className="code-box">
-        <span className="code">{code}</span>
-        <button
-          type="button"
-          onClick={copyCode}
-          style={{
-            fontFamily: "var(--font-mono, ui-monospace)",
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: copied ? "var(--accent)" : "var(--dim)",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            transition: "color 0.2s",
-          }}
-        >
+      <div className={codeBoxClass}>
+        <span className={codeTextClass}>{code}</span>
+        <button type="button" onClick={copyCode} className={copyCodeButtonClass(copied)}>
           {copied ? (
             <>
-              <CheckCircle2 size={12} /> Copied
+              <CheckCircle2 size={12} aria-hidden /> Copied
             </>
           ) : (
             <>
-              <Copy size={12} /> Copy
+              <Copy size={12} aria-hidden /> Copy
             </>
           )}
         </button>
       </div>
 
-      {/* IG preview card */}
       <IgPreviewCard handle={handle} verified={stage === "verified"} />
 
-      {/* CTA — changes per stage */}
       {stage === "paste" && (
-        <button className="btn-primary" type="button" onClick={handleCheck}>
+        <button className={btnPrimaryClass} type="button" onClick={handleCheck}>
           I&apos;ve added the code
         </button>
       )}
       {stage === "checking" && (
-        <button className="btn-primary" type="button" disabled>
-          <span style={{ opacity: 0.8 }}>Fetching instagram.com/{handle}…</span>
+        <button className={btnPrimaryClass} type="button" disabled>
+          <span className="opacity-80">Fetching instagram.com/{handle}…</span>
         </button>
       )}
       {stage === "verified" && (
-        <button className="btn-primary" type="button" onClick={handleContinue}>
+        <button className={btnPrimaryClass} type="button" onClick={handleContinue}>
           Continue → Add location
         </button>
       )}
 
-      {checkError && <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{checkError}</p>}
+      {checkError && <p className={fieldErrorClass}>{checkError}</p>}
 
-      {/* Manual review link */}
       {stage !== "verified" && (
-        <div style={{ textAlign: "center" }}>
-          <button
-            type="button"
-            onClick={() => setShowManual((v) => !v)}
-            style={{
-              fontFamily: "var(--font-mono, ui-monospace)",
-              fontSize: 10,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--faint)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              transition: "color 0.2s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--dim)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--faint)")}
-          >
+        <div className="text-center">
+          <button type="button" onClick={() => setShowManual((v) => !v)} className={ghostTextButtonClass}>
             Or request manual review →
           </button>
         </div>
       )}
 
-      {/* Inline manual review form */}
       {showManual && stage !== "verified" && (
-        <div
-          style={{
-            marginTop: 4,
-            padding: "18px",
-            background: "var(--surface)",
-            border: "1px solid var(--hairline)",
-            borderRadius: 12,
-          }}
-        >
+        <div className={cn(surfacePanelClass, "mt-1")}>
           {manualSent ? (
-            <div style={{ textAlign: "center", padding: "8px 0" }}>
-              <CheckCircle2 size={28} style={{ color: "var(--accent)", margin: "0 auto 8px" }} />
-              <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Request received</p>
-              <p style={{ fontSize: 12, color: "var(--dim)", margin: 0, lineHeight: 1.5 }}>
+            <div className="py-2 text-center">
+              <CheckCircle2 size={28} className="text-ink-spot mx-auto mb-2" aria-hidden />
+              <p className="m-0 mb-1 text-sm font-medium text-(--text)">Request received</p>
+              <p className="text-dim m-0 text-xs leading-normal">
                 We&apos;ll review within 24 h and email you when approved.
               </p>
             </div>
           ) : (
             <form action={manualAction} className="space-y-3">
-              <p style={{ fontSize: 13, color: "var(--dim)", margin: 0, lineHeight: 1.5 }}>
+              <p className="text-dim m-0 text-[13px] leading-normal">
                 Can&apos;t edit your bio right now? We&apos;ll verify manually.
               </p>
               <div>
-                <label
-                  htmlFor="contact"
-                  className="label"
-                  style={{ display: "block", marginBottom: 6 }}
-                >
+                <label htmlFor="contact" className={cn(labelClass, "mb-1.5 block")}>
                   Contact (email or WhatsApp) *
                 </label>
                 <input
@@ -174,24 +136,11 @@ export function VerifyForm({ handle, code }: Props) {
                   placeholder="you@email.com"
                   required
                   disabled={manualPending}
-                  style={{
-                    width: "100%",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--hairline)",
-                    borderRadius: 8,
-                    padding: "10px 12px",
-                    fontSize: 14,
-                    color: "var(--text)",
-                    outline: "none",
-                  }}
+                  className={fieldInputSmClass}
                 />
               </div>
               <div>
-                <label
-                  htmlFor="note"
-                  className="label"
-                  style={{ display: "block", marginBottom: 6 }}
-                >
+                <label htmlFor="note" className={cn(labelClass, "mb-1.5 block")}>
                   Note (optional)
                 </label>
                 <input
@@ -199,27 +148,11 @@ export function VerifyForm({ handle, code }: Props) {
                   name="note"
                   placeholder="Any context that helps us verify…"
                   disabled={manualPending}
-                  style={{
-                    width: "100%",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--hairline)",
-                    borderRadius: 8,
-                    padding: "10px 12px",
-                    fontSize: 14,
-                    color: "var(--text)",
-                    outline: "none",
-                  }}
+                  className={fieldInputSmClass}
                 />
               </div>
-              {manualState?.error && (
-                <p style={{ fontSize: 13, color: "#f87171", margin: 0 }}>{manualState.error}</p>
-              )}
-              <button
-                type="submit"
-                disabled={manualPending}
-                className="btn-primary"
-                style={{ marginTop: 4 }}
-              >
+              {manualState?.error && <p className={fieldErrorClass}>{manualState.error}</p>}
+              <button type="submit" disabled={manualPending} className={cn(btnPrimaryClass, "mt-1")}>
                 {manualPending ? "Submitting…" : "Request review"}
               </button>
             </form>

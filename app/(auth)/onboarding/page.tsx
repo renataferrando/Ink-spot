@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
-
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
+import { OnboardingHeading } from "@/components/onboarding/onboarding-heading";
+import { accentWordClass } from "@/lib/ui/field-classes";
+
 import { OnboardingForm } from "./onboarding-form";
 
 export const metadata: Metadata = { title: "Set up your studio" };
@@ -16,7 +18,6 @@ export default async function OnboardingPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Already has a profile → go to dashboard
   const admin = getSupabaseAdminClient();
   const { data: artist } = await admin
     .from("artists")
@@ -28,24 +29,14 @@ export default async function OnboardingPage() {
   return (
     <OnboardingShell step={1} backHref="/explore">
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h1
-            style={{
-              fontFamily: "var(--font-sans, ui-sans-serif)",
-              fontSize: 32,
-              fontWeight: 500,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              color: "var(--text)",
-              margin: 0,
-            }}
-          >
-            Set up your <span style={{ color: "var(--accent)" }}>studio</span>.
-          </h1>
-          <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: 0 }}>
-            Tell us about your work. You can update everything later.
-          </p>
-        </div>
+        <OnboardingHeading
+          title={
+            <>
+              Set up your <span className={accentWordClass}>studio</span>.
+            </>
+          }
+          lead="Tell us about your work. You can update everything later."
+        />
         <OnboardingForm />
       </div>
     </OnboardingShell>

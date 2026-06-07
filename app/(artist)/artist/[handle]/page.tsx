@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { ArtistProfile } from "@/components/artist/artist-profile";
 import type { ArtistPublic } from "@/types/artist";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ handle: string }> };
 
 // ── Data fetching ─────────────────────────────────────────────────────────────

@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
+import { cn } from "@/lib/utils";
+import { btnPrimaryClass, btnSecondaryClass } from "@/lib/ui/classes";
 
 export const metadata: Metadata = { title: "Claim your studio" };
 
@@ -67,74 +69,34 @@ export default async function ClaimPage() {
     <OnboardingShell step={2} backHref="/onboarding">
       <div className="space-y-6 text-center">
         <div className="space-y-4">
-          {/* Avatar initials */}
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: "999px",
-              background: "var(--surface-2)",
-              border: "1px solid var(--hairline)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 22,
-              fontWeight: 500,
-              color: "var(--text-2)",
-              margin: "0 auto",
-            }}
-          >
+          <div className="bg-surface-2 border-hairline text-text-2 mx-auto flex size-16 items-center justify-center rounded-full border text-[22px] font-medium">
             {(demo?.display_name ?? studioName ?? "?").slice(0, 2).toUpperCase()}
           </div>
 
           <div>
-            <h1
-              style={{
-                fontSize: 26,
-                fontWeight: 500,
-                letterSpacing: "-0.02em",
-                margin: "0 0 8px",
-                color: "var(--text)",
-              }}
-            >
+            <h1 className="m-0 mb-2 text-[26px] font-medium tracking-[-0.02em] text-(--text)">
               Is this your studio?
             </h1>
-            <p style={{ fontSize: 14, color: "var(--dim)", lineHeight: 1.55, margin: 0 }}>
+            <p className="text-dim m-0 text-[14px] leading-[1.55]">
               We found a placeholder profile for{" "}
-              <span style={{ color: "var(--text)", fontFamily: "var(--font-mono, ui-monospace)" }}>
-                @{igHandle}
-              </span>
-              . Claim it to unlock the full profile.
+              <span className="font-mono text-(--text)">@{igHandle}</span>. Claim it to unlock the
+              full profile.
             </p>
           </div>
 
-          <div
-            style={{
-              padding: "10px 16px",
-              background: "var(--surface)",
-              border: "1px solid var(--hairline)",
-              borderRadius: 10,
-              fontSize: 15,
-              fontWeight: 500,
-              color: "var(--text)",
-            }}
-          >
+          <div className="bg-surface border-hairline rounded-(--r-sm) border px-4 py-2.5 text-[15px] font-medium text-(--text)">
             {demo?.display_name ?? studioName}
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           <form action={claimDemo}>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className={btnPrimaryClass}>
               Yes, claim it
             </button>
           </form>
           <form action={declineClaim}>
-            <button
-              type="submit"
-              className="btn-secondary"
-              style={{ width: "100%", color: "var(--dim)" }}
-            >
+            <button type="submit" className={cn(btnSecondaryClass, "text-dim w-full")}>
               No, use a different handle
             </button>
           </form>

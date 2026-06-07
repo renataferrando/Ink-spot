@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { PageColumn } from "@/components/layout/page-container";
 import { LocationTimeline } from "@/components/artist/location-timeline";
 import { AddLocationForm } from "./add-location-form";
 import type { ArtistLocation } from "@/types/artist";
@@ -38,7 +39,7 @@ export default async function LocationsPage() {
   const upcoming = locations.filter((l) => !l.is_current);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 px-4 py-10">
+    <PageColumn className="space-y-8 py-10">
       <h1 className="text-xl font-medium">Manage locations</h1>
 
       <LocationTimeline currentLocation={current} upcomingLocations={upcoming} />
@@ -49,6 +50,6 @@ export default async function LocationsPage() {
         </h2>
         <AddLocationForm />
       </div>
-    </div>
+    </PageColumn>
   );
 }

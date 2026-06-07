@@ -22,7 +22,7 @@ export function StyleFilterBar({ selected, onChange }: StyleFilterBarProps) {
 
   return (
     <div
-      className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-2"
+      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="group"
       aria-label="Filter by style"
     >

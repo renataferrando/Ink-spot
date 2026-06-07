@@ -7,6 +7,8 @@ import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/s
 import { env } from "@/lib/validations/env";
 import { Button } from "@/components/ui/button";
 import { approveClaim, rejectClaim } from "@/actions/admin/review-claim";
+import { cn } from "@/lib/utils";
+import { pageColumnClass, pageGutterClass } from "@/lib/ui/classes";
 
 export const metadata: Metadata = { title: "Claims review" };
 
@@ -31,7 +33,7 @@ export default async function ClaimsPage() {
     .order("created_at", { ascending: true });
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
+    <div className={cn(pageColumnClass, pageGutterClass, "py-10")}>
       <h1 className="mb-6 text-xl font-medium">Pending claims</h1>
 
       {!claims || claims.length === 0 ? (

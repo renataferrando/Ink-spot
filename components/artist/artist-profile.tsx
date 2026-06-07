@@ -16,6 +16,8 @@ import {
 
 import type { ArtistPublic } from "@/types/artist";
 import { STYLE_LABELS } from "@/types/artist";
+import { cn } from "@/lib/utils";
+import { btnPrimaryClass, btnSecondaryClass, pageColumnClass } from "@/lib/ui/classes";
 
 interface ArtistProfileProps {
   artist: ArtistPublic;
@@ -33,6 +35,7 @@ interface ArtistProfileProps {
  * activate the Q&A panel input + suggestion chips.
  */
 export function ArtistProfile({ artist }: ArtistProfileProps) {
+  console.log(artist);
   const router = useRouter();
   const [savedToast, setSavedToast] = useState(false);
 
@@ -117,7 +120,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
       </div>
 
-      <div className="mx-auto w-full max-w-[720px] lg:max-w-[760px]">
+      <div className={cn(pageColumnClass, "w-full")}>
         {/* ── Profile head ──────────────────────────────────── */}
         <div className="relative z-5 -mt-10 px-[18px]">
           {artist.instagram_handle && (
@@ -187,7 +190,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         <div className="mt-1 flex min-w-0 gap-2 px-[18px]">
           {inquireHref ? (
             <a
-              className="btn-primary w-auto! min-w-0 flex-1"
+              className={cn(btnPrimaryClass, "w-auto! min-w-0 flex-1")}
               href={inquireHref}
               target={inquireHref.startsWith("http") ? "_blank" : undefined}
               rel={inquireHref.startsWith("http") ? "noopener noreferrer" : undefined}
@@ -198,7 +201,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
           ) : (
             <button
               type="button"
-              className="btn-primary w-auto! min-w-0 flex-1"
+              className={cn(btnPrimaryClass, "w-auto! min-w-0 flex-1")}
               disabled
               title={inquireDisabledReason}
             >
@@ -206,7 +209,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               Inquire
             </button>
           )}
-          <a className="btn-secondary min-w-0 flex-1" href="#travel">
+          <a className={cn(btnSecondaryClass, "min-w-0 flex-1")} href="#travel">
             <Calendar size={14} aria-hidden />
             Travel dates
           </a>
@@ -234,12 +237,12 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
                 Style brief
               </div>
-              <div className="text-ink-spot inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:bg-ink-spot before:content-['']">
+              <div className="text-ink-spot before:bg-ink-spot inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:content-['']">
                 AI · Auto-generated
               </div>
             </div>
             {artist.style_description && (
-              <p className="text-[19px] leading-[1.45] text-(--text) text-pretty">
+              <p className="text-[19px] leading-[1.45] text-pretty text-(--text)">
                 {artist.style_description}
               </p>
             )}
@@ -250,8 +253,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
                   <div className="text-text-2 w-20 tracking-[0.06em] uppercase">{name}</div>
                   <div className="bg-surface-3 h-1 flex-1 overflow-hidden rounded-[2px]">
                     <div
-                      className="bg-ink-spot h-full shadow-[0_0_8px_var(--accent-glow)]"
-                      style={{ width: `${pct}%` }}
+                      className={`bg-ink-spot h-full w-[${pct}%] shadow-[0_0_8px_var(--accent-glow)]`}
                     />
                   </div>
                   <div className="text-dim w-8 text-right text-[10px]">{pct}%</div>
@@ -268,7 +270,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               Portfolio · {artist.portfolio_items.length}
             </div>
             {artist.portfolio_items.length > 0 && (
-              <div className="text-dim inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:bg-dim before:content-['']">
+              <div className="text-dim before:bg-dim inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:content-['']">
                 Filter
               </div>
             )}
@@ -314,7 +316,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
           <div className="bg-surface border-hairline mx-[18px] mt-7 mb-8 overflow-hidden rounded-[18px] border">
             <div className="border-hairline flex items-center justify-between border-b px-[18px] py-4">
               <div className="flex items-center gap-2.5">
-                <div className="relative size-6 rounded-full bg-[radial-gradient(circle,var(--accent)_0%,transparent_70%)] after:absolute after:inset-2 after:rounded-full after:bg-ink-spot after:content-['']" />
+                <div className="after:bg-ink-spot relative size-6 rounded-full bg-[radial-gradient(circle,var(--accent)_0%,transparent_70%)] after:absolute after:inset-2 after:rounded-full after:content-['']" />
                 <div className="text-[17px]">Ask about {displayFirst}</div>
               </div>
               <div className="text-dim border-hairline rounded-full border px-2 py-1 font-mono text-[9px] tracking-[0.14em] uppercase">
@@ -346,7 +348,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
                 type="button"
                 disabled
                 aria-label="Send"
-                className="flex size-8 cursor-not-allowed items-center justify-center rounded-full border-0 bg-ink-spot text-(--accent-ink) opacity-45"
+                className="bg-ink-spot flex size-8 cursor-not-allowed items-center justify-center rounded-full border-0 text-(--accent-ink) opacity-45"
               >
                 <ArrowUp size={14} aria-hidden />
               </button>
@@ -365,7 +367,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         <div
           role="status"
           aria-live="polite"
-          className="bg-surface border-ink-spot fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full border px-4 py-3 text-[13px] text-(--text) shadow-[0_12px_30px_rgba(0,0,0,0.5)] animate-[toast-in_0.18s_var(--e-out)]"
+          className="bg-surface border-ink-spot fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 animate-[toast-in_0.18s_var(--e-out)] items-center gap-2.5 rounded-full border px-4 py-3 text-[13px] text-(--text) shadow-[0_12px_30px_rgba(0,0,0,0.5)]"
         >
           <Heart size={14} aria-hidden />
           <span>Sign in to save</span>

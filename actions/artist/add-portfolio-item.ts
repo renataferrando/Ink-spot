@@ -1,10 +1,12 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { classifyPortfolioItem } from "@/actions/portfolio/classify-styles";
 
 export async function addPortfolioItem(
   imageUrl: string,
@@ -34,14 +36,22 @@ export async function addPortfolioItem(
   // First item is featured
   const isFeatured = (count ?? 0) === 0;
 
-  await admin.from("portfolio_items").insert({
-    artist_id: artist.id,
-    image_url: imageUrl,
-    alt_text: altText || null,
-    is_featured: isFeatured,
-    sort_order: count ?? 0,
-    detected_styles: [],
-  });
+  const { data: newItem, error: insertError } = await admin
+    .from("portfolio_items")
+    .insert({
+      artist_id: artist.id,
+      image_url: imageUrl,
+      alt_text: altText || null,
+      is_featured: isFeatured,
+      sort_order: count ?? 0,
+      detected_styles: [],
+    })
+    .select("id")
+    .single();
+
+  if (insertError) return { error: insertError.message };
+
+  if (newItem?.id) after(() => classifyPortfolioItem(newItem.id));
 
   if (isFeatured) {
     await admin

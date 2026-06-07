@@ -26,5 +26,6 @@ export function getSupabaseAdminClient() {
 // hand-written types.ts causes 'never' inference until npm run gen:types is run.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getSupabaseAdminClientUntyped(): ReturnType<typeof createClient<any>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return buildAdminClient() as ReturnType<typeof createClient<any>>;
 }

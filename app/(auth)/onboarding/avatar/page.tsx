@@ -23,14 +23,16 @@ export default async function AvatarPage() {
   const admin = getSupabaseAdminClient();
   const { data: artist } = await admin
     .from("artists")
-    .select("id")
+    .select("id, instagram_token_encrypted")
     .eq("claimed_by_user_id", user.id)
     .maybeSingle();
   if (!artist) redirect("/onboarding");
 
+  const hasInstagramToken = Boolean(artist.instagram_token_encrypted);
+
   return (
     <OnboardingShell step={6} backHref="/onboarding/portfolio">
-      <AvatarForm />
+      <AvatarForm hasInstagramToken={hasInstagramToken} />
     </OnboardingShell>
   );
 }

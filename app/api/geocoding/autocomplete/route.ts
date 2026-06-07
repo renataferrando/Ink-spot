@@ -1,6 +1,6 @@
 // GET /api/geocoding/autocomplete?q=<text>
 // Returns up to 5 place candidates with formatted name + coordinates.
-// Biased toward Costa Rica. Cached at the edge for 60 s.
+// Cached at the edge for 60 s.
 
 export const revalidate = 60;
 
@@ -20,6 +20,8 @@ export async function GET(request: Request) {
   const key = process.env.OPENCAGE_API_KEY;
   if (!key) return Response.json({ candidates: [] });
 
+  const countrycode = searchParams.get("countrycode")?.trim().toLowerCase();
+
   try {
     const url = new URL("https://api.opencagedata.com/geocode/v1/json");
     url.searchParams.set("q", q);
@@ -27,8 +29,7 @@ export async function GET(request: Request) {
     url.searchParams.set("limit", "5");
     url.searchParams.set("no_annotations", "1");
     url.searchParams.set("language", "en");
-    // Bias toward Costa Rica but don't hard-restrict so traveling artists can add other cities
-    url.searchParams.set("countrycode", "cr");
+    if (countrycode) url.searchParams.set("countrycode", countrycode);
 
     const res = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return Response.json({ candidates: [] });

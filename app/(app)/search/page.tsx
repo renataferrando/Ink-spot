@@ -7,6 +7,12 @@ import { ArtistCard } from "@/components/artist/artist-card";
 import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
 import { cn } from "@/lib/utils";
 import { type ArtistPublic } from "@/types/artist";
+import {
+  tabShellClass,
+  sectionHeadClass,
+  sectionTitleClass,
+  sectionCountClass,
+} from "@/lib/ui/classes";
 
 const SEARCH_PHRASES = [
   "fine line botanical, palm-sized, ribcage placement",
@@ -161,9 +167,9 @@ export default function SearchPage() {
     mode === "assistant" && (stage === "streaming" || (stage === "results" && stream));
 
   return (
-    <div className="tab-shell mx-auto flex w-full max-w-[960px] flex-1 flex-col">
+    <div className={cn(tabShellClass, "flex w-full flex-1 flex-col")}>
       {/* Hero */}
-      <div className="px-[18px] pb-1.5">
+      <div className="pb-1.5">
         <h1 className="m-0 text-[32px] leading-none font-medium tracking-[-0.02em] text-(--text)">
           What are you <em className="text-ink-spot not-italic">imagining?</em>
         </h1>
@@ -175,7 +181,7 @@ export default function SearchPage() {
       <div className="h-4" />
 
       {/* Input wrap with tools row */}
-      <div className="bg-surface-2 border-hairline focus-within:border-ink-spot relative mx-[18px] mb-3.5 rounded-[14px] border px-3.5 pt-3.5 pb-3 transition-[border-color,box-shadow] focus-within:shadow-[0_0_0_3px_var(--accent-soft)]">
+      <div className="bg-surface-2 border-hairline focus-within:border-ink-spot relative mb-3.5 rounded-[14px] border px-3.5 pt-3.5 pb-3 transition-[border-color,box-shadow] focus-within:shadow-[0_0_0_3px_var(--accent-soft)]">
         <textarea
           rows={2}
           placeholder="A fine-line hibiscus, single needle, palm-sized, on the ribcage…"
@@ -261,7 +267,7 @@ export default function SearchPage() {
 
       {/* Attached image preview */}
       {image && (
-        <div className="bg-surface border-hairline mx-[18px] mt-2 flex items-center gap-2.5 rounded-[10px] border px-2.5 py-2">
+        <div className="bg-surface border-hairline mt-2 flex items-center gap-2.5 rounded-[10px] border px-2.5 py-2">
           <div className="bg-surface-3 relative size-9 shrink-0 overflow-hidden rounded-[6px]">
             <Image
               src={image.url}
@@ -291,7 +297,7 @@ export default function SearchPage() {
       {/* Segmented Assistant ↔ List only */}
       <div
         role="tablist"
-        className="bg-surface-2 border-hairline relative mx-[18px] mb-3.5 flex cursor-default rounded-full border p-[3px]"
+        className="bg-surface-2 border-hairline relative mb-3.5 flex cursor-default rounded-full border p-[3px]"
       >
         <span
           aria-hidden
@@ -334,7 +340,7 @@ export default function SearchPage() {
 
       {/* Idle: suggestion stack */}
       {!showSubmitted && (
-        <div className="px-[18px] pt-1">
+        <div className="pt-1">
           <div className="text-faint mb-2.5 font-mono text-[10px] tracking-[0.14em] uppercase">
             Try one of these
           </div>
@@ -366,7 +372,7 @@ export default function SearchPage() {
 
       {/* Streaming card (assistant mode only) */}
       {showSubmitted && showStreamCard && (
-        <div className="border-hairline from-accent-soft relative mx-[18px] mt-3.5 rounded-[14px] border bg-linear-to-b to-transparent p-[18px]">
+        <div className="border-hairline from-accent-soft relative mt-3.5 rounded-[14px] border bg-linear-to-b to-transparent p-[18px]">
           <div className="text-ink-spot before:bg-ink-spot mb-2 inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase before:size-[5px] before:animate-pulse before:rounded-full before:shadow-[0_0_8px_var(--accent-glow)] before:content-['']">
             AI · Search assistant
           </div>
@@ -385,11 +391,11 @@ export default function SearchPage() {
       {/* Results section */}
       {showSubmitted && (
         <>
-          <div className="section-head mt-3">
-            <h2 className="title">
-              Top <em>matches</em>
+          <div className={cn(sectionHeadClass, "mt-3")}>
+            <h2 className={sectionTitleClass}>
+              Top <em className="not-italic text-ink-spot">matches</em>
             </h2>
-            <span className="count">
+            <span className={sectionCountClass}>
               {loading
                 ? "SEARCHING…"
                 : `${results.length} ARTIST${results.length !== 1 ? "S" : ""}`}
@@ -404,7 +410,7 @@ export default function SearchPage() {
                 <ArtistCardSkeleton />
               </>
             ) : results.length === 0 ? (
-              <div className="px-[18px] py-12 text-center">
+              <div className="py-12 text-center">
                 <p className="text-muted-foreground text-sm">
                   No artists matched. Try a different prompt.
                 </p>

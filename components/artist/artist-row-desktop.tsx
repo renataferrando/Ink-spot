@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { STYLE_LABELS, type ArtistLocation, type ArtistPublic } from "@/types/artist";
+import { chipClass, chipActiveClass } from "@/lib/ui/classes";
 
 interface Props {
   artist: ArtistPublic;
@@ -92,7 +93,7 @@ export function ArtistRowDesktop({ artist, priority = false }: Props) {
           {artist.primary_styles.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {artist.primary_styles.slice(0, 3).map((s, i) => (
-                <span key={s} className={"chip" + (i === 0 ? " active" : "")}>
+                <span key={s} className={i === 0 ? chipActiveClass : chipClass}>
                   {STYLE_LABELS[s]}
                 </span>
               ))}

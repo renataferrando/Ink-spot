@@ -8,6 +8,16 @@ import { ArtistRowDesktop } from "@/components/artist/artist-row-desktop";
 import { MapContainer } from "@/components/map/map-container";
 import { cn } from "@/lib/utils";
 import { STYLE_LABELS, type ArtistPublic, type ArtistStyle } from "@/types/artist";
+import {
+  chipClass,
+  chipActiveClass,
+  filterBarClass,
+  pageColumnClass,
+  pageGutterClass,
+  sectionHeadClass,
+  sectionTitleClass,
+  sectionCountClass,
+} from "@/lib/ui/classes";
 
 export const metadata: Metadata = { title: "Explore" };
 
@@ -129,9 +139,9 @@ export default async function ExplorePage({ searchParams }: Props) {
   const styleLabel = activeStyle ? STYLE_LABELS[activeStyle as ArtistStyle] : null;
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1200px] flex-1 flex-col lg:mx-0 lg:max-w-none">
+    <div className="flex min-h-0 w-full flex-1 flex-col">
       <div className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto">
-        <div className="lg:mx-auto lg:w-full lg:max-w-[960px] lg:px-7 lg:pb-10">
+        <div className={cn(pageColumnClass, pageGutterClass, "lg:pb-10")}>
           {/* Map */}
           <div className="lg:border-hairline h-[42vh] min-h-48 w-full shrink-0 overflow-hidden lg:h-[360px] lg:min-h-0 lg:rounded-[14px] lg:border">
             <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
@@ -140,12 +150,12 @@ export default async function ExplorePage({ searchParams }: Props) {
           </div>
 
           {/* Style filter chip rail */}
-          <div className="filter-bar mt-4 max-w-full">
+          <div className={cn(filterBarClass, "mt-4 max-w-full")}>
             {FILTER_CHIPS.map(({ label, value }) => {
               const isActive = value === activeStyle || (value === null && !activeStyle);
               const href = value ? `/explore?styles=${value}` : "/explore";
               return (
-                <Link key={label} href={href} className={cn("chip", isActive && "active")}>
+                <Link key={label} href={href} className={isActive ? chipActiveClass : chipClass}>
                   {label}
                 </Link>
               );
@@ -153,17 +163,17 @@ export default async function ExplorePage({ searchParams }: Props) {
           </div>
 
           {/* Section header — design's title + count */}
-          <div className="section-head">
-            <h2 className="title text-[clamp(26px,2.6vw,34px)] leading-[1.1] font-medium tracking-[-0.03em]">
+          <div className={sectionHeadClass}>
+            <h2 className={cn(sectionTitleClass, "text-[clamp(26px,2.6vw,34px)] leading-[1.1] tracking-[-0.03em]")}>
               {styleLabel ? (
-                <em>{styleLabel}</em>
+                <em className="not-italic text-ink-spot">{styleLabel}</em>
               ) : (
                 <>
-                  Within <em>50&nbsp;km</em>
+                  Within <em className="not-italic text-ink-spot">50&nbsp;km</em>
                 </>
               )}
             </h2>
-            <span className="count">
+            <span className={sectionCountClass}>
               {artists.length} ARTIST{artists.length !== 1 ? "S" : ""}
               {styleLabel ? "" : ` · ${locationLabel.toUpperCase()}`}
             </span>
@@ -181,7 +191,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               }
             >
               {artists.length === 0 ? (
-                <p className="text-muted-foreground px-[18px] py-12 text-center text-sm">
+                <p className="text-muted-foreground py-12 text-center text-sm">
                   No studios found for this style yet.
                 </p>
               ) : (

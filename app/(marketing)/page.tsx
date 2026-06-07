@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { badgeAiClass, pageColumnClass, pageGutterClass } from "@/lib/ui/classes";
 
 export const metadata: Metadata = {
   title: "InkSpot — Find tattoo artists by style",
@@ -90,24 +92,13 @@ export default function LandingPage() {
       {/* ── Hero ────────────────────────────────────────── */}
       <section className="relative flex min-h-svh items-end overflow-hidden pt-14">
         {/* Moody background */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-5%,rgba(99,102,241,0.12)_0%,transparent_60%),#0a0a0a]" />
         <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 90% 60% at 50% -5%, rgba(99,102,241,0.12) 0%, transparent 60%), #0a0a0a",
-          }}
-        />
-        {/* Subtle grid texture */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
+          className="absolute inset-0 bg-size-[48px_48px] opacity-[0.025] bg-[linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)]"
+          aria-hidden
         />
 
-        <div className="relative mx-auto w-full max-w-2xl px-5 pt-24 pb-20 sm:pb-28">
+        <div className={cn(pageColumnClass, pageGutterClass, "relative w-full pt-24 pb-20 sm:pb-28")}>
           <p className="text-muted-foreground mb-5 text-xs font-medium tracking-[0.14em] uppercase">
             Tattoo artist directory · Costa Rica
           </p>
@@ -143,7 +134,7 @@ export default function LandingPage() {
 
       {/* ── Problem ─────────────────────────────────────── */}
       <section className="border-border border-t px-5 py-20">
-        <div className="mx-auto max-w-2xl">
+        <div className={cn(pageColumnClass, pageGutterClass)}>
           <p className="text-muted-foreground mb-2 text-xs font-medium tracking-[0.12em] uppercase">
             The problem
           </p>
@@ -165,7 +156,7 @@ export default function LandingPage() {
 
       {/* ── How it works ────────────────────────────────── */}
       <section className="border-border border-t px-5 py-20">
-        <div className="mx-auto max-w-2xl">
+        <div className={cn(pageColumnClass, pageGutterClass)}>
           <p className="text-muted-foreground mb-2 text-xs font-medium tracking-[0.12em] uppercase">
             How it works
           </p>
@@ -190,12 +181,12 @@ export default function LandingPage() {
 
       {/* ── AI features ─────────────────────────────────── */}
       <section className="border-border border-t px-5 py-20">
-        <div className="mx-auto max-w-2xl">
+        <div className={cn(pageColumnClass, pageGutterClass)}>
           <div className="mb-2 flex items-center gap-2">
             <p className="text-muted-foreground text-xs font-medium tracking-[0.12em] uppercase">
               AI features
             </p>
-            <span className="badge-ai">AI</span>
+            <span className={badgeAiClass}>AI</span>
           </div>
           <h2 className="mb-12 text-2xl font-medium tracking-tight">
             Smarter than a search engine.
@@ -219,7 +210,7 @@ export default function LandingPage() {
 
       {/* ── For artists ─────────────────────────────────── */}
       <section className="border-border border-t px-5 py-20">
-        <div className="mx-auto max-w-2xl">
+        <div className={cn(pageColumnClass, pageGutterClass)}>
           <div className="border-border bg-card rounded-xl border px-6 py-8 sm:px-10 sm:py-10">
             <p className="text-muted-foreground mb-2 text-xs font-medium tracking-[0.12em] uppercase">
               For artists
@@ -255,7 +246,7 @@ export default function LandingPage() {
 
       {/* ── Footer ──────────────────────────────────────── */}
       <footer className="border-border border-t px-5 py-10">
-        <div className="mx-auto flex max-w-2xl flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="page-column page-gutter flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-medium">InkSpot</p>
             <p className="text-muted-foreground mt-1 text-xs">
@@ -281,7 +272,7 @@ export default function LandingPage() {
             </button>
           </div>
         </div>
-        <div className="border-border text-muted-foreground/50 mx-auto mt-8 max-w-2xl border-t pt-6 text-xs">
+        <div className={cn(pageColumnClass, pageGutterClass, "border-border text-muted-foreground/50 mt-8 border-t pt-6 text-xs")}>
           Demo profiles are fictional. Photos from Unsplash. InkSpot is not affiliated with
           Instagram or Meta.
         </div>

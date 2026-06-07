@@ -6,6 +6,20 @@ import { redirect } from "next/navigation";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
+async function resolveArtistHandle(userId: string): Promise<string | null> {
+  const cookieStore = await cookies();
+  const cookieHandle = cookieStore.get("inkspot_handle")?.value;
+  if (cookieHandle) return cookieHandle;
+
+  const admin = getSupabaseAdminClient();
+  const { data } = await admin
+    .from("artists")
+    .select("handle")
+    .eq("claimed_by_user_id", userId)
+    .maybeSingle();
+  return data?.handle ?? null;
+}
+
 export async function verifyOwnership(): Promise<{ error?: string }> {
   const supabase = await getSupabaseServerClient();
   const {
@@ -13,8 +27,7 @@ export async function verifyOwnership(): Promise<{ error?: string }> {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const cookieStore = await cookies();
-  const handle = cookieStore.get("inkspot_handle")?.value;
+  const handle = await resolveArtistHandle(user.id);
   if (!handle) redirect("/onboarding");
 
   const admin = getSupabaseAdminClient();
@@ -52,8 +65,7 @@ export async function submitManualReview(formData: FormData): Promise<{ error?: 
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const cookieStore = await cookies();
-  const handle = cookieStore.get("inkspot_handle")?.value;
+  const handle = await resolveArtistHandle(user.id);
   if (!handle) redirect("/onboarding");
 
   const admin = getSupabaseAdminClient();

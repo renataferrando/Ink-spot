@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { signOut } from "@/actions/auth/sign-out";
+import { cn } from "@/lib/utils";
+import { btnPrimaryClass, btnSecondaryClass, labelClass, tabShellClass, scrollbarNoneClass } from "@/lib/ui/classes";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -15,7 +18,7 @@ const STEPS = [
   ["Set your home base + travel dates", "Be visible wherever you're guesting."],
 ] as const;
 
-const SHELL_CLASS = "tab-shell scrollbar-none flex-1 overflow-y-auto px-[18px]";
+const SHELL_CLASS = cn(tabShellClass, scrollbarNoneClass, "flex-1 overflow-y-auto");
 
 export default async function AccountPage() {
   const supabase = await getSupabaseServerClient();
@@ -53,13 +56,13 @@ export default async function AccountPage() {
         </div>
 
         {/* CTA */}
-        <Link href="/login" className="btn-primary mt-6 no-underline">
+        <Link href="/login" className={cn(btnPrimaryClass, "mt-6")}>
           Claim your profile <ArrowRight size={14} aria-hidden />
         </Link>
 
         <div className="h-4" />
 
-        <div className="label">Or browse as a guest</div>
+        <div className={labelClass}>Or browse as a guest</div>
       </div>
     );
   }
@@ -68,7 +71,7 @@ export default async function AccountPage() {
   const admin = getSupabaseAdminClient();
   const { data: artist } = await admin
     .from("artists")
-    .select("handle, display_name, is_claimed, primary_styles")
+    .select("handle, display_name, is_claimed, is_active, primary_styles")
     .eq("claimed_by_user_id", user.id)
     .maybeSingle();
 
@@ -86,12 +89,12 @@ export default async function AccountPage() {
         </div>
 
         <div className="mt-6 flex flex-col gap-2.5">
-          <Link href="/onboarding" className="btn-primary no-underline">
+          <Link href="/onboarding" className={btnPrimaryClass}>
             Continue onboarding
             <ArrowRight size={14} aria-hidden />
           </Link>
           <form action={signOut}>
-            <button type="submit" className="btn-secondary w-full">
+            <button type="submit" className={cn(btnSecondaryClass, "w-full")}>
               Sign out
             </button>
           </form>
@@ -100,50 +103,6 @@ export default async function AccountPage() {
     );
   }
 
-  // ── Authenticated, has artist ─────────────────────
-  return (
-    <div className={SHELL_CLASS}>
-      {/* Mini profile header */}
-      <div className="bg-surface border-hairline mb-4 rounded-[14px] border p-[18px]">
-        <div className="text-[20px] font-medium tracking-[-0.01em]">
-          {artist.display_name ?? `@${artist.handle}`}
-        </div>
-        <div className="label mt-1">@{artist.handle}</div>
-        {!artist.is_claimed && (
-          <div className="bg-demo-subtle text-demo mt-2.5 inline-block rounded-full border border-[rgba(251,191,36,0.2)] px-2.5 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase">
-            Verification pending
-          </div>
-        )}
-      </div>
-
-      {/* Quick links */}
-      <div className="flex flex-col gap-0.5">
-        {[
-          { label: "View public profile", href: `/artist/${artist.handle}` },
-          { label: "Manage portfolio", href: "/dashboard/portfolio" },
-          { label: "Manage locations", href: "/dashboard/locations" },
-          { label: "Full dashboard", href: "/dashboard" },
-        ].map(({ label, href }) => (
-          <Link
-            key={href}
-            href={href}
-            className="border-hairline text-(--text) flex items-center justify-between border-b py-3.5 text-[15px] no-underline transition-colors"
-          >
-            {label}
-            <ArrowRight size={15} className="text-faint" />
-          </Link>
-        ))}
-      </div>
-
-      {/* Sign out */}
-      <form action={signOut} className="mt-6">
-        <button
-          type="submit"
-          className="text-faint cursor-pointer border-0 bg-transparent p-0 font-mono text-[10px] tracking-[0.14em] uppercase"
-        >
-          Sign out
-        </button>
-      </form>
-    </div>
-  );
+  // ── Authenticated, has artist → go straight to dashboard ─────────────────
+  redirect("/dashboard");
 }
