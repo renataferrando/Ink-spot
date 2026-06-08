@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { btnPrimaryMd } from "@/lib/ui/classes";
 import {
   Drawer,
   DrawerContent,
@@ -60,12 +60,10 @@ export function ArtistMapSheet({ artist, onClose }: ArtistMapSheetProps) {
           {artist && (
             <div className="space-y-4">
               <StyleBadges styles={artist.primary_styles} max={4} />
-              <Button className="w-full" asChild>
-                <Link href={`/artist/${artist.handle}`}>
-                  View full profile
-                  <ArrowRight className="ml-2 size-4" aria-hidden />
-                </Link>
-              </Button>
+              <Link href={`/artist/${artist.handle}`} className={btnPrimaryMd}>
+                View full profile
+                <ArrowRight size={16} aria-hidden />
+              </Link>
             </div>
           )}
         </div>

@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { btnPrimaryLg } from "@/lib/ui/classes";
 import { PlaceAutocomplete } from "@/components/forms/place-autocomplete";
 import { addLocation, type ManageLocationState } from "@/actions/artist/manage-locations";
 
@@ -65,9 +65,9 @@ export function AddLocationForm() {
         />
       </div>
       {state.error && <p className="text-destructive text-sm">{state.error}</p>}
-      <Button type="submit" disabled={pending} className="w-full">
+      <button type="submit" className={btnPrimaryLg} disabled={pending}>
         {pending ? "Saving…" : "Add location"}
-      </Button>
+      </button>
     </form>
   );
 }

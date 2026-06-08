@@ -8,6 +8,7 @@ import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
 import { cn } from "@/lib/utils";
 import { type ArtistPublic } from "@/types/artist";
 import {
+  btnPrimarySm,
   tabShellClass,
   sectionHeadClass,
   sectionTitleClass,
@@ -247,7 +248,7 @@ export default function SearchPage() {
             type="button"
             onClick={() => submit(query || SEARCH_PHRASES[0])}
             disabled={loading}
-            className="bg-ink-spot flex h-8 cursor-pointer items-center gap-1.5 rounded-full border-0 px-3.5 font-mono text-[11px] font-medium tracking-[0.12em] text-(--accent-ink) uppercase transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className={btnPrimarySm}
           >
             Search
             <svg

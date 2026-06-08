@@ -3,8 +3,8 @@
 import { Image as ImageIcon, Mic, Search, X } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { btnPrimarySm } from "@/lib/ui/classes";
 import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
@@ -81,9 +81,9 @@ export function SearchBar({ onSearch, loading, className }: SearchBarProps) {
           )}
         </div>
       </div>
-      <Button type="submit" size="sm" disabled={loading || !value.trim()}>
+      <button type="submit" className={btnPrimarySm} disabled={loading || !value.trim()}>
         Search
-      </Button>
+      </button>
     </form>
   );
 }

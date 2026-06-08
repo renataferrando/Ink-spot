@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { pageColumnClass, pageGutterClass } from "@/lib/ui/classes";
@@ -11,7 +12,7 @@ const TAGS: Record<string, string> = {
   "/account": "ACCOUNT",
 };
 
-export function TopBar() {
+export function TopBar({ isArtist = false }: { isArtist?: boolean }) {
   const pathname = usePathname();
   const tag = TAGS[pathname] ?? "";
 
@@ -26,8 +27,23 @@ export function TopBar() {
           />
         </div>
 
-        {tag && (
-          <span className="text-dim font-mono text-[10px] tracking-[0.14em] uppercase">{tag}</span>
+        {isArtist ? (
+          <Link
+            href="/dashboard"
+            className="border-hairline flex items-center gap-2 rounded-full border px-[11px] py-1.5 transition-colors hover:bg-surface"
+          >
+            <span
+              aria-hidden
+              className="bg-ink-spot inline-block size-[5px] shrink-0 rounded-full shadow-[0_0_8px_var(--accent-glow)]"
+            />
+            <span className="text-text-2 font-mono text-[10px] tracking-[0.12em] uppercase">
+              Artist dashboard
+            </span>
+          </Link>
+        ) : (
+          tag && (
+            <span className="text-dim font-mono text-[10px] tracking-[0.14em] uppercase">{tag}</span>
+          )
         )}
       </div>
     </header>

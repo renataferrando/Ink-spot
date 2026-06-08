@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       },
     });
 
-    // Fetch artists joined with current location + portfolio items
+    // Fetch artists joined with all locations + portfolio items
     let query = supabase
       .from("artists")
       .select(
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
         primary_styles, style_description,
         is_demo, is_claimed, is_active,
         created_at, updated_at,
-        artist_locations!inner(
+        artist_locations(
           id, artist_id, lat, lng, location_name,
           kind, starts_at, ends_at, is_current,
           studio_name, notes
@@ -72,9 +72,9 @@ export async function GET(request: Request) {
           width, height
         )
       `,
+        { count: "exact" },
       )
       .eq("is_active", true)
-      .eq("artist_locations.is_current", true)
       .range(offset, offset + limit - 1);
 
     if (styleList.length > 0) {
@@ -91,10 +91,22 @@ export async function GET(request: Request) {
       return Response.json({ error: error.message }, { status: 500 });
     }
     if (data) {
-      // Reshape into ArtistPublic (flatten artist_locations → current_location)
+      // Reshape into ArtistPublic (split artist_locations → current + upcoming)
+      const now = Date.now();
       const artists: ArtistPublic[] = data.map((row) => {
         const locs = Array.isArray(row.artist_locations) ? row.artist_locations : [];
         const current = locs.find((l: Record<string, unknown>) => l.is_current) ?? locs[0] ?? null;
+        const upcoming = locs
+          .filter((l: Record<string, unknown>) => {
+            if (l.is_current) return false;
+            const start = l.starts_at as string | null | undefined;
+            if (!start) return false;
+            return new Date(start).getTime() > now;
+          })
+          .sort(
+            (a: Record<string, unknown>, b: Record<string, unknown>) =>
+              new Date(a.starts_at as string).getTime() - new Date(b.starts_at as string).getTime(),
+          );
         const items = Array.isArray(row.portfolio_items) ? row.portfolio_items : [];
         return {
           id: row.id as string,
@@ -102,6 +114,7 @@ export async function GET(request: Request) {
           display_name: row.display_name as string,
           bio: row.bio as string | null,
           current_location: current as ArtistPublic["current_location"],
+          upcoming_locations: upcoming as ArtistPublic["upcoming_locations"],
           instagram_handle: row.instagram_handle as string | null,
           profile_image_url: row.profile_image_url as string | null,
           cover_image_url: row.cover_image_url as string | null,

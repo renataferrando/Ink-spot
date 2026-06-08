@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -11,10 +10,7 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const cookieStore = await cookies();
-  const handle = cookieStore.get("inkspot_handle")?.value;
-
-  // Get artist ID — either from onboarding cookie or by looking up user
+  // Get artist ID by looking up user
   const admin = getSupabaseAdminClient();
   const { data: artist } = await admin
     .from("artists")
@@ -47,7 +43,7 @@ export async function POST(request: Request) {
   const uuid = crypto.randomUUID();
   const path = `${artist.id}/${uuid}.${ext}`;
 
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await admin.storage
     .from("portfolio")
     .upload(path, file, { contentType: file.type, upsert: false });
 
@@ -57,7 +53,7 @@ export async function POST(request: Request) {
 
   const {
     data: { publicUrl },
-  } = supabase.storage.from("portfolio").getPublicUrl(path);
+  } = admin.storage.from("portfolio").getPublicUrl(path);
 
   return Response.json({ url: publicUrl });
 }

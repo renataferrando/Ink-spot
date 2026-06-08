@@ -80,9 +80,14 @@ const NAV = [
 ] as const;
 
 /** Claude Design desktop top bar — wordmark, pill tabs, Explore search affordance, account. */
-export function DesktopNav({ showDashboard = false }: { showDashboard?: boolean }) {
+export function DesktopNav({
+  showDashboard = false,
+  isLoggedIn = false,
+}: {
+  showDashboard?: boolean;
+  isLoggedIn?: boolean;
+}) {
   const pathname = usePathname();
-  const onExplore = pathname === "/explore" || pathname.startsWith("/explore/");
 
   return (
     <header
@@ -107,7 +112,7 @@ export function DesktopNav({ showDashboard = false }: { showDashboard?: boolean 
             aria-label="Primary"
             className="border-hairline bg-surface-2 flex items-center gap-1 rounded-full border p-1"
           >
-            {NAV.map(({ href, label, icon }) => {
+            {NAV.filter(({ href }) => href !== "/saved" || isLoggedIn).map(({ href, label, icon }) => {
               const active = pathname === href || pathname.startsWith(`${href}/`);
               return (
                 <Link
@@ -144,17 +149,6 @@ export function DesktopNav({ showDashboard = false }: { showDashboard?: boolean 
               Artist dashboard
             </Link>
           )}
-
-          <Link
-            href="/account"
-            aria-label="Account"
-            className="border-hairline bg-surface-2 flex size-10 shrink-0 items-center justify-center rounded-full border"
-          >
-            <span
-              aria-hidden
-              className="from-surface to-hairline block size-[22px] rounded-full bg-linear-to-br"
-            />
-          </Link>
         </div>
       </div>
     </header>

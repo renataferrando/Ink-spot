@@ -6,7 +6,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { Loader2, MapPin, Check } from "lucide-react";
 
 import { MAP_STYLE_URL } from "@/lib/maplibre/config";
-import { btnPrimaryClass, btnSecondaryClass } from "@/lib/ui/classes";
+import { btnPrimarySm, btnSecondarySm } from "@/lib/ui/classes";
 
 interface LocationPickerProps {
   /** Initial map center */
@@ -118,7 +118,7 @@ export function LocationPicker({ center, onConfirm, onCancel }: LocationPickerPr
               type="button"
               onClick={handleConfirm}
               disabled={resolving}
-              className={btnPrimaryClass + " h-8! gap-1.5! px-3! text-[11px]!"}
+              className={btnPrimarySm}
             >
               <Check size={12} aria-hidden />
               Use this location
@@ -128,7 +128,7 @@ export function LocationPicker({ center, onConfirm, onCancel }: LocationPickerPr
           <button
             type="button"
             onClick={onCancel}
-            className={btnSecondaryClass + " h-8! text-[11px]!"}
+            className={btnSecondarySm}
           >
             Cancel
           </button>

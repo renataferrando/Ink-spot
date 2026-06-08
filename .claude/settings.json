@@ -9,7 +9,11 @@
       "Bash(log stream *)",
       "Bash(sudo log stream --pid 1294)",
       "Read(//private/tmp/**)",
-      "Read(//Users/renataferrando/**)"
+      "Read(//Users/renataferrando/**)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(kill 24886)",
+      "Bash(npx playwright *)",
+      "Bash(npx --yes playwright@1.60.0 --version)"
     ]
   }
 }

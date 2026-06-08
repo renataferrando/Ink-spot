@@ -21,6 +21,7 @@ import { InstagramConnectButton } from "@/components/onboarding/instagram-connec
 import {
   btnPrimaryClass,
   btnSecondaryClass,
+  btnSecondaryMd,
   chipClass,
   chipActiveClass,
   filterBarClass,
@@ -604,7 +605,7 @@ function DangerSection({ isActive }: { isActive: boolean }) {
                 type="button"
                 onClick={() => submit(false)}
                 disabled={isPending}
-                className={cn(btnSecondaryClass, "h-10! flex-1! text-[11px]!")}
+                className={cn(btnSecondaryMd, "flex-1")}
               >
                 {isPending ? "Hiding…" : "Yes, hide my profile"}
               </button>
@@ -631,7 +632,7 @@ function DangerSection({ isActive }: { isActive: boolean }) {
             type="button"
             onClick={() => submit(true)}
             disabled={isPending}
-            className={cn(btnSecondaryClass, "h-10! text-[11px]!")}
+            className={btnSecondaryMd}
           >
             {isPending ? "Reactivating…" : "Reactivate profile"}
           </button>

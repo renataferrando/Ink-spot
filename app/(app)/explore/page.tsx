@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
-
-import { ArtistCard } from "@/components/artist/artist-card";
-import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
-import { ArtistRowDesktop } from "@/components/artist/artist-row-desktop";
-import { MapContainer } from "@/components/map/map-container";
 import { cn } from "@/lib/utils";
+import { ExploreInteractive } from "./explore-interactive";
 import { STYLE_LABELS, type ArtistPublic, type ArtistStyle } from "@/types/artist";
 import {
   chipClass,
@@ -32,7 +27,9 @@ const FILTER_CHIPS: { label: string; value: string | null }[] = [
   { label: "Traditional", value: "traditional" },
 ];
 
-async function getArtists(styles?: string): Promise<ArtistPublic[]> {
+const PAGE_SIZE = 20;
+
+async function getArtists(styles?: string): Promise<{ artists: ArtistPublic[]; total: number; hasMore: boolean }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -76,19 +73,20 @@ async function getArtists(styles?: string): Promise<ArtistPublic[]> {
         detected_styles, is_featured, sort_order, width, height
       )
     `,
+      { count: "exact" },
     )
     .eq("is_active", true)
-    .limit(40);
+    .limit(PAGE_SIZE);
 
-  const { data, error } = await (styles
+  const { data, error, count } = await (styles
     ? baseQuery.overlaps("primary_styles", [styles])
     : baseQuery);
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []).map((row) => {
+  const now = Date.now();
+  const artists = (data ?? []).map((row) => {
     const locs = Array.isArray(row.artist_locations) ? row.artist_locations : [];
-    const now = Date.now();
     const current = locs.find((l: Record<string, unknown>) => l.is_current) ?? locs[0] ?? null;
     const upcoming = locs
       .filter((l: Record<string, unknown>) => {
@@ -126,13 +124,16 @@ async function getArtists(styles?: string): Promise<ArtistPublic[]> {
       updated_at: row.updated_at as string,
     } satisfies ArtistPublic;
   });
+
+  const total = count ?? artists.length;
+  return { artists, total, hasMore: artists.length < total };
 }
 
 type Props = { searchParams: Promise<{ styles?: string }> };
 
 export default async function ExplorePage({ searchParams }: Props) {
   const { styles } = await searchParams;
-  const artists = await getArtists(styles);
+  const { artists, total, hasMore } = await getArtists(styles);
   const locationLabel = artists[0]?.current_location?.location_name ?? "Santa Teresa";
   const activeStyle = styles ?? null;
 
@@ -142,72 +143,40 @@ export default async function ExplorePage({ searchParams }: Props) {
     <div className="flex min-h-0 w-full flex-1 flex-col">
       <div className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto">
         <div className={cn(pageColumnClass, pageGutterClass, "lg:pb-10")}>
-          {/* Map */}
-          <div className="lg:border-hairline h-[42vh] min-h-48 w-full shrink-0 overflow-hidden lg:h-[360px] lg:min-h-0 lg:rounded-[14px] lg:border">
-            <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
-              <MapContainer artists={artists} />
-            </Suspense>
-          </div>
+          {/* Map + artist list connected via shared hover state.
+              Filter chips and section header are passed as children so they render
+              between the map and the list while staying server-rendered. */}
+          <ExploreInteractive artists={artists} initialHasMore={hasMore} styles={styles}>
+            {/* Style filter chip rail */}
+            <div className={cn(filterBarClass, "mt-4 max-w-full")}>
+              {FILTER_CHIPS.map(({ label, value }) => {
+                const isActive = value === activeStyle || (value === null && !activeStyle);
+                const href = value ? `/explore?styles=${value}` : "/explore";
+                return (
+                  <Link key={label} href={href} className={isActive ? chipActiveClass : chipClass}>
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
 
-          {/* Style filter chip rail */}
-          <div className={cn(filterBarClass, "mt-4 max-w-full")}>
-            {FILTER_CHIPS.map(({ label, value }) => {
-              const isActive = value === activeStyle || (value === null && !activeStyle);
-              const href = value ? `/explore?styles=${value}` : "/explore";
-              return (
-                <Link key={label} href={href} className={isActive ? chipActiveClass : chipClass}>
-                  {label}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Section header — design's title + count */}
-          <div className={sectionHeadClass}>
-            <h2 className={cn(sectionTitleClass, "text-[clamp(26px,2.6vw,34px)] leading-[1.1] tracking-[-0.03em]")}>
-              {styleLabel ? (
-                <em className="not-italic text-ink-spot">{styleLabel}</em>
-              ) : (
-                <>
-                  Within <em className="not-italic text-ink-spot">50&nbsp;km</em>
-                </>
-              )}
-            </h2>
-            <span className={sectionCountClass}>
-              {artists.length} ARTIST{artists.length !== 1 ? "S" : ""}
-              {styleLabel ? "" : ` · ${locationLabel.toUpperCase()}`}
-            </span>
-          </div>
-
-          {/* Artist list — mobile cards / desktop dt rows */}
-          <div className="lg:border-hairline flex flex-col pb-24 lg:mt-2 lg:border-t lg:pt-[18px] lg:pb-0">
-            <Suspense
-              fallback={
-                <>
-                  <ArtistCardSkeleton />
-                  <ArtistCardSkeleton />
-                  <ArtistCardSkeleton />
-                </>
-              }
-            >
-              {artists.length === 0 ? (
-                <p className="text-muted-foreground py-12 text-center text-sm">
-                  No studios found for this style yet.
-                </p>
-              ) : (
-                artists.map((artist, i) => (
-                  <div key={artist.id}>
-                    <div className="lg:hidden">
-                      <ArtistCard artist={artist} priority={i < 2} />
-                    </div>
-                    <div className="hidden lg:block">
-                      <ArtistRowDesktop artist={artist} priority={i < 2} />
-                    </div>
-                  </div>
-                ))
-              )}
-            </Suspense>
-          </div>
+            {/* Section header */}
+            <div className={sectionHeadClass}>
+              <h2 className={cn(sectionTitleClass, "text-[clamp(26px,2.6vw,34px)] leading-[1.1] tracking-[-0.03em]")}>
+                {styleLabel ? (
+                  <em className="not-italic text-ink-spot">{styleLabel}</em>
+                ) : (
+                  <>
+                    Within <em className="not-italic text-ink-spot">50&nbsp;km</em>
+                  </>
+                )}
+              </h2>
+              <span className={sectionCountClass}>
+                {total} ARTIST{total !== 1 ? "S" : ""}
+                {styleLabel ? "" : ` · ${locationLabel.toUpperCase()}`}
+              </span>
+            </div>
+          </ExploreInteractive>
         </div>
       </div>
     </div>

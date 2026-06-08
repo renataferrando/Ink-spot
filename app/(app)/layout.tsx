@@ -21,12 +21,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     showDashboard = Boolean(data);
   }
 
+  const isLoggedIn = !!user;
+
   return (
     <div className="flex min-h-screen flex-col">
-      <DesktopNav showDashboard={showDashboard} />
-      <TopBar />
+      <DesktopNav showDashboard={showDashboard} isLoggedIn={isLoggedIn} />
+      <TopBar isArtist={showDashboard} />
       <div className="flex min-h-0 flex-1 flex-col">{children}</div>
-      <BottomNav />
+      <BottomNav isLoggedIn={isLoggedIn} />
     </div>
   );
 }

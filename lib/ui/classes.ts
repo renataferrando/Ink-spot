@@ -2,11 +2,31 @@ import { cn } from "@/lib/utils";
 
 // ── Buttons ──────────────────────────────────────────────────────────────────
 
-export const btnPrimaryClass =
-  "h-12 w-full lg:w-auto lg:px-12 bg-ink-spot text-(--accent-ink) rounded-full font-mono text-[12px] tracking-[0.12em] uppercase font-medium flex items-center justify-center gap-1.5 border-none cursor-pointer transition-opacity duration-150 disabled:opacity-55 disabled:cursor-not-allowed hover:opacity-90 no-underline";
+const btnBase =
+  "inline-flex items-center justify-center gap-2 cursor-pointer no-underline";
 
-export const btnSecondaryClass =
-  "h-12 bg-surface-2 text-(--text) lg:px-12 lg:w-auto  border border-ds-border rounded-full font-mono text-[12px] tracking-[0.12em] uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-[background] duration-150 no-underline";
+const btnPrimaryBase =
+  "bg-ink-spot text-(--accent-ink) rounded-full font-mono uppercase tracking-[0.12em] font-medium border-none transition-opacity duration-150 hover:opacity-90 disabled:opacity-55 disabled:cursor-not-allowed";
+
+const btnSecondaryBase =
+  "bg-surface-2 text-(--text) border border-ds-border rounded-full font-mono uppercase tracking-[0.12em] transition-colors duration-150 hover:bg-surface-3 disabled:opacity-55 disabled:cursor-not-allowed";
+
+const btnSizeSm = "h-8 px-3.5 text-[11px]";
+const btnSizeMd = "h-[46px] w-full text-[11px]";
+const btnSizeLg = "h-12 w-full lg:w-auto lg:px-12 text-[12px]";
+
+export const btnPrimarySm = cn(btnBase, btnPrimaryBase, btnSizeSm);
+export const btnPrimaryMd = cn(btnBase, btnPrimaryBase, btnSizeMd);
+export const btnPrimaryLg = cn(btnBase, btnPrimaryBase, btnSizeLg);
+
+export const btnSecondarySm = cn(btnBase, btnSecondaryBase, btnSizeSm);
+export const btnSecondaryMd = cn(btnBase, btnSecondaryBase, btnSizeMd);
+export const btnSecondaryLg = cn(btnBase, btnSecondaryBase, btnSizeLg);
+
+/** @deprecated Use `btnPrimaryLg` */
+export const btnPrimaryClass = btnPrimaryLg;
+/** @deprecated Use `btnSecondaryLg` */
+export const btnSecondaryClass = btnSecondaryLg;
 
 // ── Chip ─────────────────────────────────────────────────────────────────────
 

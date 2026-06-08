@@ -7,9 +7,19 @@ import { ArrowRight, Mail } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { fieldErrorClass, fieldInputClass, ghostTextButtonClass } from "@/lib/ui/field-classes";
 import { cn } from "@/lib/utils";
-import { btnPrimaryClass, pageColumnClass, pageGutterClass } from "@/lib/ui/classes";
+import { btnPrimaryLg, pageGutterClass } from "@/lib/ui/classes";
 
-export function LoginForm() {
+type Intent = "artist" | "fan" | "returning";
+
+const INTENT_CONFIG: Record<Intent, { heading: string; sub: string; next: string }> = {
+  artist:    { heading: "Claim your profile",  sub: "Enter your email — we'll send a magic link to get started.", next: "/onboarding" },
+  fan:       { heading: "Create your account", sub: "Enter your email — we'll send a magic link. No password.",   next: "/explore"    },
+  returning: { heading: "Sign in",             sub: "Enter your email — we'll send a magic link. No password.",   next: "/explore"    },
+};
+
+export function LoginForm({ intent = "returning" }: { intent?: Intent }) {
+  const { heading, sub, next } = INTENT_CONFIG[intent];
+
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,7 +36,7 @@ export function LoginForm() {
     const { error: authError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=${next}`,
         shouldCreateUser: true,
       },
     });
@@ -43,7 +53,7 @@ export function LoginForm() {
   if (sent) {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center bg-(--bg)">
-        <div className={cn(pageColumnClass, pageGutterClass, "w-full text-center")}>
+        <div className={cn(pageGutterClass, "w-full max-w-[440px] mx-auto text-center")}>
           <div className="bg-surface-2 border-hairline mx-auto mb-5 flex size-[52px] items-center justify-center rounded-full border">
             <Mail size={20} className="text-ink-spot" aria-hidden />
           </div>
@@ -66,7 +76,7 @@ export function LoginForm() {
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-(--bg)">
-      <div className={cn(pageColumnClass, pageGutterClass, "w-full")}>
+      <div className={cn(pageGutterClass, "w-full max-w-[440px] mx-auto")}>
         <div className="mb-9 text-center">
           <span className="relative inline-block font-sans text-[22px] font-medium tracking-[-0.01em] text-(--text)">
             InkSpot
@@ -79,11 +89,9 @@ export function LoginForm() {
 
         <div className="mb-7 text-center">
           <h1 className="m-0 mb-2 text-[26px] font-medium tracking-[-0.02em] text-(--text)">
-            Sign in as an artist
+            {heading}
           </h1>
-          <p className="text-dim m-0 text-[14px] leading-normal">
-            Enter your email — we&apos;ll send a magic link. No password.
-          </p>
+          <p className="text-dim m-0 text-[14px] leading-normal">{sub}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -101,7 +109,7 @@ export function LoginForm() {
 
           {error && <p className={fieldErrorClass}>{error}</p>}
 
-          <button type="submit" className={btnPrimaryClass} disabled={loading || !email.trim()}>
+          <button type="submit" className={btnPrimaryLg} disabled={loading || !email.trim()}>
             {loading ? (
               "Sending…"
             ) : (

@@ -11,7 +11,7 @@ import { classifyPortfolioItem } from "@/actions/portfolio/classify-styles";
 export async function addPortfolioItem(
   imageUrl: string,
   altText?: string,
-): Promise<{ error?: string }> {
+): Promise<{ id?: string; error?: string }> {
   const supabase = await getSupabaseServerClient();
   const {
     data: { user },
@@ -50,8 +50,9 @@ export async function addPortfolioItem(
     .single();
 
   if (insertError) return { error: insertError.message };
+  if (!newItem?.id) return { error: "Failed to create portfolio item." };
 
-  if (newItem?.id) after(() => classifyPortfolioItem(newItem.id));
+  after(() => classifyPortfolioItem(newItem.id));
 
   if (isFeatured) {
     await admin
@@ -62,7 +63,7 @@ export async function addPortfolioItem(
   }
 
   revalidateTag(`artist:${artist.handle}`, "max");
-  return {};
+  return { id: newItem.id };
 }
 
 export async function removePortfolioItem(itemId: string): Promise<{ error?: string }> {

@@ -64,11 +64,11 @@ export function PortfolioManager({
           const dbResult = await addPortfolioItem(json.url);
           if (dbResult.error) {
             setError(dbResult.error);
-          } else {
+          } else if (dbResult.id) {
             setItems((p) => [
               ...p,
               {
-                id: crypto.randomUUID(),
+                id: dbResult.id!,
                 image_url: json.url!,
                 is_featured: p.length === 0,
                 alt_text: null,

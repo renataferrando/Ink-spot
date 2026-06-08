@@ -4,7 +4,9 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { LoginForm } from "./login-form";
 
-export default async function LoginPage() {
+type Props = { searchParams: Promise<{ intent?: string }> };
+
+export default async function LoginPage({ searchParams }: Props) {
   const supabase = await getSupabaseServerClient();
   const {
     data: { user },
@@ -18,8 +20,11 @@ export default async function LoginPage() {
       .eq("claimed_by_user_id", user.id)
       .maybeSingle();
 
-    redirect(artist ? "/dashboard" : "/onboarding");
+    redirect(artist ? "/dashboard" : "/explore");
   }
 
-  return <LoginForm />;
+  const { intent } = await searchParams;
+  const validIntent = intent === "artist" || intent === "fan" ? intent : "returning";
+
+  return <LoginForm intent={validIntent} />;
 }

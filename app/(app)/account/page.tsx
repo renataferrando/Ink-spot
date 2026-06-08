@@ -7,7 +7,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { signOut } from "@/actions/auth/sign-out";
 import { cn } from "@/lib/utils";
-import { btnPrimaryClass, btnSecondaryClass, labelClass, tabShellClass, scrollbarNoneClass } from "@/lib/ui/classes";
+import { btnPrimaryLg, btnSecondaryLg, labelClass, tabShellClass, scrollbarNoneClass } from "@/lib/ui/classes";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -30,9 +30,10 @@ export default async function AccountPage() {
   if (!user) {
     return (
       <div className={SHELL_CLASS}>
+        {/* Artist path */}
         <div className="mb-2">
           <h1 className="m-0 font-sans text-[30px] leading-[1.1] font-medium tracking-[-0.02em]">
-            Are you the <span className="text-ink-spot">artist?</span>
+            Are you an <span className="text-ink-spot">artist?</span>
           </h1>
         </div>
         <p className="text-dim mt-2 text-[14px] leading-[1.55]">
@@ -55,14 +56,31 @@ export default async function AccountPage() {
           ))}
         </div>
 
-        {/* CTA */}
-        <Link href="/login" className={cn(btnPrimaryClass, "mt-6")}>
+        <Link href="/login?intent=artist" className={cn(btnPrimaryLg, "mt-6")}>
           Claim your profile <ArrowRight size={14} aria-hidden />
         </Link>
 
-        <div className="h-4" />
+        {/* Fan path */}
+        <div className="border-hairline mt-8 border-t pt-6">
+          <p className="text-(--text) text-[16px] font-medium leading-snug">Just here to explore?</p>
+          <p className="text-dim mt-1 text-[13px] leading-[1.55]">
+            Save your favorite artists and get notified when they visit.
+          </p>
+          <Link href="/login?intent=fan" className={cn(btnSecondaryLg, "mt-4")}>
+            Save your favorite artists <ArrowRight size={14} aria-hidden />
+          </Link>
+        </div>
 
-        <div className={labelClass}>Or browse as a guest</div>
+        {/* Returning users */}
+        <div className="mt-6 text-center">
+          <Link href="/login" className={cn(labelClass, "no-underline hover:text-(--text) transition-colors")}>
+            Already have an account? Sign in
+          </Link>
+        </div>
+
+        <div className="mt-3 text-center">
+          <div className={labelClass}>Or browse as a guest</div>
+        </div>
       </div>
     );
   }
@@ -80,24 +98,25 @@ export default async function AccountPage() {
     return (
       <div className={SHELL_CLASS}>
         <div>
-          <h1 className="mt-0 mb-2 text-[24px] font-medium tracking-[-0.02em]">
-            Complete your profile
-          </h1>
-          <p className="text-dim m-0 text-[14px]">
-            You&apos;re signed in but haven&apos;t set up your artist profile yet.
-          </p>
+          <h1 className="mt-0 mb-2 text-[24px] font-medium tracking-[-0.02em]">Account</h1>
+          <p className="text-dim m-0 text-[14px]">{user.email}</p>
         </div>
 
         <div className="mt-6 flex flex-col gap-2.5">
-          <Link href="/onboarding" className={btnPrimaryClass}>
-            Continue onboarding
-            <ArrowRight size={14} aria-hidden />
-          </Link>
           <form action={signOut}>
-            <button type="submit" className={cn(btnSecondaryClass, "w-full")}>
+            <button type="submit" className={cn(btnSecondaryLg, "w-full")}>
               Sign out
             </button>
           </form>
+        </div>
+
+        <div className="border-hairline mt-8 border-t pt-6">
+          <p className="text-dim text-[13px] leading-[1.55]">
+            Want to list your studio?
+          </p>
+          <Link href="/onboarding" className={cn(btnPrimaryLg, "mt-3")}>
+            Claim your artist profile <ArrowRight size={14} aria-hidden />
+          </Link>
         </div>
       </div>
     );

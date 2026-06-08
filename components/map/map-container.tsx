@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
 import type { ArtistPublic } from "@/types/artist";
@@ -25,9 +26,20 @@ type MapArtist = Pick<
 
 interface MapContainerProps {
   artists: MapArtist[];
-  userLocation?: { lat: number; lng: number };
+  hoveredArtistId?: string | null;
 }
 
-export function MapContainer(props: MapContainerProps) {
-  return <ArtistsMap {...props} />;
+export function MapContainer({ artists, hoveredArtistId }: MapContainerProps) {
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | undefined>();
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => { /* permission denied or unavailable — keep Santa Teresa default */ },
+      { timeout: 8000 },
+    );
+  }, []);
+
+  return <ArtistsMap artists={artists} userLocation={userLocation} hoveredArtistId={hoveredArtistId} />;
 }

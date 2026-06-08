@@ -85,7 +85,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
   return (
     <>
       {/* ── Cover ─────────────────────────────────────────── */}
-      <div className="bg-surface-2 relative h-[280px] w-full overflow-hidden after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0)_30%,rgba(0,0,0,0.95)_100%)] after:content-['']">
+      <div className="bg-surface-2 relative h-[300px] w-full overflow-hidden after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.15)_0%,rgba(0,0,0,0)_28%,rgba(0,0,0,0.9)_100%)] after:content-['']">
         {coverSrc ? (
           <Image src={coverSrc} alt="" fill sizes="100vw" priority className="object-cover" />
         ) : (
@@ -113,7 +113,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
           <Share2 size={16} aria-hidden />
         </button>
         {artist.is_demo && (
-          <div className="border-hairline text-text-2 absolute bottom-4 left-4 z-4 flex items-center gap-1.5 rounded-full border bg-black/70 px-2.5 py-1.5 font-mono text-[10px] tracking-widest uppercase backdrop-blur-[10px]">
+          <div className="border-hairline text-text-2 absolute top-[54px] left-3.5 z-4 flex items-center gap-1.5 rounded-full border bg-black/70 px-2.5 py-1.5 font-mono text-[10px] tracking-widest uppercase backdrop-blur-[10px]">
             <span className="size-1.5 rounded-full bg-[#ffb340]" />
             Demo profile · unclaimed
           </div>
@@ -122,11 +122,11 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
 
       <div className={cn(pageColumnClass, "w-full")}>
         {/* ── Profile head ──────────────────────────────────── */}
-        <div className="relative z-5 -mt-10 px-[18px]">
+        <div className="relative z-5 -mt-12 px-[18px] pt-2">
           {artist.instagram_handle && (
-            <div className="text-dim font-mono text-[12px]">@{artist.instagram_handle}</div>
+            <div className="text-text-2 mb-2 font-mono text-[12px]">@{artist.instagram_handle}</div>
           )}
-          <h1 className="mb-1.5 text-[44px] leading-[0.95] font-medium tracking-[-0.02em]">
+          <h1 className="mb-2 text-[44px] leading-[0.95] font-medium tracking-[-0.02em]">
             {displayFirst}
             {displayRest && (
               <>
@@ -155,12 +155,22 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         {(artist.current_location || upcoming) && (
           <div
             id="travel"
-            className="bg-surface border-hairline m-[18px] flex min-w-0 items-center gap-3.5 rounded-[14px] border px-4 py-3.5"
+            className="bg-surface border-hairline mx-[18px] mt-5 mb-0 flex min-w-0 items-center gap-3.5 rounded-[14px] border px-4 py-4"
           >
             <div className="min-w-0 flex-1">
-              <div className="text-faint font-mono text-[9px] tracking-[0.14em] uppercase">
-                <span className="bg-ink-spot mr-1.5 inline-block size-1.5 rounded-full align-middle shadow-[0_0_8px_var(--accent-glow)]" />
-                Now
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-faint font-mono text-[9px] tracking-[0.14em] uppercase">
+                  <span className="bg-ink-spot mr-1.5 inline-block size-1.5 rounded-full align-middle shadow-[0_0_8px_var(--accent-glow)]" />
+                  Now
+                </div>
+                {artist.current_location && (
+                  <Link
+                    href="/explore"
+                    className="text-dim hover:text-(--text) shrink-0 font-mono text-[9px] tracking-widest uppercase transition-colors"
+                  >
+                    Map →
+                  </Link>
+                )}
               </div>
               <div className="mt-0.5 truncate text-[18px] leading-[1.2] text-(--text)">
                 {artist.current_location?.location_name?.split(",")[0] ?? "—"}
@@ -187,7 +197,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
 
         {/* ── CTA row ───────────────────────────────────────── */}
-        <div className="mt-1 flex min-w-0 gap-2 px-[18px]">
+        <div className="mt-4 flex min-w-0 gap-2 px-[18px]">
           {inquireHref ? (
             <a
               className={cn(btnPrimaryClass, "w-auto! min-w-0 flex-1")}
@@ -225,14 +235,14 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
 
         {/* ── Bio ───────────────────────────────────────────── */}
         {artist.bio && (
-          <div className="text-text-2 px-[18px] pt-5 pb-1 text-[18px] leading-normal">
+          <div className="text-text-2 px-[18px] pt-6 pb-2 text-[18px] leading-relaxed">
             {artist.bio}
           </div>
         )}
 
         {/* ── Style brief (only when AI summary + style_confidence exist) ── */}
         {styleBreakdown && (
-          <div className="border-hairline mt-7 border-t px-[18px] pt-7 pb-1">
+          <div className="border-hairline mt-8 border-t px-[18px] pt-7 pb-6">
             <div className="mb-3.5 flex items-baseline justify-between">
               <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
                 Style brief
@@ -264,7 +274,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
 
         {/* ── Portfolio masonry ─────────────────────────────── */}
-        <div className="border-hairline mt-7 border-t px-[18px] pt-7 pb-1">
+        <div className="border-hairline mt-8 border-t px-[18px] pt-7 pb-6">
           <div className="mb-3.5 flex items-baseline justify-between">
             <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
               Portfolio · {artist.portfolio_items.length}
@@ -313,7 +323,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
 
         {/* ── Q&A panel shell (Stage 5.5.3 wires this) ─────── */}
         {!artist.is_demo && (
-          <div className="bg-surface border-hairline mx-[18px] mt-7 mb-8 overflow-hidden rounded-[18px] border">
+          <div className="bg-surface border-hairline mx-[18px] mt-8 mb-8 overflow-hidden rounded-[18px] border">
             <div className="border-hairline flex items-center justify-between border-b px-[18px] py-4">
               <div className="flex items-center gap-2.5">
                 <div className="after:bg-ink-spot relative size-6 rounded-full bg-[radial-gradient(circle,var(--accent)_0%,transparent_70%)] after:absolute after:inset-2 after:rounded-full after:content-['']" />

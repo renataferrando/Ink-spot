@@ -74,15 +74,16 @@ const tabs = [
   },
 ] as const;
 
-export function BottomNav() {
+export function BottomNav({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const pathname = usePathname();
+  const visibleTabs = tabs.filter(({ href }) => href !== "/saved" || isLoggedIn);
 
   return (
     <nav
       aria-label="Main navigation"
-      className="border-hairline sticky inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t bg-black/85 pt-2.5 pb-[calc(env(safe-area-inset-bottom,0)+18px)] backdrop-blur-[14px] lg:hidden"
+      className={`border-hairline sticky inset-x-0 bottom-0 z-40 grid border-t bg-black/85 pt-2.5 pb-[calc(env(safe-area-inset-bottom,0)+18px)] backdrop-blur-[14px] lg:hidden ${visibleTabs.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}
     >
-      {tabs.map(({ href, label, icon }) => {
+      {visibleTabs.map(({ href, label, icon }) => {
         const active = pathname === href || pathname.startsWith(href + "/");
         return (
           <Link

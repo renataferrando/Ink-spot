@@ -7,6 +7,7 @@ import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/s
 import { PageColumn } from "@/components/layout/page-container";
 import { PortfolioManager } from "./portfolio-manager";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Portfolio" };
 
 export default async function PortfolioPage() {

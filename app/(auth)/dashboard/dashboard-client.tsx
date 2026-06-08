@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { btnPrimaryMd, btnSecondaryMd } from "@/lib/ui/classes";
 import { signOut } from "@/actions/auth/sign-out";
 import { DashboardAvatar } from "./dashboard-avatar";
 
@@ -189,7 +190,7 @@ function MobileHomeTab({ data }: { data: DashboardData }) {
       </div>
       <div className="mx-[18px]"><LocationWidget data={data} /></div>
 
-      <Link href="/dashboard/locations" className="border-hairline mx-[18px] mt-[14px] flex h-[46px] w-[calc(100%-36px)] items-center justify-center gap-2 rounded-full border bg-surface-2 font-mono text-[11px] tracking-[0.12em] uppercase text-(--text) transition-colors hover:bg-surface-3">
+      <Link href="/dashboard/locations" className={cn(btnSecondaryMd, "mx-[18px] mt-[14px] w-[calc(100%-36px)]")}>
         <Calendar size={14} aria-hidden /> Manage travel dates
       </Link>
 
@@ -236,7 +237,7 @@ function MobilePortfolioTab({ items, handle }: { items: DashboardData["portfolio
           <Plus size={20} aria-hidden />
         </Link>
       </div>
-      <Link href="/dashboard/portfolio" className="mx-[18px] mt-[14px] flex h-[46px] w-[calc(100%-36px)] items-center justify-center gap-2 rounded-full bg-ink-spot font-mono text-[11px] tracking-[0.12em] uppercase text-(--accent-ink) transition-opacity hover:opacity-90">
+      <Link href="/dashboard/portfolio" className={cn(btnPrimaryMd, "mx-[18px] mt-[14px] w-[calc(100%-36px)]")}>
         <Camera size={14} aria-hidden /> Manage photos
       </Link>
       <div className="h-10" />
@@ -257,7 +258,7 @@ function MobilePreviewTab({ handle }: { handle: string }) {
           <p className="text-text-2 text-[13px]">See exactly what clients see when they find you</p>
         </div>
         <div className="flex flex-col items-center gap-3">
-          <Link href={`/artist/${handle}`} className="border-ds-border flex h-11 items-center gap-2 rounded-full border bg-surface-2 px-5 font-mono text-[10px] tracking-[0.12em] uppercase text-(--text) transition-colors hover:bg-surface-3">
+          <Link href={`/artist/${handle}`} className={btnSecondaryMd}>
             View public profile <ArrowRight size={12} aria-hidden />
           </Link>
           <Link href="/dashboard/profile" className="text-faint hover:text-dim font-mono text-[10px] tracking-[0.12em] uppercase transition-colors">
@@ -408,8 +409,7 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
           <div className="bg-surface border-hairline rounded-[18px] border p-[22px_24px]">
             <div className="text-dim mb-[14px] font-mono text-[10px] tracking-[0.14em] uppercase">Where you are</div>
             <LocationWidget data={data} />
-            <Link href="/dashboard/locations"
-              className="mt-[14px] flex h-[46px] w-full items-center justify-center gap-2 rounded-full border border-ds-border bg-surface-2 font-mono text-[11px] tracking-[0.12em] uppercase text-(--text) transition-colors hover:bg-surface-3">
+            <Link href="/dashboard/locations" className={cn(btnSecondaryMd, "mt-[14px]")}>
               <Calendar size={14} aria-hidden /> Manage travel
             </Link>
           </div>
@@ -435,8 +435,7 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
                 <p className="text-faint font-mono text-[10px] tracking-widest uppercase">No photos yet</p>
               </div>
             )}
-            <Link href="/dashboard/portfolio"
-              className="mt-[14px] flex h-[42px] w-full items-center justify-center gap-2 rounded-full bg-ink-spot font-mono text-[11px] tracking-[0.12em] uppercase text-(--accent-ink) transition-opacity hover:opacity-90">
+            <Link href="/dashboard/portfolio" className={cn(btnPrimaryMd, "mt-[14px]")}>
               <Camera size={13} aria-hidden /> Manage photos
             </Link>
           </div>
@@ -495,8 +494,7 @@ function DesktopPortfolioTab({ items }: { items: DashboardData["portfolioItems"]
 
         {/* Sidebar */}
         <div className="flex flex-col gap-4">
-          <Link href="/dashboard/portfolio"
-            className="flex h-[46px] w-full items-center justify-center gap-2 rounded-full bg-ink-spot font-mono text-[11px] tracking-[0.12em] uppercase text-(--accent-ink) transition-opacity hover:opacity-90">
+          <Link href="/dashboard/portfolio" className={btnPrimaryMd}>
             <Camera size={14} aria-hidden /> Add photos
           </Link>
           <div className="bg-surface border-hairline rounded-[18px] border p-5">
@@ -524,12 +522,10 @@ function DesktopPreviewTab({ handle }: { handle: string }) {
             <p className="text-text-2 text-[13px]">See exactly what clients see when they find you</p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href={`/artist/${handle}`}
-              className="border-ds-border flex h-11 items-center gap-2 rounded-full border bg-surface-2 px-5 font-mono text-[10px] tracking-[0.12em] uppercase text-(--text) transition-colors hover:bg-surface-3">
+            <Link href={`/artist/${handle}`} className={btnSecondaryMd}>
               View public profile <ArrowRight size={12} aria-hidden />
             </Link>
-            <Link href="/dashboard/profile"
-              className="border-ds-border flex h-11 items-center gap-2 rounded-full border bg-surface-2 px-5 font-mono text-[10px] tracking-[0.12em] uppercase text-(--text) transition-colors hover:bg-surface-3">
+            <Link href="/dashboard/profile" className={btnSecondaryMd}>
               Edit profile
             </Link>
           </div>
@@ -567,7 +563,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             className="border-hairline flex items-center gap-2 rounded-full border px-[11px] py-1.5 transition-colors hover:bg-surface">
             <AccentDot size={5} />
             <span className="text-text-2 font-mono text-[10px] tracking-[0.12em] uppercase">
-              Artist · exit
+              ← Explore
             </span>
           </Link>
         </div>
