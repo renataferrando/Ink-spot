@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { PlaceAutocomplete } from "@/components/forms/place-autocomplete";
-import { addLocation, type ManageLocationState } from "@/actions/artist/manage-locations";
+import { setHomeBase, type ManageLocationState } from "@/actions/artist/manage-locations";
 import {
   fieldErrorClass,
   fieldHintClass,
@@ -22,7 +22,7 @@ export function LocationForm() {
 
   const [state, action, pending] = useActionState<ManageLocationState, FormData>(
     async (_prev, fd) => {
-      const result = await addLocation(_prev, fd);
+      const result = await setHomeBase(_prev, fd);
       if (result.success) router.push("/onboarding/portfolio");
       return result;
     },
@@ -31,7 +31,6 @@ export function LocationForm() {
 
   return (
     <form action={action} className={formStackClass}>
-      <input type="hidden" name="kind" value="home_base" />
 
       <div>
         <div className={fieldLabelRowClass}>
@@ -40,7 +39,7 @@ export function LocationForm() {
         </div>
         <PlaceAutocomplete
           name="address"
-          placeholder="Santa Teresa, Puntarenas…"
+          placeholder="City, country…"
           required
           disabled={pending}
         />

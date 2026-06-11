@@ -2,12 +2,13 @@ import { env } from "@/lib/validations/env";
 
 export const MAP_STYLE_URL = env.NEXT_PUBLIC_MAP_TILES_URL;
 
-export const SANTA_TERESA_CENTER = {
-  lng: -85.1697,
-  lat: 9.6369,
+export const DEFAULT_CENTER = {
+  lng: 0,
+  lat: 20,
 } as const;
 
 export const DEFAULT_ZOOM = 13;
+export const DEFAULT_REGION_ZOOM = 2;
 
 export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { DEFAULT_ZOOM, MAP_STYLE_URL, SANTA_TERESA_CENTER } from "@/lib/maplibre/config";
+import { DEFAULT_CENTER, DEFAULT_REGION_ZOOM, DEFAULT_ZOOM, MAP_STYLE_URL } from "@/lib/maplibre/config";
 import { chipActiveClass, chipClass } from "@/lib/ui/classes";
 import { STYLE_LABELS, type ArtistPublic } from "@/types/artist";
 
@@ -20,6 +20,7 @@ interface ArtistsMapProps {
   artists: MapArtist[];
   userLocation?: { lat: number; lng: number };
   hoveredArtistId?: string | null;
+  focusArtistId?: string | null;
 }
 
 type MarkerEntry = { marker: maplibregl.Marker; el: HTMLButtonElement };
@@ -90,7 +91,7 @@ function createMarkerElement(artist: MapArtist, onSelect: () => void): HTMLButto
   return el;
 }
 
-export function ArtistsMap({ artists, userLocation, hoveredArtistId }: ArtistsMapProps) {
+export function ArtistsMap({ artists, userLocation, hoveredArtistId, focusArtistId }: ArtistsMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<Map<string, MarkerEntry>>(new Map());
@@ -120,13 +121,14 @@ export function ArtistsMap({ artists, userLocation, hoveredArtistId }: ArtistsMa
 
     const center = userLocation
       ? ([userLocation.lng, userLocation.lat] as [number, number])
-      : ([SANTA_TERESA_CENTER.lng, SANTA_TERESA_CENTER.lat] as [number, number]);
+      : ([DEFAULT_CENTER.lng, DEFAULT_CENTER.lat] as [number, number]);
+    const zoom = userLocation ? DEFAULT_ZOOM : DEFAULT_REGION_ZOOM;
 
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: MAP_STYLE_URL,
       center,
-      zoom: DEFAULT_ZOOM,
+      zoom,
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
@@ -167,13 +169,36 @@ export function ArtistsMap({ artists, userLocation, hoveredArtistId }: ArtistsMa
           const showTooltip = () => {
             hideTooltip();
             const tooltip = buildTooltipContent(artist);
-            map.getContainer().appendChild(tooltip);
+            // Append to the wrapper div (parent of the map container) so the tooltip
+            // is not clipped by MapLibre's overflow:hidden on the map container itself.
+            const parent = map.getContainer().parentElement ?? map.getContainer();
+            parent.appendChild(tooltip);
             tooltipRef.current = tooltip;
 
             const sync = () => {
               const point = map.project(lngLat);
+              const containerW = map.getContainer().offsetWidth;
+              const containerH = map.getContainer().offsetHeight;
+              const tooltipW = tooltip.offsetWidth || 192;
+              const tooltipH = tooltip.offsetHeight || 80;
+              const pad = 8;
+
+              // Clamp X: keep tooltip inside the map horizontally
+              const half = tooltipW / 2;
+              const nudgeX = Math.max(half + pad - point.x, 0)
+                - Math.max(point.x + half + pad - containerW, 0);
+
+              // Flip Y: show below the marker when too close to the top edge
+              const showBelow = point.y - tooltipH - 20 < pad;
+              const translateY = showBelow ? "20px" : "calc(-100% - 20px)";
+
               tooltip.style.left = `${point.x}px`;
               tooltip.style.top = `${point.y}px`;
+              tooltip.style.transform = `translate(calc(-50% + ${nudgeX}px), ${translateY})`;
+
+              // Hide when marker scrolls fully out of the map viewport
+              const visible = point.x >= 0 && point.x <= containerW && point.y >= 0 && point.y <= containerH;
+              tooltip.style.visibility = visible ? "visible" : "hidden";
             };
 
             sync();
@@ -208,15 +233,15 @@ export function ArtistsMap({ artists, userLocation, hoveredArtistId }: ArtistsMa
     };
   }, [artists]);
 
-  // Fly to user's device location once it becomes available.
+  // Fly to user's device location once it becomes available — skip if a specific artist is focused.
   useEffect(() => {
-    if (!userLocation || !mapRef.current) return;
+    if (!userLocation || !mapRef.current || focusArtistId) return;
     mapRef.current.flyTo({
       center: [userLocation.lng, userLocation.lat],
       zoom: DEFAULT_ZOOM,
       duration: 1500,
     });
-  }, [userLocation]);
+  }, [userLocation, focusArtistId]);
 
   // Highlight the marker whose artist is hovered in the list.
   useEffect(() => {
@@ -224,6 +249,29 @@ export function ArtistsMap({ artists, userLocation, hoveredArtistId }: ArtistsMa
       el.classList.toggle("map-marker--hovered", id === hoveredArtistId);
     });
   }, [hoveredArtistId]);
+
+  // Fly to and persistently highlight a focused artist (e.g. arriving from artist profile).
+  useEffect(() => {
+    if (!focusArtistId) return;
+    const map = mapRef.current;
+    const artist = artists.find((a) => a.id === focusArtistId);
+    if (!artist?.current_location) return;
+
+    const { lng, lat } = artist.current_location;
+
+    const flyAndHighlight = () => {
+      map!.flyTo({ center: [lng, lat], zoom: 15, duration: 1200 });
+      const entry = markersRef.current.get(focusArtistId);
+      if (entry) entry.el.classList.add("map-marker--focused");
+    };
+
+    if (map?.loaded()) {
+      flyAndHighlight();
+    } else {
+      map?.once("load", flyAndHighlight);
+      return () => { map?.off("load", flyAndHighlight); };
+    }
+  }, [focusArtistId, artists]);
 
   return (
     <div className="relative h-full w-full">

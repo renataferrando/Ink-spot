@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArtistCard } from "@/components/artist/artist-card";
 import { ArtistCardSkeleton } from "@/components/artist/artist-card-skeleton";
 import { cn } from "@/lib/utils";
-import { type ArtistPublic } from "@/types/artist";
+import { type ArtistWithScore } from "@/types/artist";
 import {
   btnPrimarySm,
   tabShellClass,
@@ -25,11 +25,6 @@ const SEARCH_PHRASES = [
 type Mode = "assistant" | "list";
 type Stage = "idle" | "streaming" | "results";
 
-function buildExplanation(query: string) {
-  const trimmed = query.trim();
-  return `Searching for "${trimmed}". I'm matching artists by style fit, portfolio strength, and proximity. Top picks are sorted by overall match — tap any card to view full work and book a consult.`;
-}
-
 export default function SearchPage() {
   const [mode, setMode] = useState<Mode>("assistant");
   const [query, setQuery] = useState("");
@@ -37,32 +32,72 @@ export default function SearchPage() {
   const [stage, setStage] = useState<Stage>("idle");
   const [stream, setStream] = useState("");
   const [recording, setRecording] = useState(false);
-  const [results, setResults] = useState<ArtistPublic[]>([]);
+  const [results, setResults] = useState<ArtistWithScore[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const recognitionRef = useRef<unknown>(null);
-  const streamTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const uploadedImageUrlRef = useRef<string | null>(null);
 
   useEffect(
     () => () => {
-      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+      abortRef.current?.abort();
       if (image?.url) URL.revokeObjectURL(image.url);
     },
     [image],
   );
 
-  // FE gap: only `q` hits `/api/artists`. Backend already supports `styles` (comma-separated
-  // ArtistStyle slugs → Supabase overlaps on primary_styles). When StyleFilterBar is added,
-  // append selected styles here — do not filter the returned list only on the client.
-  async function fetchResults(q: string) {
+  async function getGeoLocation(): Promise<{ lat: number; lng: number } | null> {
+    if (!("geolocation" in navigator)) return null;
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve(null),
+        { timeout: 5000 },
+      );
+    });
+  }
+
+  async function fetchResults(q: string, imageFile?: File) {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (q.trim()) params.set("q", q.trim());
-      const res = await fetch(`/api/artists?${params}`);
-      const json = (await res.json()) as { artists: ArtistPublic[] };
-      setResults(json.artists ?? []);
+      let imageUrl: string | undefined;
+      let searchMode: "text" | "image" | "combined" = "text";
+
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append("file", imageFile);
+        fd.append("purpose", "search");
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: fd });
+        if (uploadRes.ok) {
+          const uploadJson = (await uploadRes.json()) as { url: string };
+          imageUrl = uploadJson.url;
+          uploadedImageUrlRef.current = imageUrl;
+          searchMode = q.trim() ? "combined" : "image";
+        }
+      } else if (uploadedImageUrlRef.current && !q.trim()) {
+        imageUrl = uploadedImageUrlRef.current;
+        searchMode = "image";
+      }
+
+      if (q.trim() && imageUrl) searchMode = "combined";
+      else if (q.trim()) searchMode = "text";
+
+      const body: Record<string, unknown> = { mode: searchMode };
+      if (q.trim()) body.text = q.trim();
+      if (imageUrl) body.imageUrl = imageUrl;
+
+      const geo = await getGeoLocation();
+      if (geo) { body.lat = geo.lat; body.lng = geo.lng; }
+
+      const res = await fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = (await res.json()) as { results: ArtistWithScore[] };
+      setResults(json.results ?? []);
     } catch {
       setResults([]);
     } finally {
@@ -70,45 +105,88 @@ export default function SearchPage() {
     }
   }
 
-  function startStream(text: string) {
-    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+  async function streamAssistant(q: string) {
+    abortRef.current?.abort();
+    const abort = new AbortController();
+    abortRef.current = abort;
     setStream("");
-    let i = 0;
-    streamTimerRef.current = setInterval(() => {
-      i++;
-      setStream(text.slice(0, i));
-      if (i >= text.length && streamTimerRef.current) {
-        clearInterval(streamTimerRef.current);
-        streamTimerRef.current = null;
+
+    const geo = await getGeoLocation();
+    const body: Record<string, unknown> = { text: q };
+    if (geo) { body.lat = geo.lat; body.lng = geo.lng; }
+
+    try {
+      const res = await fetch("/api/ai/search-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: abort.signal,
+      });
+
+      if (!res.ok || !res.body) return;
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const event = JSON.parse(line.slice(6)) as {
+              type: string;
+              text?: string;
+              artists?: ArtistWithScore[];
+            };
+            if (event.type === "results" && event.artists) {
+              setResults(event.artists);
+              setLoading(false);
+              setStage("results");
+            } else if (event.type === "token" && event.text) {
+              setStream((prev) => prev + event.text);
+            }
+          } catch {
+            // ignore
+          }
+        }
       }
-    }, 18);
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") setLoading(false);
+    }
   }
 
-  function submit(text?: string) {
+  function submit(text?: string, imageFile?: File) {
     const q = (text ?? query).trim();
-    if (!q && !image) return;
+    if (!q && !imageFile && !image) return;
 
     if (text !== undefined) setQuery(text);
-    setStage(mode === "assistant" ? "streaming" : "results");
+    setStage("streaming");
+    setLoading(true);
+    setResults([]);
 
-    fetchResults(q);
-
-    if (mode === "assistant") {
-      startStream(buildExplanation(q || (image?.name ?? "your reference")));
-      setStage("streaming");
-      // Move to results when stream finishes
-      setTimeout(() => setStage("results"), Math.max(1200, q.length * 22));
+    if (mode === "assistant" && q) {
+      streamAssistant(q);
+    } else {
+      fetchResults(q, imageFile);
+      setStage("results");
     }
   }
 
   function reset() {
-    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    abortRef.current?.abort();
     setStream("");
     setQuery("");
     if (image?.url) URL.revokeObjectURL(image.url);
     setImage(null);
     setResults([]);
     setStage("idle");
+    uploadedImageUrlRef.current = null;
   }
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -118,6 +196,8 @@ export default function SearchPage() {
     const url = URL.createObjectURL(file);
     setImage({ url, name: file.name });
     e.target.value = "";
+    // Trigger search immediately with attached image
+    submit(query, file);
   }
 
   function toggleMic() {
@@ -424,17 +504,14 @@ export default function SearchPage() {
                 </button>
               </div>
             ) : (
-              results.map((artist, i) => {
-                const matchScore = Math.max(0.5, 0.96 - i * 0.05);
-                return (
-                  <ArtistCard
-                    key={artist.id}
-                    artist={artist}
-                    priority={i < 2}
-                    matchScore={matchScore}
-                  />
-                );
-              })
+              results.map((artist, i) => (
+                <ArtistCard
+                  key={artist.id}
+                  artist={artist}
+                  priority={i < 2}
+                  matchScore={artist.combined_score}
+                />
+              ))
             )}
           </div>
         </>

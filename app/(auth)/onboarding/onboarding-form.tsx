@@ -77,7 +77,7 @@ export function OnboardingForm() {
         <textarea
           id="bio"
           name="bio"
-          placeholder="Blackwork and dotwork based in Santa Teresa…"
+          placeholder="Blackwork and dotwork based in San José…"
           maxLength={200}
           rows={3}
           disabled={pending}

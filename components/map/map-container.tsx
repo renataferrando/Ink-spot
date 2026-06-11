@@ -27,19 +27,20 @@ type MapArtist = Pick<
 interface MapContainerProps {
   artists: MapArtist[];
   hoveredArtistId?: string | null;
+  focusArtistId?: string | null;
 }
 
-export function MapContainer({ artists, hoveredArtistId }: MapContainerProps) {
+export function MapContainer({ artists, hoveredArtistId, focusArtistId }: MapContainerProps) {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | undefined>();
 
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => { /* permission denied or unavailable — keep Santa Teresa default */ },
+      () => { /* permission denied or unavailable — keep Costa Rica fallback */ },
       { timeout: 8000 },
     );
   }, []);
 
-  return <ArtistsMap artists={artists} userLocation={userLocation} hoveredArtistId={hoveredArtistId} />;
+  return <ArtistsMap artists={artists} userLocation={userLocation} hoveredArtistId={hoveredArtistId} focusArtistId={focusArtistId} />;
 }

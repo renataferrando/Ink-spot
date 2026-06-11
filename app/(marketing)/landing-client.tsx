@@ -19,8 +19,23 @@ const TEAL_GLOW = "rgba(39, 183, 165, 0.42)";
 const TEAL_SOFT = "rgba(39, 183, 165, 0.12)";
 const E_OUT: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
 
-const img = (seed: string, w = 600, h = 600) =>
-  `https://picsum.photos/seed/inkspot-${seed}/${w}/${h}`;
+const PORTFOLIO_IMGS: Record<string, string> = {
+  "luna-1": "https://images.unsplash.com/photo-1555427688-34f53f812abb",
+  "kai-1": "https://images.unsplash.com/photo-1570877037877-d3c5f05d09a0",
+  "kai-2": "https://images.unsplash.com/photo-1590403823825-8dbc090b8e95",
+  "tomas-1": "https://images.unsplash.com/photo-1533158326339-7f3cf2404354",
+  "mari-2": "https://images.unsplash.com/photo-1548690596-f1b6d71b9ba7",
+  "luna-avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
+  "kai-avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+  "tomas-avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d",
+};
+
+const img = (seed: string, w = 600, h = 600) => {
+  const base = PORTFOLIO_IMGS[seed];
+  return base
+    ? `${base}?auto=format&fit=crop&w=${w}&h=${h}&q=80`
+    : `https://picsum.photos/seed/inkspot-${seed}/${w}/${h}`;
+};
 
 const ARTISTS_MOCK = [
   {
@@ -51,8 +66,7 @@ const SHOWCASE_CARDS = [
 
 const FLOATS = [
   {
-    src: img("luna-1", 600, 800),
-    tag: "fine line",
+    src: "/landing/float-fine-line.png",
     speed: 80,
     delay: 0.45,
     bob: 0,
@@ -62,8 +76,7 @@ const FLOATS = [
     right: "7%",
   },
   {
-    src: img("kai-2", 600, 600),
-    tag: "blackwork",
+    src: "/landing/float-blackwork.png",
     speed: 152,
     delay: 0.6,
     bob: -2,
@@ -73,8 +86,7 @@ const FLOATS = [
     right: "31%",
   },
   {
-    src: img("tomas-1", 600, 800),
-    tag: "dotwork",
+    src: "/landing/float-dotwork.png",
     speed: 224,
     delay: 0.75,
     bob: -4,
@@ -84,8 +96,7 @@ const FLOATS = [
     right: "10%",
   },
   {
-    src: img("mari-2", 600, 800),
-    tag: "realism",
+    src: "/landing/float-realism.png",
     speed: 296,
     delay: 0.9,
     bob: -6,
@@ -125,7 +136,7 @@ const HOW_STEPS = [
   {
     k: "Book",
     h: "Catch them while they're in town.",
-    p: "Artists are nomadic. See who's in Santa Teresa today and who leaves Friday, then reach out before the chair fills up.",
+    p: "Artists are nomadic. See who's near you today and who leaves Friday, then reach out before the chair fills up.",
   },
 ];
 
@@ -254,7 +265,6 @@ function RotorWord() {
 
 function FloatImg({
   src,
-  tag,
   delay = 0,
   bob = 0,
   speed = 80,
@@ -266,7 +276,6 @@ function FloatImg({
   right,
 }: {
   src: string;
-  tag: string;
   delay?: number;
   bob?: number;
   speed?: number;
@@ -326,24 +335,6 @@ function FloatImg({
         animate={{ y: [0, -12, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: bob }}
       />
-      {/* Tag */}
-      <div
-        className="absolute bottom-3 left-3 flex items-center gap-[7px]"
-        style={{
-          zIndex: 3,
-          fontFamily: "var(--mono)",
-          fontSize: "9px",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: "var(--text)",
-        }}
-      >
-        <span
-          className="block h-[5px] w-[5px] shrink-0 rounded-full"
-          style={{ background: TEAL, boxShadow: `0 0 8px ${TEAL_GLOW}` }}
-        />
-        {tag}
-      </div>
     </motion.div>
   );
 }
@@ -395,7 +386,7 @@ function HeroSection() {
           className="h-px w-7 shrink-0"
           style={{ background: "var(--accent)", boxShadow: "0 0 10px var(--accent-glow)" }}
         />
-        Style-matched · Geolocated · Costa Rica
+        Style-matched · Geolocated · Wherever you are
       </motion.div>
 
       {/* Headline */}
@@ -423,7 +414,13 @@ function HeroSection() {
       </h1>
 
       {/* Rotor */}
-      <RotorWord />
+      <motion.div
+        initial={{ opacity: 0, y: 26 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.38, ease: E_OUT }}
+      >
+        <RotorWord />
+      </motion.div>
 
       {/* Sub */}
       <motion.p
@@ -434,7 +431,7 @@ function HeroSection() {
         transition={{ duration: 0.9, delay: 0.5, ease: E_OUT }}
       >
         InkSpot matches you with tattoo artists by the style of their work and by where they are
-        right now — across Santa Teresa, Nosara, and everywhere the needle travels.
+        right now — across cities, beaches, and everywhere the needle travels.
       </motion.p>
 
       {/* CTA row */}
@@ -474,7 +471,6 @@ function HeroSection() {
           key={i}
           floatIdx={i}
           src={f.src}
-          tag={f.tag}
           delay={f.delay}
           bob={f.bob}
           speed={f.speed}
@@ -561,7 +557,7 @@ function MarqueeSection() {
 function MockCard({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="w-full max-w-[420px] rounded-[20px] p-6"
+      className="w-full max-w-[620px] rounded-[20px] p-6"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--hairline)",
@@ -789,8 +785,11 @@ function HowSection() {
   const mocks = [<HowMockSearch key="s" />, <HowMockMatch key="m" />, <HowMockBook key="b" />];
 
   return (
-    <section ref={sectionRef} id="how" style={{ height: "calc(210vh)", position: "relative" }}>
-      <div className="lp-how-inner sticky top-0 overflow-hidden" style={{ height: "100vh", padding: "0 40px" }}>
+    <section className="relative h-[calc(210vh)] lg:ml-[30px]" ref={sectionRef} id="how">
+      <div
+        className="lp-how-inner sticky top-0 overflow-hidden"
+        style={{ height: "100vh", padding: "0 40px" }}
+      >
         {/* Step counter */}
         <div
           className="lp-how-count absolute top-10 right-10 flex gap-2.5"
@@ -820,7 +819,10 @@ function HowSection() {
           </span>
         </div>
 
-        <div className="lp-how-grid grid h-full items-center gap-12" style={{ gridTemplateColumns: "1fr 1fr" }}>
+        <div
+          className="lp-how-grid grid h-full items-center gap-2"
+          style={{ gridTemplateColumns: "1fr 1fr" }}
+        >
           {/* Left: text */}
           <div className="relative">
             {/* Progress rail */}
@@ -899,10 +901,7 @@ function HowSection() {
           </div>
 
           {/* Right: visual mock */}
-          <div
-            className="lp-how-visual relative flex items-center justify-center"
-            style={{ height: "70%", minHeight: 360 }}
-          >
+          <div className="lp-how-visual relative flex h-full w-full items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeStep}
@@ -1080,7 +1079,7 @@ function ShowcaseSection() {
           <div
             style={{ fontSize: "clamp(16px, 1.6vw, 19px)", lineHeight: 1.45, color: "var(--text)" }}
           >
-            Three artists near <span style={{ color: TEAL }}>Santa Teresa</span> work in delicate
+            Three artists near <span style={{ color: TEAL }}>your location</span> work in delicate
             single-needle botanicals. <span style={{ color: TEAL }}>Luna Vargas</span> is the
             closest match — and she&apos;s in town until the 22nd.
           </div>
@@ -1301,6 +1300,13 @@ export default function LandingClient() {
       {/* Global keyframes + mobile overrides */}
       <style>{`
         @keyframes lp-blink { 50% { opacity: 0; } }
+
+        @media (min-width: 1440px) {
+          .lp-float-0 { width: clamp(172px, 13vw, 300px) !important; height: clamp(228px, 17vw, 400px) !important; }
+          .lp-float-1 { width: clamp(144px, 11vw, 240px) !important; height: clamp(190px, 14vw, 310px) !important; }
+          .lp-float-2 { width: clamp(168px, 12vw, 280px) !important; height: clamp(222px, 16vw, 370px) !important; }
+          .lp-float-3 { width: clamp(138px, 10vw, 220px) !important; height: clamp(182px, 13vw, 290px) !important; }
+        }
 
         @media (max-width: 639px) {
           /* Nav */

@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: {
     template: "%s · InkSpot",
-    default: "InkSpot — Find tattoo artists in Costa Rica",
+    default: "InkSpot — Find tattoo artists worldwide",
   },
   description: "Discover verified studios, styles, and locations for your next tattoo.",
 };

@@ -38,6 +38,9 @@ const serverSchema = z.object({
     z.string().uuid().optional(),
   ),
   CRON_SECRET: z.string().min(32).optional(),
+  // Upstash Redis — required for rate limiting in production
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
   // Instagram OAuth (ADR 015). All four are required together — the
   // instagramOAuthEnabled() helper gates the UI/routes when any is missing.
   INSTAGRAM_APP_ID: z.string().min(1).optional(),

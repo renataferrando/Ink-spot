@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { computeCurrentLocation } from "@/lib/location";
 import { DashboardClient, type DashboardData } from "./dashboard-client";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -35,10 +36,16 @@ export default async function DashboardPage() {
   const locs = (Array.isArray(artist.artist_locations) ? artist.artist_locations : []) as Record<string, unknown>[];
   const portfolio = (Array.isArray(artist.portfolio_items) ? artist.portfolio_items : []) as Record<string, unknown>[];
 
-  const currentLoc = locs.find((l) => l.is_current) ?? null;
+  const currentLoc = computeCurrentLocation(locs);
+  const now = new Date();
   const nextLoc =
     locs
-      .filter((l) => !l.is_current && l.starts_at)
+      .filter(
+        (l) =>
+          l.kind !== "home_base" &&
+          l.starts_at &&
+          new Date(l.starts_at as string) > now,
+      )
       .sort((a, b) => (a.starts_at as string).localeCompare(b.starts_at as string))[0] ?? null;
 
   // Profile strength — 5 dimensions, 20 pts each

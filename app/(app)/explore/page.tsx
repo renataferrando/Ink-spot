@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ExploreInteractive } from "./explore-interactive";
 import { STYLE_LABELS, type ArtistPublic, type ArtistStyle } from "@/types/artist";
+import { computeCurrentLocation } from "@/lib/location";
 import {
   chipClass,
   chipActiveClass,
@@ -87,10 +88,10 @@ async function getArtists(styles?: string): Promise<{ artists: ArtistPublic[]; t
   const now = Date.now();
   const artists = (data ?? []).map((row) => {
     const locs = Array.isArray(row.artist_locations) ? row.artist_locations : [];
-    const current = locs.find((l: Record<string, unknown>) => l.is_current) ?? locs[0] ?? null;
+    const current = computeCurrentLocation(locs);
     const upcoming = locs
       .filter((l: Record<string, unknown>) => {
-        if (l.is_current) return false;
+        if (l.id === current?.id) return false;
         const start = l.starts_at as string | null | undefined;
         if (!start) return false;
         return new Date(start).getTime() > now;
@@ -129,12 +130,81 @@ async function getArtists(styles?: string): Promise<{ artists: ArtistPublic[]; t
   return { artists, total, hasMore: artists.length < total };
 }
 
-type Props = { searchParams: Promise<{ styles?: string }> };
+type Props = { searchParams: Promise<{ styles?: string; artist?: string }> };
+
+async function getFocusArtist(handle: string): Promise<ArtistPublic | null> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) return null;
+
+  const { createServerClient } = await import("@supabase/ssr");
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() { return cookieStore.getAll(); },
+      setAll(cookiesToSet: Array<{ name: string; value: string; options?: object }>) {
+        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options ?? {}));
+      },
+    },
+  });
+
+  const { data } = await supabase
+    .from("artists")
+    .select(`id, handle, display_name, profile_image_url, primary_styles,
+             artist_locations(id, artist_id, lat, lng, location_name,
+               kind, starts_at, ends_at, is_current, studio_name, notes)`)
+    .eq("handle", handle)
+    .eq("is_active", true)
+    .single();
+
+  if (!data) return null;
+
+  const locs = Array.isArray(data.artist_locations) ? data.artist_locations : [];
+  const current = computeCurrentLocation(locs as Record<string, unknown>[]);
+
+  return {
+    id: data.id as string,
+    handle: data.handle as string,
+    display_name: data.display_name as string,
+    bio: null,
+    profile_image_url: data.profile_image_url as string | null,
+    cover_image_url: null,
+    instagram_handle: null,
+    website_url: null,
+    contact_email: null,
+    years_experience: null,
+    primary_styles: (data.primary_styles ?? []) as ArtistPublic["primary_styles"],
+    style_description: null,
+    is_demo: false,
+    is_claimed: false,
+    is_active: true,
+    current_location: current as ArtistPublic["current_location"],
+    upcoming_locations: [],
+    portfolio_items: [],
+    created_at: "",
+    updated_at: "",
+  };
+}
 
 export default async function ExplorePage({ searchParams }: Props) {
-  const { styles } = await searchParams;
+  const { styles, artist: artistHandle } = await searchParams;
   const { artists, total, hasMore } = await getArtists(styles);
-  const locationLabel = artists[0]?.current_location?.location_name ?? "Santa Teresa";
+
+  let focusArtistId: string | null = null;
+  if (artistHandle) {
+    const inPage = artists.find((a) => a.handle === artistHandle);
+    if (inPage) {
+      focusArtistId = inPage.id;
+    } else {
+      const target = await getFocusArtist(artistHandle);
+      if (target) {
+        artists.unshift(target);
+        focusArtistId = target.id;
+      }
+    }
+  }
+
   const activeStyle = styles ?? null;
 
   const styleLabel = activeStyle ? STYLE_LABELS[activeStyle as ArtistStyle] : null;
@@ -146,7 +216,7 @@ export default async function ExplorePage({ searchParams }: Props) {
           {/* Map + artist list connected via shared hover state.
               Filter chips and section header are passed as children so they render
               between the map and the list while staying server-rendered. */}
-          <ExploreInteractive artists={artists} initialHasMore={hasMore} styles={styles}>
+          <ExploreInteractive artists={artists} initialHasMore={hasMore} styles={styles} focusArtistId={focusArtistId}>
             {/* Style filter chip rail */}
             <div className={cn(filterBarClass, "mt-4 max-w-full")}>
               {FILTER_CHIPS.map(({ label, value }) => {
@@ -167,13 +237,13 @@ export default async function ExplorePage({ searchParams }: Props) {
                   <em className="not-italic text-ink-spot">{styleLabel}</em>
                 ) : (
                   <>
-                    Within <em className="not-italic text-ink-spot">50&nbsp;km</em>
+                    Nearby{" "}
+                    <em className="not-italic text-ink-spot">artists</em>
                   </>
                 )}
               </h2>
               <span className={sectionCountClass}>
                 {total} ARTIST{total !== 1 ? "S" : ""}
-                {styleLabel ? "" : ` · ${locationLabel.toUpperCase()}`}
               </span>
             </div>
           </ExploreInteractive>

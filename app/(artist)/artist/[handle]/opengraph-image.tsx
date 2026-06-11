@@ -12,7 +12,7 @@ export default async function ArtistOgImage({ params }: Props) {
 
   // Attempt to fetch artist data from the API (works in edge runtime via HTTP)
   let name = "InkSpot";
-  let location = "Santa Teresa, Costa Rica";
+  let location = "";
   let styles = "";
 
   try {
@@ -57,7 +57,7 @@ export default async function ArtistOgImage({ params }: Props) {
         InkSpot
       </div>
       <div style={{ fontSize: 56, fontWeight: 700, color: "#f9fafb", lineHeight: 1.1 }}>{name}</div>
-      <div style={{ fontSize: 22, color: "#9ca3af" }}>{location}</div>
+      {location && <div style={{ fontSize: 22, color: "#9ca3af" }}>{location}</div>}
       {styles && <div style={{ fontSize: 18, color: "#4b5563" }}>{styles}</div>}
     </div>,
     { ...size },

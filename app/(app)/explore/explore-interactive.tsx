@@ -11,11 +11,12 @@ interface Props {
   artists: ArtistPublic[];
   initialHasMore: boolean;
   styles?: string;
+  focusArtistId?: string | null;
   /** Server-rendered content (filter chips + section header) slotted between map and list. */
   children?: ReactNode;
 }
 
-export function ExploreInteractive({ artists, initialHasMore, styles, children }: Props) {
+export function ExploreInteractive({ artists, initialHasMore, styles, focusArtistId, children }: Props) {
   const [hoveredArtistId, setHoveredArtistId] = useState<string | null>(null);
 
   return (
@@ -23,7 +24,7 @@ export function ExploreInteractive({ artists, initialHasMore, styles, children }
       {/* Map */}
       <div className="lg:border-hairline h-[42vh] min-h-48 w-full shrink-0 overflow-hidden lg:h-[360px] lg:min-h-0 lg:rounded-[14px] lg:border">
         <Suspense fallback={<div className="bg-muted h-full w-full animate-pulse" />}>
-          <MapContainer artists={artists} hoveredArtistId={hoveredArtistId} />
+          <MapContainer artists={artists} hoveredArtistId={hoveredArtistId} focusArtistId={focusArtistId} />
         </Suspense>
       </div>
 

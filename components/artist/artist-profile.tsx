@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   ArrowRight,
-  ArrowUp,
   Calendar,
   ChevronLeft,
   Heart,
+  MapPin,
   MessageSquare,
   Share2,
 } from "lucide-react";
@@ -17,10 +17,14 @@ import {
 import type { ArtistPublic } from "@/types/artist";
 import { STYLE_LABELS } from "@/types/artist";
 import { cn } from "@/lib/utils";
-import { btnPrimaryClass, btnSecondaryClass, pageColumnClass } from "@/lib/ui/classes";
+import { btnPrimaryLg, btnSecondaryLg, pageColumnClass } from "@/lib/ui/classes";
+import { ArtistQAPanel } from "@/components/ai/artist-qa-panel";
+import { toggleSave } from "@/actions/saved/toggle-save";
 
 interface ArtistProfileProps {
   artist: ArtistPublic;
+  aiSummary?: string | null;
+  isSaved?: boolean;
 }
 
 /**
@@ -34,10 +38,10 @@ interface ArtistProfileProps {
  * Stages 4.1 + 5.5.2 will populate the Style brief; Stage 5.5.3 will
  * activate the Q&A panel input + suggestion chips.
  */
-export function ArtistProfile({ artist }: ArtistProfileProps) {
-  console.log(artist);
+export function ArtistProfile({ artist, aiSummary, isSaved = false }: ArtistProfileProps) {
   const router = useRouter();
-  const [savedToast, setSavedToast] = useState(false);
+  const [saved, setSaved] = useState(isSaved);
+  const [savedToast, setSavedToast] = useState<"saved" | "removed" | "auth" | null>(null);
 
   const initials = artist.display_name.slice(0, 2).toUpperCase();
   const firstPortfolioImage = artist.portfolio_items[0]?.image_url ?? null;
@@ -65,11 +69,19 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
     "No public contact for this artist yet — try the Save action and check back later.";
 
   const upcoming = artist.upcoming_locations?.[0] ?? null;
-  const styleBreakdown = buildStyleBreakdownStub();
 
-  function showSaveToast() {
-    setSavedToast(true);
-    window.setTimeout(() => setSavedToast(false), 3500);
+  async function handleSave() {
+    const prev = saved;
+    setSaved(!prev);
+    const result = await toggleSave(artist.id);
+    if ("requiresAuth" in result) {
+      setSaved(prev);
+      setSavedToast("auth");
+    } else {
+      setSaved(result.saved);
+      setSavedToast(result.saved ? "saved" : "removed");
+    }
+    window.setTimeout(() => setSavedToast(null), 3000);
   }
 
   function handleShare() {
@@ -163,14 +175,6 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
                   <span className="bg-ink-spot mr-1.5 inline-block size-1.5 rounded-full align-middle shadow-[0_0_8px_var(--accent-glow)]" />
                   Now
                 </div>
-                {artist.current_location && (
-                  <Link
-                    href="/explore"
-                    className="text-dim hover:text-(--text) shrink-0 font-mono text-[9px] tracking-widest uppercase transition-colors"
-                  >
-                    Map →
-                  </Link>
-                )}
               </div>
               <div className="mt-0.5 truncate text-[18px] leading-[1.2] text-(--text)">
                 {artist.current_location?.location_name?.split(",")[0] ?? "—"}
@@ -197,10 +201,10 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         )}
 
         {/* ── CTA row ───────────────────────────────────────── */}
-        <div className="mt-4 flex min-w-0 gap-2 px-[18px]">
+        <div className="mt-4 flex min-w-0 justify-end gap-2 px-[18px]">
           {inquireHref ? (
             <a
-              className={cn(btnPrimaryClass, "w-auto! min-w-0 flex-1")}
+              className={cn(btnPrimaryLg, "w-auto!")}
               href={inquireHref}
               target={inquireHref.startsWith("http") ? "_blank" : undefined}
               rel={inquireHref.startsWith("http") ? "noopener noreferrer" : undefined}
@@ -211,7 +215,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
           ) : (
             <button
               type="button"
-              className={cn(btnPrimaryClass, "w-auto! min-w-0 flex-1")}
+              className={cn(btnPrimaryLg, "w-auto!")}
               disabled
               title={inquireDisabledReason}
             >
@@ -219,17 +223,33 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
               Inquire
             </button>
           )}
-          <a className={cn(btnSecondaryClass, "min-w-0 flex-1")} href="#travel">
-            <Calendar size={14} aria-hidden />
-            Travel dates
-          </a>
+          {(artist.upcoming_locations?.length ?? 0) > 0 && (
+            <a className={cn(btnSecondaryLg, "w-auto!")} href="#upcoming-travel">
+              <Calendar size={14} aria-hidden />
+              Travel dates
+            </a>
+          )}
+          {artist.current_location && (
+            <Link
+              href={`/explore?artist=${artist.handle}`}
+              aria-label="View on map"
+              className="bg-surface-2 border-ds-border hover:bg-surface-3 flex size-12 shrink-0 items-center justify-center rounded-full border text-(--text) transition-colors"
+            >
+              <MapPin size={18} aria-hidden />
+            </Link>
+          )}
           <button
             type="button"
-            aria-label="Save artist"
-            onClick={showSaveToast}
-            className="bg-surface-2 border-ds-border hover:bg-surface-3 flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border text-(--text) transition-colors"
+            aria-label={saved ? "Unsave artist" : "Save artist"}
+            onClick={handleSave}
+            className={cn(
+              "flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors",
+              saved
+                ? "border-ink-spot bg-accent-soft text-ink-spot"
+                : "bg-surface-2 border-ds-border hover:bg-surface-3 text-(--text)",
+            )}
           >
-            <Heart size={18} aria-hidden />
+            <Heart size={18} aria-hidden fill={saved ? "currentColor" : "none"} />
           </button>
         </div>
 
@@ -240,8 +260,8 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
           </div>
         )}
 
-        {/* ── Style brief (only when AI summary + style_confidence exist) ── */}
-        {styleBreakdown && (
+        {/* ── Style brief (AI summary — populated by Phase 5.5 cron) ── */}
+        {aiSummary && (
           <div className="border-hairline mt-8 border-t px-[18px] pt-7 pb-6">
             <div className="mb-3.5 flex items-baseline justify-between">
               <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
@@ -251,25 +271,7 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
                 AI · Auto-generated
               </div>
             </div>
-            {artist.style_description && (
-              <p className="text-[19px] leading-[1.45] text-pretty text-(--text)">
-                {artist.style_description}
-              </p>
-            )}
-            <div className="h-[18px]" />
-            <div className="flex flex-col gap-2.5">
-              {styleBreakdown.map(([name, pct]) => (
-                <div className="flex items-center gap-2.5 font-mono text-[11px]" key={name}>
-                  <div className="text-text-2 w-20 tracking-[0.06em] uppercase">{name}</div>
-                  <div className="bg-surface-3 h-1 flex-1 overflow-hidden rounded-[2px]">
-                    <div
-                      className={`bg-ink-spot h-full w-[${pct}%] shadow-[0_0_8px_var(--accent-glow)]`}
-                    />
-                  </div>
-                  <div className="text-dim w-8 text-right text-[10px]">{pct}%</div>
-                </div>
-              ))}
-            </div>
+            <p className="text-[19px] leading-[1.45] text-pretty text-(--text)">{aiSummary}</p>
           </div>
         )}
 
@@ -289,11 +291,10 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
             <div className="mx-[-18px] grid grid-cols-2 gap-1 px-1">
               {artist.portfolio_items.map((item, i) => {
                 const tagStyle = item.detected_styles[0] ?? artist.primary_styles[0];
-                const tall = i % 3 === 0;
                 return (
                   <div
                     key={item.id}
-                    className={`bg-surface-2 group relative cursor-pointer overflow-hidden ${tall ? "aspect-[0.75]" : "aspect-square"}`}
+                    className="bg-surface-2 group relative aspect-square cursor-pointer overflow-hidden"
                   >
                     <Image
                       src={item.image_url}
@@ -321,49 +322,46 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
           )}
         </div>
 
-        {/* ── Q&A panel shell (Stage 5.5.3 wires this) ─────── */}
-        {!artist.is_demo && (
-          <div className="bg-surface border-hairline mx-[18px] mt-8 mb-8 overflow-hidden rounded-[18px] border">
-            <div className="border-hairline flex items-center justify-between border-b px-[18px] py-4">
-              <div className="flex items-center gap-2.5">
-                <div className="after:bg-ink-spot relative size-6 rounded-full bg-[radial-gradient(circle,var(--accent)_0%,transparent_70%)] after:absolute after:inset-2 after:rounded-full after:content-['']" />
-                <div className="text-[17px]">Ask about {displayFirst}</div>
-              </div>
-              <div className="text-dim border-hairline rounded-full border px-2 py-1 font-mono text-[9px] tracking-[0.14em] uppercase">
-                AI · Coming soon
-              </div>
+        {/* ── Upcoming travel ───────────────────────────────── */}
+        {(artist.upcoming_locations?.length ?? 0) > 0 && (
+          <div
+            id="upcoming-travel"
+            className="border-hairline mt-8 border-t px-[18px] pt-7 pb-6"
+          >
+            <div className="text-dim mb-3.5 font-mono text-[10px] tracking-[0.16em] uppercase">
+              Travel dates
             </div>
-            <div className="text-dim flex min-h-24 items-center justify-center px-[18px] py-3.5 font-mono text-[13px] tracking-[0.08em] uppercase">
-              Conversational Q&amp;A unlocks in Phase 5.5
-            </div>
-            <div className="flex flex-wrap gap-1.5 px-[18px] pb-3.5">
-              {QA_SUGGESTIONS.map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  disabled
-                  className="text-text-2 border-hairline cursor-not-allowed rounded-full border bg-transparent px-2.5 py-1.5 font-mono text-[10px] tracking-[0.06em] opacity-50"
+            <div className="flex flex-col gap-2">
+              {artist.upcoming_locations!.map((loc) => (
+                <div
+                  key={loc.id}
+                  className="bg-surface border-hairline flex items-center gap-3 rounded-xl border px-4 py-3"
                 >
-                  {q}
-                </button>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] text-(--text)">
+                      {loc.location_name?.split(",")[0]}
+                    </p>
+                    {loc.studio_name && (
+                      <p className="text-dim text-[12px]">{loc.studio_name}</p>
+                    )}
+                    {loc.starts_at && (
+                      <p className="text-dim text-[12px]">
+                        {formatDateRange(loc.starts_at, loc.ends_at)}
+                      </p>
+                    )}
+                  </div>
+                  <span className="border-hairline text-dim shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] capitalize">
+                    {loc.kind === "guest_spot" ? "Guest spot" : "Traveling"}
+                  </span>
+                </div>
               ))}
             </div>
-            <div className="border-hairline flex items-center gap-2 border-t px-3.5 py-3">
-              <input
-                placeholder={`Ask about ${displayFirst}'s work, style, availability…`}
-                disabled
-                className="placeholder:text-faint disabled:text-dim h-8 flex-1 border-0 bg-transparent text-[14px] outline-none"
-              />
-              <button
-                type="button"
-                disabled
-                aria-label="Send"
-                className="bg-ink-spot flex size-8 cursor-not-allowed items-center justify-center rounded-full border-0 text-(--accent-ink) opacity-45"
-              >
-                <ArrowUp size={14} aria-hidden />
-              </button>
-            </div>
           </div>
+        )}
+
+        {/* ── Q&A panel (Phase 5.5 — claimed non-demo only) ─── */}
+        {!artist.is_demo && artist.is_claimed && (
+          <ArtistQAPanel handle={artist.handle} displayName={artist.display_name} />
         )}
 
         {/* ── URL footer ────────────────────────────────────── */}
@@ -372,46 +370,31 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
         </div>
       </div>
 
-      {/* ── Save toast (pre-Stage 5.3) ────────────────────── */}
+      {/* ── Save toast ───────────────────────────────────── */}
       {savedToast && (
         <div
           role="status"
           aria-live="polite"
           className="bg-surface border-ink-spot fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 animate-[toast-in_0.18s_var(--e-out)] items-center gap-2.5 rounded-full border px-4 py-3 text-[13px] text-(--text) shadow-[0_12px_30px_rgba(0,0,0,0.5)]"
         >
-          <Heart size={14} aria-hidden />
-          <span>Sign in to save</span>
-          <Link
-            href="/login"
-            className="text-ink-spot font-mono text-[11px] tracking-widest uppercase"
-          >
-            Log in
-          </Link>
+          <Heart size={14} aria-hidden fill={savedToast === "saved" ? "currentColor" : "none"} />
+          {savedToast === "auth" ? (
+            <>
+              <span>Sign in to save</span>
+              <Link href="/login" className="text-ink-spot font-mono text-[11px] tracking-widest uppercase">
+                Log in
+              </Link>
+            </>
+          ) : (
+            <span>{savedToast === "saved" ? "Saved" : "Removed"}</span>
+          )}
         </div>
       )}
     </>
   );
 }
 
-const QA_SUGGESTIONS = [
-  "Does she travel for clients?",
-  "Availability this month?",
-  "Cover-up work?",
-  "Pricing range",
-];
 
-/**
- * Style breakdown stub.
- *
- * Pre-Phase-4 we don't have `portfolio_items.style_confidence` populated and
- * we don't have an `ai_artist_summaries` row, so the section stays hidden.
- * Once Stage 4.1 lands the per-item confidence and Stage 5.5.2 generates the
- * narrative summary, this helper will be replaced by a real aggregation that
- * accepts the artist (already documented in PLAN Stage 4.1 + 5.5.2).
- */
-function buildStyleBreakdownStub(): Array<[string, number]> | null {
-  return null;
-}
 
 function formatDateRange(start: string, end?: string | null) {
   try {

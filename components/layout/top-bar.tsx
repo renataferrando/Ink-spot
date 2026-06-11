@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { pageColumnClass, pageGutterClass } from "@/lib/ui/classes";
 
 const TAGS: Record<string, string> = {
-  "/explore": "SANTA TERESA · 12 KM",
+  "/explore": "NEARBY",
   "/search": "SEARCH",
   "/saved": "SAVED",
   "/account": "ACCOUNT",

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { MapPin, Loader2, ChevronDown, Map } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { fieldInputClass } from "@/lib/ui/field-classes";
 
 const LocationPicker = dynamic(
   () => import("@/components/map/location-picker").then((m) => m.LocationPicker),
@@ -223,9 +223,13 @@ export function PlaceAutocomplete({
           className={selectClass}
           aria-label="Country"
         >
-          <option value="" disabled>Select a country…</option>
+          <option value="" disabled>
+            Select a country…
+          </option>
           {COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>{c.name}</option>
+            <option key={c.code} value={c.code}>
+              {c.name}
+            </option>
           ))}
         </select>
         <ChevronDown
@@ -238,24 +242,32 @@ export function PlaceAutocomplete({
       {/* Step 2 — city search */}
       {country && !showMap && (
         <div className="relative">
-          {loading ? (
-            <Loader2 className="text-dim pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 animate-spin" />
-          ) : (
-            <MapPin className="text-dim pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          )}
-          <Input
-            value={query}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => candidates.length > 0 && setOpen(true)}
-            placeholder={placeholder}
-            required={required && !selected}
-            disabled={disabled}
-            autoComplete="off"
-            aria-autocomplete="list"
-            aria-expanded={open}
-            className="pl-9"
-          />
+          <div className="grid *:col-start-1 *:row-start-1">
+            <input
+              type="text"
+              value={query}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => candidates.length > 0 && setOpen(true)}
+              placeholder={placeholder}
+              required={required && !selected}
+              disabled={disabled}
+              autoComplete="off"
+              aria-autocomplete="list"
+              aria-expanded={open}
+              className={`${fieldInputClass} pl-10 leading-normal`}
+            />
+            <span
+              className="text-dim pointer-events-none flex items-center self-center pl-4"
+              aria-hidden
+            >
+              {loading ? (
+                <Loader2 className="size-4 shrink-0 animate-spin" />
+              ) : (
+                <MapPin className="size-4 shrink-0 -translate-y-px" strokeWidth={1.75} />
+              )}
+            </span>
+          </div>
 
           {open && candidates.length > 0 && (
             <ul
@@ -277,19 +289,17 @@ export function PlaceAutocomplete({
             </ul>
           )}
 
-          {noResults && (
-            <div className="mt-2 flex items-center justify-between">
-              <p className="text-dim text-xs">No results found.</p>
-              <button
-                type="button"
-                onClick={() => setShowMap(true)}
-                className="text-ink-spot hover:opacity-80 inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] uppercase transition-opacity"
-              >
-                <Map size={11} aria-hidden />
-                Pick on map
-              </button>
-            </div>
-          )}
+          <div className="mt-1.5 flex items-center justify-end gap-3">
+            {noResults && <p className="text-dim flex-1 text-xs">No results found.</p>}
+            <button
+              type="button"
+              onClick={() => setShowMap(true)}
+              className="text-ink-spot inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] uppercase transition-opacity hover:opacity-80"
+            >
+              <Map size={11} aria-hidden />
+              Pick on map
+            </button>
+          </div>
         </div>
       )}
 

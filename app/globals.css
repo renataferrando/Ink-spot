@@ -213,6 +213,11 @@
   }
 }
 
+/* Date inputs: force dark calendar chrome on Safari/iOS */
+input[type="date"] {
+  color-scheme: dark;
+}
+
 /* Search streaming cursor — used by app/(app)/search/page.tsx */
 @keyframes blink {
   0%,

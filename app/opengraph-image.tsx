@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "InkSpot — Tattoo artists in Santa Teresa, Costa Rica";
+export const alt = "InkSpot — Find tattoo artists worldwide";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -36,7 +36,7 @@ export default function OgImage() {
           color: "#6b7280",
         }}
       >
-        Tattoo artists in Santa Teresa, Costa Rica
+        Find tattoo artists worldwide
       </div>
     </div>,
     { ...size },

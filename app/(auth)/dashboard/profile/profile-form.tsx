@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRef, useState, useTransition, useActionState } from "react";
-import { CheckCircle2, ImageOff, Loader2, Upload, X } from "lucide-react";
+import { CheckCircle2, ImageOff, Loader2, MapPin, Upload, X } from "lucide-react";
 
 import {
   updateProfile,
@@ -169,7 +170,7 @@ function VerificationSection({
               <button
                 type="submit"
                 disabled={pending}
-                className="text-faint hover:text-(--text) disabled:opacity-55 inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors"
+                className="text-faint inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors hover:text-(--text) disabled:opacity-55"
               >
                 {pending ? "Disconnecting…" : "Disconnect Instagram"}
               </button>
@@ -251,11 +252,7 @@ function AppearanceSection({
       <SectionEyebrow>Appearance</SectionEyebrow>
 
       <form ref={formRef} action={action} className="space-y-5">
-        <input
-          type="hidden"
-          name="remove_avatar"
-          value={pendingAvatarRemove ? "true" : "false"}
-        />
+        <input type="hidden" name="remove_avatar" value={pendingAvatarRemove ? "true" : "false"} />
         <input type="hidden" name="remove_cover" value={pendingCoverRemove ? "true" : "false"} />
 
         {/* Cover */}
@@ -335,7 +332,13 @@ function ImageSlot({
         <div className="text-faint text-[11px]">{hint}</div>
       </div>
 
-      <div className={cn("relative overflow-hidden bg-surface-2 border border-hairline", aspect, rounded)}>
+      <div
+        className={cn(
+          "bg-surface-2 border-hairline relative overflow-hidden border",
+          aspect,
+          rounded,
+        )}
+      >
         {previewUrl ? (
           <Image
             src={previewUrl}
@@ -369,7 +372,7 @@ function ImageSlot({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={disabled}
-          className="border-ds-border text-text-2 hover:bg-surface-2 disabled:opacity-55 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors"
+          className="border-ds-border text-text-2 hover:bg-surface-2 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors disabled:opacity-55"
         >
           <Upload size={11} aria-hidden /> {previewUrl ? "Replace" : "Upload"}
         </button>
@@ -381,7 +384,7 @@ function ImageSlot({
               onRemove();
             }}
             disabled={disabled}
-            className="text-faint hover:text-(--text) disabled:opacity-55 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors"
+            className="text-faint inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors hover:text-(--text) disabled:opacity-55"
           >
             <ImageOff size={11} aria-hidden /> Remove
           </button>
@@ -472,12 +475,12 @@ function DetailsSection({ artist }: { artist: ProfileFormProps["artist"] }) {
             defaultValue={artist.bio}
             disabled={pending}
             className={cn(inputClass, "resize-none leading-normal")}
-            placeholder="Blackwork and dotwork based in Santa Teresa…"
+            placeholder="Blackwork and dotwork based in San José…"
           />
         </Field>
 
         <Field label="Primary styles" hint={`Pick up to ${MAX_STYLES}.`}>
-          <div className={cn(filterBarClass, "mx-[-2px] px-0!")}>
+          <div className={cn(filterBarClass, "mx-[-2px] flex flex-wrap gap-2 px-0!")}>
             {ALL_STYLES.map((s) => {
               const active = selectedStyles.includes(s);
               const atCap = !active && selectedStyles.length >= MAX_STYLES;
@@ -539,6 +542,22 @@ function DetailsSection({ artist }: { artist: ProfileFormProps["artist"] }) {
           />
         </Field>
 
+        <div className="bg-surface border-hairline flex items-center justify-between rounded-(--r-md) border px-4 py-3">
+          <div>
+            <div className={labelClass}>Locations & travel</div>
+            <p className="text-dim mt-0.5 text-[12px]">
+              Set your home base and upcoming travel dates.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/locations"
+            className="text-ink-spot inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.12em] uppercase transition-opacity hover:opacity-80"
+          >
+            <MapPin size={11} aria-hidden />
+            Manage
+          </Link>
+        </div>
+
         {state.error && <FieldError message={state.error} />}
         {state.success && <SavedHint />}
 
@@ -571,7 +590,7 @@ function DangerSection({ isActive }: { isActive: boolean }) {
   }
 
   return (
-    <section className="space-y-4 border-t border-hairline pt-7">
+    <section className="border-hairline space-y-4 border-t pt-7">
       <SectionEyebrow>Visibility</SectionEyebrow>
 
       <div className="bg-surface border-hairline space-y-3 rounded-(--r-md) border p-4">
@@ -613,7 +632,7 @@ function DangerSection({ isActive }: { isActive: boolean }) {
                 type="button"
                 onClick={() => setConfirming(false)}
                 disabled={isPending}
-                className="text-dim hover:text-(--text) inline-flex h-10 items-center gap-1.5 px-3 font-mono text-[10px] tracking-[0.14em] uppercase"
+                className="text-dim inline-flex h-10 items-center gap-1.5 px-3 font-mono text-[10px] tracking-[0.14em] uppercase hover:text-(--text)"
               >
                 <X size={12} aria-hidden /> Cancel
               </button>
@@ -622,7 +641,7 @@ function DangerSection({ isActive }: { isActive: boolean }) {
             <button
               type="button"
               onClick={() => setConfirming(true)}
-              className="text-faint hover:text-(--text) inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors"
+              className="text-faint inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors hover:text-(--text)"
             >
               Hide my profile
             </button>

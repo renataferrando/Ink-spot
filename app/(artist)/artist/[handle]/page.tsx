@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 
 import { ArtistProfile } from "@/components/artist/artist-profile";
 import type { ArtistPublic } from "@/types/artist";
+import { computeCurrentLocation } from "@/lib/location";
+import { getSupabaseAdminClientUntyped } from "@/lib/supabase/admin";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +49,7 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
           artist_locations(
             id, artist_id, lat, lng, location_name,
             kind, starts_at, ends_at, is_current, studio_name, notes
-          ).order("is_current", { ascending: false }),
+          ),
           portfolio_items(
             id, artist_id, image_url, caption, alt_text,
             detected_styles, is_featured, sort_order, width, height
@@ -60,11 +63,17 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
 
       if (!error && data) {
         const locs = Array.isArray(data.artist_locations) ? data.artist_locations : [];
-        const current = locs.find((l: Record<string, unknown>) => l.is_current) ?? locs[0] ?? null;
-        const upcoming = locs.filter(
-          (l: Record<string, unknown>) =>
-            !l.is_current && l.starts_at && new Date(l.starts_at as string) > new Date(),
-        );
+        const current = computeCurrentLocation(locs);
+        const upcoming = locs
+          .filter(
+            (l: Record<string, unknown>) =>
+              l.id !== current?.id && l.starts_at && new Date(l.starts_at as string) > new Date(),
+          )
+          .sort(
+            (a, b) =>
+              new Date(a.starts_at as string).getTime() -
+              new Date(b.starts_at as string).getTime(),
+          );
         return {
           id: data.id as string,
           handle: data.handle as string,
@@ -144,10 +153,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const artist = await getArtist(handle);
   if (!artist) return {};
 
-  const locationName = artist.current_location?.location_name ?? "Costa Rica";
+  const locationName = artist.current_location?.location_name;
 
   return {
-    title: `${artist.display_name} — Tattoo artist · ${locationName}`,
+    title: locationName
+      ? `${artist.display_name} — Tattoo artist · ${locationName}`
+      : `${artist.display_name} — Tattoo artist`,
     description: artist.bio?.slice(0, 155) ?? `${artist.display_name} portfolio on InkSpot`,
     openGraph: {
       title: artist.display_name,
@@ -161,10 +172,45 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+async function getAiSummary(artistId: string): Promise<string | null> {
+  try {
+    const admin = getSupabaseAdminClientUntyped();
+    const now = new Date().toISOString();
+    const { data } = await admin
+      .from("ai_artist_summaries")
+      .select("content")
+      .eq("artist_id", artistId)
+      .gt("expires_at", now)
+      .single();
+    return data?.content ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function ArtistPage({ params }: Props) {
   const { handle } = await params;
   const artist = await getArtist(handle);
   if (!artist) notFound();
 
-  return <ArtistProfile artist={artist} />;
+  const [aiSummary, supabase] = await Promise.all([
+    artist.is_demo ? Promise.resolve(null) : getAiSummary(artist.id),
+    getSupabaseServerClient(),
+  ]);
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let isSaved = false;
+  if (user) {
+    const admin = getSupabaseAdminClientUntyped();
+    const { data } = await admin
+      .from("saved_artists")
+      .select("artist_id")
+      .eq("user_id", user.id)
+      .eq("artist_id", artist.id)
+      .maybeSingle();
+    isSaved = !!data;
+  }
+
+  return <ArtistProfile artist={artist} aiSummary={aiSummary} isSaved={isSaved} />;
 }
