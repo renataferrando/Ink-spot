@@ -11,6 +11,7 @@ import { InstagramVerificationPanel } from "@/components/artist/instagram-verifi
 import { accentWordClass } from "@/lib/ui/field-classes";
 import { instagramOAuthEnabled } from "@/lib/validations/env";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Verify your Instagram" };
 
 interface VerifyPageProps {

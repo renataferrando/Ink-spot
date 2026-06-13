@@ -10,6 +10,7 @@ import { approveClaim, rejectClaim } from "@/actions/admin/review-claim";
 import { cn } from "@/lib/utils";
 import { pageColumnClass, pageGutterClass } from "@/lib/ui/classes";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Claims review" };
 
 export default async function ClaimsPage() {

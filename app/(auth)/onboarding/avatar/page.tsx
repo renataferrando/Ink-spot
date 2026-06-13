@@ -8,6 +8,7 @@ import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 
 import { AvatarForm } from "./avatar-form";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Profile photo — onboarding" };
 
 export default async function AvatarPage() {

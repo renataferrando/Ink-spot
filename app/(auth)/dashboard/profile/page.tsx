@@ -11,6 +11,7 @@ import type { ArtistStyle } from "@/types/artist";
 import { PageColumn } from "@/components/layout/page-container";
 import { ProfileForm } from "./profile-form";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Edit profile" };
 
 const OAUTH_ERROR_COPY: Record<string, string> = {

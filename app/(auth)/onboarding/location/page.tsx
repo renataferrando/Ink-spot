@@ -9,6 +9,7 @@ import { OnboardingHeading } from "@/components/onboarding/onboarding-heading";
 import { accentWordClass } from "@/lib/ui/field-classes";
 import { LocationForm } from "./location-form";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Where do you tattoo?" };
 
 export default async function LocationPage() {

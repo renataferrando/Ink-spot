@@ -9,6 +9,7 @@ import { signOut } from "@/actions/auth/sign-out";
 import { cn } from "@/lib/utils";
 import { btnPrimaryLg, btnSecondaryLg, labelClass, tabShellClass, scrollbarNoneClass } from "@/lib/ui/classes";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Account" };
 
 const STEPS = [

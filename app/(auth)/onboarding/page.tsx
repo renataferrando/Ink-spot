@@ -9,6 +9,7 @@ import { accentWordClass } from "@/lib/ui/field-classes";
 
 import { OnboardingForm } from "./onboarding-form";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Set up your studio" };
 
 export default async function OnboardingPage() {

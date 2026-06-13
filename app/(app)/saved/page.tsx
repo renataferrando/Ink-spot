@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { btnPrimaryLg, tabShellClass } from "@/lib/ui/classes";
 import type { ArtistPublic } from "@/types/artist";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Saved" };
 
 const EMPTY_CLASS = cn(tabShellClass, "flex flex-1 flex-col items-center justify-center py-24 text-center");

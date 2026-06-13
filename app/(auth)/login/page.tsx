@@ -4,6 +4,8 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { LoginForm } from "./login-form";
 
+export const dynamic = "force-dynamic";
+
 type Props = { searchParams: Promise<{ intent?: string }> };
 
 export default async function LoginPage({ searchParams }: Props) {

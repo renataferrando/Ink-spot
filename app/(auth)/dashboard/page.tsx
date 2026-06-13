@@ -6,6 +6,7 @@ import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/s
 import { computeCurrentLocation, computeNextLocation } from "@/lib/location";
 import { DashboardClient, type DashboardData } from "./dashboard-client";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {

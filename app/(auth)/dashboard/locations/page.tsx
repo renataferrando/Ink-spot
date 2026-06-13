@@ -12,6 +12,7 @@ import { HomeBaseSection } from "./home-base-section";
 import { computeCurrentLocation } from "@/lib/location";
 import type { ArtistLocation } from "@/types/artist";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Manage locations" };
 
 export default async function LocationsPage() {

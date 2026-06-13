@@ -8,6 +8,7 @@ import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { cn } from "@/lib/utils";
 import { btnPrimaryClass, btnSecondaryClass } from "@/lib/ui/classes";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Claim your studio" };
 
 async function claimDemo(formData: FormData) {

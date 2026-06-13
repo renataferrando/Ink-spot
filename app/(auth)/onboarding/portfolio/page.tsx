@@ -4,6 +4,8 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PortfolioUploader } from "./portfolio-uploader";
 
+export const dynamic = "force-dynamic";
+
 export default async function PortfolioPage() {
   const supabase = await getSupabaseServerClient();
   const {
