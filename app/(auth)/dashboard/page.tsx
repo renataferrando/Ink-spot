@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { computeCurrentLocation } from "@/lib/location";
+import { computeCurrentLocation, computeNextLocation } from "@/lib/location";
 import { DashboardClient, type DashboardData } from "./dashboard-client";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -37,16 +37,7 @@ export default async function DashboardPage() {
   const portfolio = (Array.isArray(artist.portfolio_items) ? artist.portfolio_items : []) as Record<string, unknown>[];
 
   const currentLoc = computeCurrentLocation(locs);
-  const now = new Date();
-  const nextLoc =
-    locs
-      .filter(
-        (l) =>
-          l.kind !== "home_base" &&
-          l.starts_at &&
-          new Date(l.starts_at as string) > now,
-      )
-      .sort((a, b) => (a.starts_at as string).localeCompare(b.starts_at as string))[0] ?? null;
+  const nextLoc = computeNextLocation(locs, currentLoc);
 
   // Profile strength — 5 dimensions, 20 pts each
   let strength = 0;
@@ -70,8 +61,8 @@ export default async function DashboardPage() {
       : null,
     nextLocation: nextLoc
       ? {
-          location_name: nextLoc.location_name as string,
-          starts_at: nextLoc.starts_at as string | null,
+          location_name: nextLoc.location.location_name,
+          starts_at: nextLoc.starts_at,
         }
       : null,
     portfolioItems: portfolio

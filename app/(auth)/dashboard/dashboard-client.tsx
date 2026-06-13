@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { splitCityCountry } from "@/lib/location";
 import { btnPrimaryMd, btnSecondaryMd } from "@/lib/ui/classes";
 import { signOut } from "@/actions/auth/sign-out";
 import { DashboardAvatar } from "./dashboard-avatar";
@@ -42,13 +43,14 @@ type Tab = "home" | "inquiries" | "portfolio" | "preview";
 
 const AccentDot = ({ size = 5 }: { size?: number }) => (
   <span
-    className="inline-block shrink-0 rounded-full bg-ink-spot"
+    className="bg-ink-spot inline-block shrink-0 rounded-full"
     style={{ width: size, height: size, boxShadow: "0 0 8px var(--accent-glow)" }}
   />
 );
 
 function Spark({ data }: { data: number[] }) {
-  const w = 60, h = 22;
+  const w = 60,
+    h = 22;
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
@@ -57,14 +59,30 @@ function Spark({ data }: { data: number[] }) {
     .join(" ");
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden>
-      <polyline points={pts} fill="none" stroke="var(--accent)" strokeWidth="1.5"
-        strokeLinejoin="round" strokeLinecap="round" />
+      <polyline
+        points={pts}
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-function StatCell({ label, value, delta, data, large }: {
-  label: string; value: string; delta: number; data: number[]; large?: boolean;
+function StatCell({
+  label,
+  value,
+  delta,
+  data,
+  large,
+}: {
+  label: string;
+  value: string;
+  delta: number;
+  data: number[];
+  large?: boolean;
 }) {
   return (
     <div className="bg-surface border-hairline rounded-[14px] border p-[14px] lg:p-[18px]">
@@ -72,10 +90,20 @@ function StatCell({ label, value, delta, data, large }: {
         <span className="text-dim font-mono text-[9px] tracking-[0.12em] uppercase">{label}</span>
         <Spark data={data} />
       </div>
-      <div className={cn("mt-3 font-medium leading-none tracking-tight", large ? "text-[34px]" : "text-[30px]")}>
+      <div
+        className={cn(
+          "mt-3 leading-none font-medium tracking-tight",
+          large ? "text-[34px]" : "text-[30px]",
+        )}
+      >
         {value}
       </div>
-      <div className={cn("mt-1.5 font-mono text-[10px] leading-none", delta >= 0 ? "text-[#3ddc84]" : "text-[#ff5d5d]")}>
+      <div
+        className={cn(
+          "mt-1.5 font-mono text-[10px] leading-none",
+          delta >= 0 ? "text-[#3ddc84]" : "text-[#ff5d5d]",
+        )}
+      >
         {delta >= 0 ? "▲" : "▼"} {Math.abs(delta)}% this week
       </div>
     </div>
@@ -84,26 +112,51 @@ function StatCell({ label, value, delta, data, large }: {
 
 // ── Location widget (shared, used in both mobile home and desktop card) ───────
 function LocationWidget({ data }: { data: DashboardData }) {
+  const now = splitCityCountry(data.currentLocation?.location_name);
+  const next = splitCityCountry(data.nextLocation?.location_name);
   const nextDate = data.nextLocation?.starts_at
-    ? new Date(data.nextLocation.starts_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+    ? new Date(data.nextLocation.starts_at).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      })
     : null;
+
+  const nextMeta = [next.country, nextDate ? `from ${nextDate}` : ""].filter(Boolean).join(" · ");
+
   return (
-    <div className="bg-surface border-hairline flex items-center gap-3.5 rounded-[14px] border px-4 py-[14px]">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase text-faint">
-          <AccentDot size={6} /> Now
+    <div className="bg-surface border-hairline rounded-[14px] border px-4 py-[14px]">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3.5 gap-y-0.5">
+        {/* Row 1 — labels */}
+        <div className="text-faint col-start-1 row-start-1 flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase">
+          <span className="inline-flex w-[6px] shrink-0 justify-center">
+            <AccentDot size={6} />
+          </span>
+          Now
         </div>
-        <div className="mt-0.5 truncate text-[18px] font-medium leading-[1.2]">
-          {data.currentLocation?.location_name?.split(",")[0] ?? "—"}
+        <div className="text-faint col-start-3 row-start-1 font-mono text-[9px] tracking-[0.14em] uppercase">
+          Next
         </div>
-      </div>
-      <ArrowRight size={14} className="text-faint shrink-0" aria-hidden />
-      <div className="min-w-0 flex-1">
-        <div className="font-mono text-[9px] tracking-[0.14em] uppercase text-faint">Next</div>
-        <div className="text-text-2 mt-0.5 truncate text-[18px] font-medium leading-[1.2]">
-          {data.nextLocation?.location_name?.split(",")[0] ?? "—"}
+
+        {/* Row 2 — cities + arrow */}
+        <div className="col-start-1 row-start-2 min-w-0 truncate text-[18px] leading-[1.2] font-medium">
+          {now.city || "—"}
         </div>
-        {nextDate && <div className="text-dim mt-0.5 font-mono text-[10px]">from {nextDate}</div>}
+        <ArrowRight
+          size={14}
+          className="text-faint col-start-2 row-start-2 shrink-0 self-center"
+          aria-hidden
+        />
+        <div className="text-text-2 col-start-3 row-start-2 min-w-0 truncate text-[18px] leading-[1.2] font-medium">
+          {next.city || "—"}
+        </div>
+
+        {/* Row 3 — country / date meta */}
+        <div className="text-dim col-start-1 row-start-3 min-h-[14px] truncate font-mono text-[10px]">
+          {now.country}
+        </div>
+        <div className="text-dim col-start-3 row-start-3 min-h-[14px] truncate font-mono text-[10px]">
+          {nextMeta}
+        </div>
       </div>
     </div>
   );
@@ -113,16 +166,21 @@ function LocationWidget({ data }: { data: DashboardData }) {
 function AiPanel({ flush }: { flush?: boolean }) {
   return (
     <div
-      className={cn("border-hairline rounded-[18px] border p-[18px]", flush && "rounded-none border-0 border-b")}
+      className={cn(
+        "border-hairline rounded-[18px] border p-[18px]",
+        flush && "rounded-none border-0 border-b",
+      )}
       style={{ background: "linear-gradient(180deg, var(--accent-soft) 0%, transparent 72%)" }}
     >
-      <div className="flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase text-ink-spot">
+      <div className="text-ink-spot flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase">
         <AccentDot size={5} />
         AI Search · this week
       </div>
       <div className="py-5 text-center">
         <p className="text-text-2 text-[14px]">Appears once clients start searching</p>
-        <p className="text-faint mt-1 font-mono text-[10px] tracking-[0.08em] uppercase">Coming soon</p>
+        <p className="text-faint mt-1 font-mono text-[10px] tracking-[0.08em] uppercase">
+          Coming soon
+        </p>
       </div>
     </div>
   );
@@ -139,9 +197,9 @@ function MobileHomeTab({ data }: { data: DashboardData }) {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="flex items-center justify-between gap-4 px-[18px] pb-4 pt-5">
+      <div className="flex items-center justify-between gap-4 px-[18px] pt-5 pb-4">
         <div>
-          <div className="text-[28px] font-medium leading-none tracking-tight">
+          <div className="text-[28px] leading-none font-medium tracking-tight">
             Hola, <span className="text-ink-spot">{firstName}</span>
           </div>
           <div className="text-dim mt-[9px] font-mono text-[10px] tracking-[0.14em] uppercase">
@@ -154,48 +212,71 @@ function MobileHomeTab({ data }: { data: DashboardData }) {
       {/* Status card */}
       <div className="bg-surface border-hairline mx-[18px] mb-4 rounded-[16px] border p-[18px]">
         <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.12em] uppercase">
-          <span className="size-[7px] shrink-0 rounded-full" style={{ background: data.isActive ? "#3ddc84" : "var(--dim)", boxShadow: data.isActive ? "0 0 10px rgba(61,220,132,0.6)" : "none" }} />
+          <span
+            className="size-[7px] shrink-0 rounded-full"
+            style={{
+              background: data.isActive ? "#3ddc84" : "var(--dim)",
+              boxShadow: data.isActive ? "0 0 10px rgba(61,220,132,0.6)" : "none",
+            }}
+          />
           {data.isActive ? "Live & visible" : "Profile hidden"}
         </div>
         {data.currentLocation && (
-          <div className="text-text-2 mt-[9px] text-[13px]">{data.currentLocation.location_name}</div>
+          <div className="text-text-2 mt-[9px] text-[13px]">
+            {data.currentLocation.location_name}
+          </div>
         )}
-        {!data.isClaimed && (
-          <div className="mt-2 inline-block rounded-full border border-[rgba(251,191,36,0.2)] bg-[rgba(251,191,36,0.06)] px-2.5 py-1 font-mono text-[10px] tracking-[0.08em] uppercase text-demo">
+        {!data.isClaimed && data.hasInstagram && (
+          <div className="text-demo mt-2 inline-block rounded-full border border-[rgba(251,191,36,0.2)] bg-[rgba(251,191,36,0.06)] px-2.5 py-1 font-mono text-[10px] tracking-[0.08em] uppercase">
             Verification pending
           </div>
         )}
         <div className="mt-[14px] flex items-center gap-[10px]">
-          <div className="h-1 flex-1 overflow-hidden rounded-[2px] bg-surface-3">
-            <div className="h-full rounded-[2px] bg-ink-spot" style={{ width: `${data.profileStrength}%`, boxShadow: "0 0 8px var(--accent-glow)" }} />
+          <div className="bg-surface-3 h-1 flex-1 overflow-hidden rounded-[2px]">
+            <div
+              className="bg-ink-spot h-full rounded-[2px]"
+              style={{ width: `${data.profileStrength}%`, boxShadow: "0 0 8px var(--accent-glow)" }}
+            />
           </div>
-          <span className="text-dim font-mono text-[10px] tracking-[0.08em] uppercase shrink-0">Profile {data.profileStrength}%</span>
+          <span className="text-dim shrink-0 font-mono text-[10px] tracking-[0.08em] uppercase">
+            Profile {data.profileStrength}%
+          </span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-[10px] px-[18px] pb-[6px]">
         <StatCell label="Profile views" value="—" delta={0} data={flat} />
-        <StatCell label="Search hits"   value="—" delta={0} data={flat} />
-        <StatCell label="Shortlisted"   value="—" delta={0} data={flat} />
-        <StatCell label="Inquiries"     value="—" delta={0} data={flat} />
+        <StatCell label="Search hits" value="—" delta={0} data={flat} />
+        <StatCell label="Shortlisted" value="—" delta={0} data={flat} />
+        <StatCell label="Inquiries" value="—" delta={0} data={flat} />
       </div>
-      <p className="px-[18px] pb-1 text-faint font-mono text-[9px] tracking-widest uppercase">
+      <p className="text-faint px-[18px] pb-1 font-mono text-[9px] tracking-widest uppercase">
         Analytics activate as visitors engage
       </p>
 
-      <div className="mx-[18px] my-3"><AiPanel /></div>
+      <div className="mx-[18px] my-3">
+        <AiPanel />
+      </div>
 
-      <div className="flex items-baseline justify-between px-[18px] pb-3 pt-[22px]">
+      <div className="flex items-baseline justify-between px-[18px] pt-[22px] pb-3">
         <div className="text-[22px] font-medium tracking-tight">Where you are</div>
       </div>
-      <div className="mx-[18px]"><LocationWidget data={data} /></div>
+      <div className="mx-[18px]">
+        <LocationWidget data={data} />
+      </div>
 
-      <Link href="/dashboard/locations" className={cn(btnSecondaryMd, "mx-[18px] mt-[14px] w-[calc(100%-36px)]")}>
+      <Link
+        href="/dashboard/locations"
+        className={cn(btnSecondaryMd, "mx-[18px] mt-[14px] w-[calc(100%-36px)]")}
+      >
         <Calendar size={14} aria-hidden /> Manage travel dates
       </Link>
 
       <form action={signOut} className="mx-[18px] mt-6">
-        <button type="submit" className="text-faint hover:text-dim flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors">
+        <button
+          type="submit"
+          className="text-faint hover:text-dim flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors"
+        >
           <LogOut size={12} aria-hidden /> Sign out
         </button>
       </form>
@@ -207,37 +288,60 @@ function MobileHomeTab({ data }: { data: DashboardData }) {
 function MobileInquiriesTab() {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-baseline justify-between px-[18px] pb-3 pt-[22px]">
+      <div className="flex items-baseline justify-between px-[18px] pt-[22px] pb-3">
         <div className="text-[22px] font-medium tracking-tight">Inquiries</div>
         <div className="text-dim font-mono text-[10px] tracking-[0.12em] uppercase">0 New</div>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-3 pb-20">
         <Inbox size={36} className="text-surface-3" aria-hidden />
         <p className="text-text-2 text-[14px]">No inquiries yet</p>
-        <p className="text-faint font-mono text-[10px] tracking-widest uppercase">Client messaging coming soon</p>
+        <p className="text-faint font-mono text-[10px] tracking-widest uppercase">
+          Client messaging coming soon
+        </p>
       </div>
     </div>
   );
 }
 
-function MobilePortfolioTab({ items, handle }: { items: DashboardData["portfolioItems"]; handle: string }) {
+function MobilePortfolioTab({
+  items,
+  handle,
+}: {
+  items: DashboardData["portfolioItems"];
+  handle: string;
+}) {
   return (
     <div className="h-full overflow-y-auto">
-      <div className="flex items-baseline justify-between px-[18px] pb-3 pt-[22px]">
+      <div className="flex items-baseline justify-between px-[18px] pt-[22px] pb-3">
         <div className="text-[22px] font-medium tracking-tight">Portfolio</div>
-        <div className="text-dim font-mono text-[10px] tracking-[0.12em] uppercase">{items.length} Photos</div>
+        <div className="text-dim font-mono text-[10px] tracking-[0.12em] uppercase">
+          {items.length} Photos
+        </div>
       </div>
       <div className="grid grid-cols-4 gap-1.5 px-[18px]">
         {items.map((item) => (
           <div key={item.id} className="aspect-square overflow-hidden rounded-lg">
-            <Image src={item.image_url} alt="" width={120} height={120} className="h-full w-full object-cover" />
+            <Image
+              src={item.image_url}
+              alt=""
+              width={120}
+              height={120}
+              className="h-full w-full object-cover"
+            />
           </div>
         ))}
-        <Link href="/dashboard/portfolio" className="border-ds-border text-dim hover:text-(--text) aspect-square flex items-center justify-center rounded-lg border border-dashed transition-colors" aria-label="Add photos">
+        <Link
+          href="/dashboard/portfolio"
+          className="border-ds-border text-dim flex aspect-square items-center justify-center rounded-lg border border-dashed transition-colors hover:text-(--text)"
+          aria-label="Add photos"
+        >
           <Plus size={20} aria-hidden />
         </Link>
       </div>
-      <Link href="/dashboard/portfolio" className={cn(btnPrimaryMd, "mx-[18px] mt-[14px] w-[calc(100%-36px)]")}>
+      <Link
+        href="/dashboard/portfolio"
+        className={cn(btnPrimaryMd, "mx-[18px] mt-[14px] w-[calc(100%-36px)]")}
+      >
         <Camera size={14} aria-hidden /> Manage photos
       </Link>
       <div className="h-10" />
@@ -248,7 +352,7 @@ function MobilePortfolioTab({ items, handle }: { items: DashboardData["portfolio
 function MobilePreviewTab({ handle }: { handle: string }) {
   return (
     <div className="flex h-full flex-col">
-      <div className="bg-surface border-hairline flex shrink-0 items-center gap-2 border-b px-[18px] py-3 font-mono text-[10px] tracking-[0.12em] uppercase text-dim">
+      <div className="bg-surface border-hairline text-dim flex shrink-0 items-center gap-2 border-b px-[18px] py-3 font-mono text-[10px] tracking-[0.12em] uppercase">
         <AccentDot size={5} /> Preview · what clients see
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-5 px-[18px] pb-20">
@@ -261,7 +365,10 @@ function MobilePreviewTab({ handle }: { handle: string }) {
           <Link href={`/artist/${handle}`} className={btnSecondaryMd}>
             View public profile <ArrowRight size={12} aria-hidden />
           </Link>
-          <Link href="/dashboard/profile" className="text-faint hover:text-dim font-mono text-[10px] tracking-[0.12em] uppercase transition-colors">
+          <Link
+            href="/dashboard/profile"
+            className="text-faint hover:text-dim font-mono text-[10px] tracking-[0.12em] uppercase transition-colors"
+          >
             Edit profile →
           </Link>
         </div>
@@ -272,17 +379,31 @@ function MobilePreviewTab({ handle }: { handle: string }) {
 
 function MobileBottomNav({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
   const tabs: { id: Tab; Icon: React.ElementType; label: string }[] = [
-    { id: "home",      Icon: BarChart2,     label: "Home"      },
-    { id: "inquiries", Icon: MessageSquare, label: "Inbox"     },
-    { id: "portfolio", Icon: Grid2x2,       label: "Portfolio" },
-    { id: "preview",   Icon: User,          label: "Profile"   },
+    { id: "home", Icon: BarChart2, label: "Home" },
+    { id: "inquiries", Icon: MessageSquare, label: "Inbox" },
+    { id: "portfolio", Icon: Grid2x2, label: "Portfolio" },
+    { id: "preview", Icon: User, label: "Profile" },
   ];
   return (
-    <nav className="border-hairline z-10 grid shrink-0 grid-cols-4 border-t"
-      style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))" }}>
+    <nav
+      className="border-hairline z-10 grid shrink-0 grid-cols-4 border-t"
+      style={{
+        background: "rgba(0,0,0,0.85)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
+      }}
+    >
       {tabs.map(({ id, Icon, label }) => (
-        <button key={id} type="button" onClick={() => setTab(id)}
-          className={cn("flex flex-col items-center gap-1 pt-2.5 pb-1 font-mono text-[9px] tracking-[0.12em] uppercase transition-colors", tab === id ? "text-(--text)" : "text-faint")}>
+        <button
+          key={id}
+          type="button"
+          onClick={() => setTab(id)}
+          className={cn(
+            "flex flex-col items-center gap-1 pt-2.5 pb-1 font-mono text-[9px] tracking-[0.12em] uppercase transition-colors",
+            tab === id ? "text-(--text)" : "text-faint",
+          )}
+        >
           <Icon size={22} aria-hidden className={tab === id ? "text-ink-spot" : ""} />
           {label}
         </button>
@@ -295,29 +416,51 @@ function MobileBottomNav({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }
 // DESKTOP LAYOUT
 // ══════════════════════════════════════════════════════════════════════════════
 
-function DesktopTopBar({ tab, setTab, data }: { tab: Tab; setTab: (t: Tab) => void; data: DashboardData }) {
+function DesktopTopBar({
+  tab,
+  setTab,
+  data,
+}: {
+  tab: Tab;
+  setTab: (t: Tab) => void;
+  data: DashboardData;
+}) {
   const initials = data.displayName.slice(0, 2).toUpperCase();
   const tabs: { id: Tab; Icon: React.ElementType; label: string }[] = [
-    { id: "home",      Icon: BarChart2,     label: "Home"      },
+    { id: "home", Icon: BarChart2, label: "Home" },
     { id: "inquiries", Icon: MessageSquare, label: "Inquiries" },
-    { id: "portfolio", Icon: Grid2x2,       label: "Portfolio" },
-    { id: "preview",   Icon: User,          label: "Profile"   },
+    { id: "portfolio", Icon: Grid2x2, label: "Portfolio" },
+    { id: "preview", Icon: User, label: "Profile" },
   ];
   return (
-    <header className="border-hairline bg-[rgba(8,8,8,0.85)] sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b px-8"
-      style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
+    <header
+      className="border-hairline sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b bg-[rgba(8,8,8,0.85)] px-8"
+      style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+    >
       {/* Left: wordmark + tabs */}
       <div className="flex items-center gap-9">
         <div className="flex items-center gap-1 text-[20px] font-semibold tracking-[-0.02em]">
-          InkSpot
-          <span className="bg-ink-spot ml-0.5 inline-block size-2 -translate-y-2 rounded-full"
-            style={{ boxShadow: "0 0 12px var(--accent-glow)" }} />
+          <Link href="/" className="inline-flex items-center gap-1">
+            InkSpot
+            <span
+              className="bg-ink-spot ml-0.5 inline-block size-2 -translate-y-2 rounded-full"
+              style={{ boxShadow: "0 0 12px var(--accent-glow)" }}
+            />
+          </Link>
         </div>
         <nav className="flex gap-1">
           {tabs.map(({ id, Icon, label }) => (
-            <button key={id} type="button" onClick={() => setTab(id)}
-              className={cn("flex h-9 items-center gap-2 rounded-full px-3.5 text-[13px] transition-colors",
-                tab === id ? "bg-surface-2 text-(--text) [&_svg]:text-ink-spot" : "text-text-2 hover:text-(--text) hover:bg-surface")}>
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={cn(
+                "flex h-9 items-center gap-2 rounded-full px-3.5 text-[13px] transition-colors",
+                tab === id
+                  ? "bg-surface-2 [&_svg]:text-ink-spot text-(--text)"
+                  : "text-text-2 hover:bg-surface hover:text-(--text)",
+              )}
+            >
               <Icon size={16} aria-hidden />
               <span>{label}</span>
             </button>
@@ -326,12 +469,14 @@ function DesktopTopBar({ tab, setTab, data }: { tab: Tab; setTab: (t: Tab) => vo
       </div>
       {/* Right: exit + avatar */}
       <div className="flex items-center gap-3.5">
-        <Link href="/explore"
-          className="border-hairline flex items-center gap-2 rounded-full border px-[11px] py-[7px] font-mono text-[10px] tracking-[0.12em] uppercase text-text-2 transition-colors hover:bg-surface hover:text-(--text)">
+        <Link
+          href="/explore"
+          className="border-hairline text-text-2 hover:bg-surface flex items-center gap-2 rounded-full border px-[11px] py-[7px] font-mono text-[10px] tracking-[0.12em] uppercase transition-colors hover:text-(--text)"
+        >
           <AccentDot size={5} />
-          Artist · exit
+          Switch to user view
         </Link>
-        <div className="bg-surface border-hairline overflow-hidden rounded-full border size-[38px] shrink-0">
+        <div className="bg-surface border-hairline size-[38px] shrink-0 overflow-hidden rounded-full border">
           <DashboardAvatar src={data.profileImageUrl} initials={initials} size="sm" />
         </div>
       </div>
@@ -348,7 +493,7 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
       {/* Greeting row */}
       <div className="mb-6 flex items-end justify-between gap-5">
         <div>
-          <div className="text-[38px] font-medium leading-none tracking-tight">
+          <div className="text-[38px] leading-none font-medium tracking-tight">
             Hola, <span className="text-ink-spot">{firstName}</span>
           </div>
           <div className="text-dim mt-3 font-mono text-[11px] tracking-[0.14em] uppercase">
@@ -356,16 +501,23 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <div className="border-hairline flex items-center gap-2 rounded-full border px-[14px] py-[9px] font-mono text-[11px] tracking-widest uppercase text-text-2">
-            <span className="size-[7px] shrink-0 rounded-full"
-              style={{ background: data.isActive ? "#3ddc84" : "var(--dim)", boxShadow: data.isActive ? "0 0 10px rgba(61,220,132,0.6)" : "none" }} />
+          <div className="border-hairline text-text-2 flex items-center gap-2 rounded-full border px-[14px] py-[9px] font-mono text-[11px] tracking-widest uppercase">
+            <span
+              className="size-[7px] shrink-0 rounded-full"
+              style={{
+                background: data.isActive ? "#3ddc84" : "var(--dim)",
+                boxShadow: data.isActive ? "0 0 10px rgba(61,220,132,0.6)" : "none",
+              }}
+            />
             {data.isActive ? "Live & visible" : "Profile hidden"}
             {data.currentLocation && (
-              <span className="text-dim pl-1">{data.currentLocation.location_name.split(",")[0]}</span>
+              <span className="text-dim pl-1">
+                {data.currentLocation.location_name.split(",")[0]}
+              </span>
             )}
           </div>
-          {!data.isClaimed && (
-            <div className="rounded-full border border-[rgba(251,191,36,0.2)] bg-[rgba(251,191,36,0.06)] px-[14px] py-[9px] font-mono text-[11px] tracking-widest uppercase text-demo">
+          {!data.isClaimed && data.hasInstagram && (
+            <div className="text-demo rounded-full border border-[rgba(251,191,36,0.2)] bg-[rgba(251,191,36,0.06)] px-[14px] py-[9px] font-mono text-[11px] tracking-widest uppercase">
               Verification pending
             </div>
           )}
@@ -375,9 +527,9 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
       {/* 4-col stats */}
       <div className="mb-5 grid grid-cols-4 gap-[14px]">
         <StatCell large label="Profile views" value="—" delta={0} data={flat} />
-        <StatCell large label="Search hits"   value="—" delta={0} data={flat} />
-        <StatCell large label="Shortlisted"   value="—" delta={0} data={flat} />
-        <StatCell large label="Inquiries"     value="—" delta={0} data={flat} />
+        <StatCell large label="Search hits" value="—" delta={0} data={flat} />
+        <StatCell large label="Shortlisted" value="—" delta={0} data={flat} />
+        <StatCell large label="Inquiries" value="—" delta={0} data={flat} />
       </div>
 
       {/* 2-col grid: left (AI + Inquiries) | right (Location + Portfolio) */}
@@ -385,20 +537,24 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
         {/* Left column */}
         <div className="flex flex-col gap-5">
           {/* AI panel */}
-          <div className="bg-surface border-hairline rounded-[18px] border overflow-hidden">
+          <div className="bg-surface border-hairline overflow-hidden rounded-[18px] border">
             <AiPanel flush />
           </div>
 
           {/* Inquiries card */}
-          <div className="bg-surface border-hairline rounded-[18px] border overflow-hidden">
-            <div className="flex items-baseline justify-between border-b border-hairline px-6 py-5">
+          <div className="bg-surface border-hairline overflow-hidden rounded-[18px] border">
+            <div className="border-hairline flex items-baseline justify-between border-b px-6 py-5">
               <span className="text-[22px] font-medium tracking-tight">Inquiries</span>
-              <span className="text-dim font-mono text-[10px] tracking-widest uppercase">0 new</span>
+              <span className="text-dim font-mono text-[10px] tracking-widest uppercase">
+                0 new
+              </span>
             </div>
             <div className="flex flex-col items-center justify-center gap-2 py-10">
               <Inbox size={28} className="text-surface-3" aria-hidden />
               <p className="text-text-2 text-[13px]">No inquiries yet</p>
-              <p className="text-faint font-mono text-[9px] tracking-widest uppercase">Client messaging coming soon</p>
+              <p className="text-faint font-mono text-[9px] tracking-widest uppercase">
+                Client messaging coming soon
+              </p>
             </div>
           </div>
         </div>
@@ -407,7 +563,9 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
         <div className="flex flex-col gap-5">
           {/* Location + travel */}
           <div className="bg-surface border-hairline rounded-[18px] border p-[22px_24px]">
-            <div className="text-dim mb-[14px] font-mono text-[10px] tracking-[0.14em] uppercase">Where you are</div>
+            <div className="text-dim mb-[14px] pl-4 font-mono text-[10px] tracking-[0.14em] uppercase">
+              Where you are
+            </div>
             <LocationWidget data={data} />
             <Link href="/dashboard/locations" className={cn(btnSecondaryMd, "mt-[14px]")}>
               <Calendar size={14} aria-hidden /> Manage travel
@@ -416,9 +574,12 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
 
           {/* Portfolio snapshot */}
           <div className="bg-surface border-hairline rounded-[18px] border p-[22px_24px]">
-            <div className="flex items-baseline justify-between mb-[14px]">
+            <div className="mb-[14px] flex items-baseline justify-between">
               <span className="text-[22px] font-medium tracking-tight">Portfolio</span>
-              <Link href="/dashboard/portfolio" className="text-ink-spot font-mono text-[10px] tracking-widest uppercase">
+              <Link
+                href="/dashboard/portfolio"
+                className="text-ink-spot font-mono text-[10px] tracking-widest uppercase"
+              >
                 {data.portfolioItems.length} photos →
               </Link>
             </div>
@@ -426,13 +587,21 @@ function DesktopHomeTab({ data }: { data: DashboardData }) {
               <div className="grid grid-cols-3 gap-1.5">
                 {data.portfolioItems.slice(0, 6).map((item) => (
                   <div key={item.id} className="aspect-square overflow-hidden rounded-lg">
-                    <Image src={item.image_url} alt="" width={120} height={120} className="h-full w-full object-cover" />
+                    <Image
+                      src={item.image_url}
+                      alt=""
+                      width={120}
+                      height={120}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="border-ds-border flex aspect-[3/1] items-center justify-center rounded-xl border border-dashed">
-                <p className="text-faint font-mono text-[10px] tracking-widest uppercase">No photos yet</p>
+                <p className="text-faint font-mono text-[10px] tracking-widest uppercase">
+                  No photos yet
+                </p>
               </div>
             )}
             <Link href="/dashboard/portfolio" className={cn(btnPrimaryMd, "mt-[14px]")}>
@@ -450,14 +619,18 @@ function DesktopInquiriesTab() {
   return (
     <div className="mx-auto w-full max-w-[1140px] px-8 py-6">
       <div className="mb-5 flex items-baseline gap-3.5">
-        <span className="text-[34px] font-medium leading-none tracking-tight">Inquiries</span>
-        <span className="text-ink-spot font-mono text-[11px] tracking-[0.12em] uppercase">0 new</span>
+        <span className="text-[34px] leading-none font-medium tracking-tight">Inquiries</span>
+        <span className="text-ink-spot font-mono text-[11px] tracking-[0.12em] uppercase">
+          0 new
+        </span>
       </div>
       <div className="bg-surface border-hairline flex min-h-[500px] items-center justify-center rounded-[18px] border">
         <div className="flex flex-col items-center gap-3 text-center">
           <Inbox size={36} className="text-surface-3" aria-hidden />
           <p className="text-text-2 text-[15px]">No inquiries yet</p>
-          <p className="text-faint font-mono text-[10px] tracking-widest uppercase">Client messaging coming soon</p>
+          <p className="text-faint font-mono text-[10px] tracking-widest uppercase">
+            Client messaging coming soon
+          </p>
         </div>
       </div>
     </div>
@@ -468,8 +641,10 @@ function DesktopPortfolioTab({ items }: { items: DashboardData["portfolioItems"]
   return (
     <div className="mx-auto w-full max-w-[1140px] px-8 py-6">
       <div className="mb-5 flex items-baseline gap-3.5">
-        <span className="text-[34px] font-medium leading-none tracking-tight">Portfolio</span>
-        <span className="text-dim font-mono text-[11px] tracking-[0.12em] uppercase">{items.length} photos</span>
+        <span className="text-[34px] leading-none font-medium tracking-tight">Portfolio</span>
+        <span className="text-dim font-mono text-[11px] tracking-[0.12em] uppercase">
+          {items.length} photos
+        </span>
       </div>
       <div className="grid grid-cols-[1fr_260px] items-start gap-5">
         {/* Grid */}
@@ -478,16 +653,28 @@ function DesktopPortfolioTab({ items }: { items: DashboardData["portfolioItems"]
             <div className="grid grid-cols-4 gap-2">
               {items.map((item) => (
                 <div key={item.id} className="aspect-square overflow-hidden rounded-lg">
-                  <Image src={item.image_url} alt="" width={200} height={200} className="h-full w-full object-cover" />
+                  <Image
+                    src={item.image_url}
+                    alt=""
+                    width={200}
+                    height={200}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
               ))}
-              <Link href="/dashboard/portfolio" className="border-ds-border text-dim hover:text-(--text) aspect-square flex items-center justify-center rounded-lg border border-dashed transition-colors" aria-label="Add">
+              <Link
+                href="/dashboard/portfolio"
+                className="border-ds-border text-dim flex aspect-square items-center justify-center rounded-lg border border-dashed transition-colors hover:text-(--text)"
+                aria-label="Add"
+              >
                 <Plus size={24} aria-hidden />
               </Link>
             </div>
           ) : (
             <div className="flex aspect-[4/3] items-center justify-center">
-              <p className="text-faint font-mono text-[10px] tracking-widest uppercase">No photos yet</p>
+              <p className="text-faint font-mono text-[10px] tracking-widest uppercase">
+                No photos yet
+              </p>
             </div>
           )}
         </div>
@@ -498,8 +685,13 @@ function DesktopPortfolioTab({ items }: { items: DashboardData["portfolioItems"]
             <Camera size={14} aria-hidden /> Add photos
           </Link>
           <div className="bg-surface border-hairline rounded-[18px] border p-5">
-            <div className="text-dim mb-4 font-mono text-[10px] tracking-[0.14em] uppercase">Profile strength</div>
-            <p className="text-faint text-[13px]">Style analytics will appear here once you&rsquo;ve uploaded photos and they&rsquo;re classified by AI.</p>
+            <div className="text-dim mb-4 font-mono text-[10px] tracking-[0.14em] uppercase">
+              Profile strength
+            </div>
+            <p className="text-faint text-[13px]">
+              Style analytics will appear here once you&rsquo;ve uploaded photos and they&rsquo;re
+              classified by AI.
+            </p>
           </div>
         </div>
       </div>
@@ -512,16 +704,18 @@ function DesktopPreviewTab({ handle }: { handle: string }) {
   return (
     <div className="mx-auto w-full max-w-[760px] px-8 py-6">
       <div className="bg-surface border-hairline overflow-hidden rounded-[18px] border">
-        <div className="border-hairline flex items-center gap-2 border-b px-6 py-3 font-mono text-[10px] tracking-[0.12em] uppercase text-dim">
+        <div className="border-hairline text-dim flex items-center gap-2 border-b px-6 py-3 font-mono text-[10px] tracking-[0.12em] uppercase">
           <AccentDot size={5} /> Preview · what clients see
         </div>
         <div className="flex flex-col items-center gap-5 py-14">
           <User size={44} className="text-surface-3" aria-hidden />
           <div className="space-y-1.5 text-center">
             <p className="text-[16px] font-medium">Your public profile</p>
-            <p className="text-text-2 text-[13px]">See exactly what clients see when they find you</p>
+            <p className="text-text-2 text-[13px]">
+              See exactly what clients see when they find you
+            </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full max-w-[280px] flex-col items-stretch gap-3">
             <Link href={`/artist/${handle}`} className={btnSecondaryMd}>
               View public profile <ArrowRight size={12} aria-hidden />
             </Link>
@@ -530,7 +724,10 @@ function DesktopPreviewTab({ handle }: { handle: string }) {
             </Link>
           </div>
           <form action={signOut}>
-            <button type="submit" className="text-faint hover:text-dim flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors">
+            <button
+              type="submit"
+              className="text-faint hover:text-dim flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors"
+            >
               <LogOut size={12} aria-hidden /> Sign out
             </button>
           </form>
@@ -553,14 +750,21 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       {/* ── Mobile layout (hidden on lg+) ─────────────────────────────────── */}
       <div className="fixed inset-0 flex flex-col bg-(--bg) text-(--text) lg:hidden">
         {/* Mobile top bar */}
-        <div className="relative z-10 flex shrink-0 items-center justify-between px-[18px] pb-2.5 pt-[14px]">
-          <div className="flex items-center gap-0.5 text-[22px] font-medium tracking-tight">
+        <div className="relative z-10 flex shrink-0 items-center justify-between px-[18px] pt-[14px] pb-2.5">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-0.5 text-[22px] font-medium tracking-tight"
+          >
             InkSpot
-            <span className="ml-[3px] inline-block size-[6px] -translate-y-2 rounded-full bg-ink-spot"
-              style={{ boxShadow: "0 0 12px var(--accent-glow)" }} />
-          </div>
-          <Link href="/explore"
-            className="border-hairline flex items-center gap-2 rounded-full border px-[11px] py-1.5 transition-colors hover:bg-surface">
+            <span
+              className="bg-ink-spot ml-[3px] inline-block size-[6px] -translate-y-2 rounded-full"
+              style={{ boxShadow: "0 0 12px var(--accent-glow)" }}
+            />
+          </Link>
+          <Link
+            href="/explore"
+            className="border-hairline hover:bg-surface flex items-center gap-2 rounded-full border px-[11px] py-1.5 transition-colors"
+          >
             <AccentDot size={5} />
             <span className="text-text-2 font-mono text-[10px] tracking-[0.12em] uppercase">
               ← Explore
@@ -569,10 +773,12 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         </div>
 
         <div className="min-h-0 flex-1 overflow-hidden">
-          {tab === "home"      && <MobileHomeTab data={data} />}
+          {tab === "home" && <MobileHomeTab data={data} />}
           {tab === "inquiries" && <MobileInquiriesTab />}
-          {tab === "portfolio" && <MobilePortfolioTab items={data.portfolioItems} handle={data.handle} />}
-          {tab === "preview"   && <MobilePreviewTab handle={data.handle} />}
+          {tab === "portfolio" && (
+            <MobilePortfolioTab items={data.portfolioItems} handle={data.handle} />
+          )}
+          {tab === "preview" && <MobilePreviewTab handle={data.handle} />}
         </div>
 
         <MobileBottomNav tab={tab} setTab={setTab} />
@@ -581,11 +787,11 @@ export function DashboardClient({ data }: { data: DashboardData }) {
       {/* ── Desktop layout (hidden below lg) ──────────────────────────────── */}
       <div className="hidden h-screen flex-col bg-(--bg) text-(--text) lg:flex">
         <DesktopTopBar tab={tab} setTab={setTab} data={data} />
-        <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:var(--surface-3)_transparent]">
-          {tab === "home"      && <DesktopHomeTab data={data} />}
+        <div className="flex-1 overflow-y-auto [scrollbar-color:var(--surface-3)_transparent] [scrollbar-width:thin]">
+          {tab === "home" && <DesktopHomeTab data={data} />}
           {tab === "inquiries" && <DesktopInquiriesTab />}
           {tab === "portfolio" && <DesktopPortfolioTab items={data.portfolioItems} />}
-          {tab === "preview"   && <DesktopPreviewTab handle={data.handle} />}
+          {tab === "preview" && <DesktopPreviewTab handle={data.handle} />}
         </div>
       </div>
     </>

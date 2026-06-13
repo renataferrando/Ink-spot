@@ -2,6 +2,8 @@
 // Returns up to 5 place candidates with formatted name + coordinates.
 // Cached at the edge for 60 s.
 
+import { cityCountryFromComponents } from "@/lib/location";
+
 export const revalidate = 60;
 
 interface Candidate {
@@ -44,7 +46,7 @@ export async function GET(request: Request) {
 
     const candidates: Candidate[] = (data.results ?? []).map((r, i) => ({
       id: `${i}-${r.geometry.lat}-${r.geometry.lng}`,
-      formatted: r.formatted,
+      formatted: cityCountryFromComponents(r.components, r.formatted),
       lat: r.geometry.lat,
       lng: r.geometry.lng,
       country: r.components.country ?? "",

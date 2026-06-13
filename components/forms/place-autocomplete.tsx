@@ -18,6 +18,10 @@ interface Country {
   lng: number;
 }
 
+const WORLD_CENTER = { lat: 20, lng: 0 };
+const WORLD_ZOOM = 2;
+const COUNTRY_ZOOM = 5;
+
 const COUNTRIES: Country[] = [
   { code: "af", name: "Afghanistan", lat: 33.9, lng: 67.7 },
   { code: "al", name: "Albania", lat: 41.1, lng: 20.2 },
@@ -120,6 +124,8 @@ export function PlaceAutocomplete({
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Candidate | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [mapCenter, setMapCenter] = useState(WORLD_CENTER);
+  const [mapZoom, setMapZoom] = useState(WORLD_ZOOM);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -133,7 +139,7 @@ export function PlaceAutocomplete({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const fetchCandidates = useCallback(async (q: string, countryCode: string) => {
+  const fetchCandidates = useCallback(async (q: string, countryCode?: string) => {
     if (q.length < 2) {
       setCandidates([]);
       setOpen(false);
@@ -142,9 +148,9 @@ export function PlaceAutocomplete({
     }
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/geocoding/autocomplete?q=${encodeURIComponent(q)}&countrycode=${countryCode}`,
-      );
+      const params = new URLSearchParams({ q });
+      if (countryCode) params.set("countrycode", countryCode);
+      const res = await fetch(`/api/geocoding/autocomplete?${params.toString()}`);
       const data = (await res.json()) as { candidates: Candidate[] };
       setCandidates(data.candidates ?? []);
       setOpen(data.candidates.length > 0);
@@ -153,6 +159,28 @@ export function PlaceAutocomplete({
       setLoading(false);
     }
   }, []);
+
+  function openMap() {
+    if (country) {
+      setMapCenter({ lat: country.lat, lng: country.lng });
+      setMapZoom(COUNTRY_ZOOM);
+    } else {
+      setMapCenter(WORLD_CENTER);
+      setMapZoom(WORLD_ZOOM);
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setMapCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            setMapZoom(COUNTRY_ZOOM);
+          },
+          () => {},
+          { timeout: 5000, maximumAge: 60_000 },
+        );
+      }
+    }
+    setShowMap(true);
+  }
 
   function handleCountryChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const code = e.target.value;
@@ -171,9 +199,7 @@ export function PlaceAutocomplete({
     setSelected(null);
     setSearched(false);
     clearTimeout(timerRef.current);
-    if (country) {
-      timerRef.current = setTimeout(() => fetchCandidates(val, country.code), 300);
-    }
+    timerRef.current = setTimeout(() => fetchCandidates(val, country?.code), 300);
   }
 
   function handleSelect(c: Candidate) {
@@ -239,8 +265,8 @@ export function PlaceAutocomplete({
         />
       </div>
 
-      {/* Step 2 — city search */}
-      {country && !showMap && (
+      {/* City search or map picker */}
+      {!showMap && (
         <div className="relative">
           <div className="grid *:col-start-1 *:row-start-1">
             <input
@@ -293,7 +319,7 @@ export function PlaceAutocomplete({
             {noResults && <p className="text-dim flex-1 text-xs">No results found.</p>}
             <button
               type="button"
-              onClick={() => setShowMap(true)}
+              onClick={openMap}
               className="text-ink-spot inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] uppercase transition-opacity hover:opacity-80"
             >
               <Map size={11} aria-hidden />
@@ -303,10 +329,10 @@ export function PlaceAutocomplete({
         </div>
       )}
 
-      {/* Step 2 (alt) — map picker */}
-      {country && showMap && (
+      {showMap && (
         <LocationPicker
-          center={{ lat: country.lat, lng: country.lng }}
+          center={mapCenter}
+          zoom={mapZoom}
           onConfirm={handleMapConfirm}
           onCancel={() => setShowMap(false)}
         />

@@ -31,22 +31,28 @@ export async function GET(request: Request) {
     return Response.json({ ok: true, processed: 0, failed: 0 });
   }
 
+  const artistIds = artists.map((a) => a.id);
+  const { data: allItems } = await admin
+    .from("portfolio_items")
+    .select("artist_id, image_url")
+    .in("artist_id", artistIds)
+    .order("is_featured", { ascending: false })
+    .order("sort_order", { ascending: true });
+
+  const itemsByArtist: Record<string, { image_url: string }[]> = {};
+  for (const item of allItems ?? []) {
+    const id = (item as { artist_id: string; image_url: string }).artist_id;
+    (itemsByArtist[id] ??= []).push({ image_url: (item as { image_url: string }).image_url });
+  }
+
   let processed = 0;
   let failed = 0;
 
   for (const artist of artists) {
     await new Promise((r) => setTimeout(r, 1200)); // ~50 RPM stay well under Voyage limits
     try {
-      // Fetch up to 10 featured portfolio images for multimodal embedding
-      const { data: items } = await admin
-        .from("portfolio_items")
-        .select("image_url")
-        .eq("artist_id", artist.id)
-        .order("is_featured", { ascending: false })
-        .order("sort_order", { ascending: true })
-        .limit(10);
-
-      const imageUrls = ((items ?? []) as { image_url: string }[])
+      const imageUrls = (itemsByArtist[artist.id] ?? [])
+        .slice(0, 10)
         .map((i) => i.image_url)
         .filter(Boolean);
 

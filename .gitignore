@@ -47,3 +47,6 @@ next-env.d.ts
 app/dev/
 
 certificates
+
+# stray agent worktrees
+.claude/worktrees/

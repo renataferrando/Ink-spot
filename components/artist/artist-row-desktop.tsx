@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { STYLE_LABELS, type ArtistLocation, type ArtistPublic } from "@/types/artist";
+import { formatCityCountry } from "@/lib/location";
 import { chipClass, chipActiveClass } from "@/lib/ui/classes";
 
 interface Props {
@@ -38,10 +39,10 @@ function pickNextLocation(upcoming?: ArtistLocation[]) {
 /** Desktop explore list row. */
 export function ArtistRowDesktop({ artist, priority = false }: Props) {
   const thumbs = artist.portfolio_items.slice(0, 3);
-  const currentIn = artist.current_location?.location_name ?? "—";
+  const currentIn = formatCityCountry(artist.current_location?.location_name) || "—";
   const next = pickNextLocation(artist.upcoming_locations);
   const nextLabel = next
-    ? `${next.location_name.split(",")[0]}${formatNextDate(next.starts_at) ? ` · ${formatNextDate(next.starts_at)}` : ""}`
+    ? `${formatCityCountry(next.location_name)}${formatNextDate(next.starts_at) ? ` · ${formatNextDate(next.starts_at)}` : ""}`
     : "—";
 
   const href = `/artist/${artist.handle}`;
@@ -83,7 +84,7 @@ export function ArtistRowDesktop({ artist, priority = false }: Props) {
           <div className="text-text-2 mt-2 flex flex-wrap items-center gap-1.5 text-[12px]">
             <span className="size-1.5 shrink-0 rounded-full bg-[#22c55e]" />
             <span className="text-faint font-mono text-[10px] tracking-widest uppercase">Now</span>
-            {currentIn.split(",")[0]}
+            {currentIn}
             <span className="text-faint mx-0.5">·</span>
             <span className="text-faint font-mono text-[10px] tracking-widest uppercase">
               Next:

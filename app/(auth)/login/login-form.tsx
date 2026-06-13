@@ -78,13 +78,13 @@ export function LoginForm({ intent = "returning" }: { intent?: Intent }) {
     <div className="flex min-h-svh flex-col items-center justify-center bg-(--bg)">
       <div className={cn(pageGutterClass, "w-full max-w-[440px] mx-auto")}>
         <div className="mb-9 text-center">
-          <span className="relative inline-block font-sans text-[22px] font-medium tracking-[-0.01em] text-(--text)">
+          <Link href="/" className="relative inline-block font-sans text-[22px] font-medium tracking-[-0.01em] text-(--text)">
             InkSpot
             <span
               aria-hidden
               className="bg-ink-spot ml-1 inline-block size-1.5 -translate-y-2 rounded-full shadow-[0_0_12px_var(--accent-glow)]"
             />
-          </span>
+          </Link>
         </div>
 
         <div className="mb-7 text-center">

@@ -44,7 +44,7 @@ export function LocationForm() {
           disabled={pending}
         />
         <p className={fieldHintClass}>
-          Select a suggestion from the dropdown so we can place you on the map.
+          Search for your city or pick a spot on the map so we can place you correctly.
         </p>
       </div>
 

@@ -99,7 +99,7 @@ export function DesktopNav({
       >
         <div className="flex min-w-0 items-center gap-5">
           <Link
-            href="/explore"
+            href="/"
             className="inline-flex shrink-0 items-baseline font-sans text-[20px] font-medium tracking-[-0.02em] text-(--text)"
           >
             InkSpot
@@ -112,23 +112,25 @@ export function DesktopNav({
             aria-label="Primary"
             className="border-hairline bg-surface-2 flex items-center gap-1 rounded-full border p-1"
           >
-            {NAV.filter(({ href }) => href !== "/saved" || isLoggedIn).map(({ href, label, icon }) => {
-              const active = pathname === href || pathname.startsWith(`${href}/`);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "text-dim inline-flex items-center gap-2 rounded-full border border-transparent px-3.5 py-2 text-[13px] font-medium transition-colors hover:text-(--text) [&_svg]:shrink-0 [&_svg]:opacity-85",
-                    active && "bg-surface border-hairline text-(--text)",
-                  )}
-                >
-                  {icon}
-                  <span>{label}</span>
-                </Link>
-              );
-            })}
+            {NAV.filter(({ href }) => href !== "/saved" || isLoggedIn).map(
+              ({ href, label, icon }) => {
+                const active = pathname === href || pathname.startsWith(`${href}/`);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "text-dim inline-flex items-center gap-2 rounded-full border border-transparent px-3.5 py-2 text-[13px] font-medium transition-colors hover:text-(--text) [&_svg]:shrink-0 [&_svg]:opacity-85",
+                      active && "bg-surface border-hairline text-(--text)",
+                    )}
+                  >
+                    {icon}
+                    <span>{label}</span>
+                  </Link>
+                );
+              },
+            )}
           </nav>
         </div>
         <div className="flex min-w-0 flex-1 items-center justify-end gap-3.5">
@@ -146,7 +148,7 @@ export function DesktopNav({
                 aria-hidden
                 className="bg-ink-spot inline-block size-[5px] rounded-full shadow-[0_0_8px_var(--accent-glow)]"
               />
-              Artist dashboard
+              Switch to artist dashboard
             </Link>
           )}
         </div>

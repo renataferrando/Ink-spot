@@ -128,7 +128,7 @@ export function AddLocationForm({ existingTravelLocs }: AddLocationFormProps) {
             <div>
               <div className={fieldLabelRowClass}>
                 <label htmlFor="loc-starts" className={labelClass}>From</label>
-                <span className={fieldOptionalMarkClass}>optional</span>
+                <span className="text-[10px] text-red-400">*</span>
               </div>
               <input
                 id="loc-starts"
@@ -136,6 +136,7 @@ export function AddLocationForm({ existingTravelLocs }: AddLocationFormProps) {
                 type="date"
                 value={startsAt}
                 min={today}
+                required
                 onChange={(e) => {
                   const val = e.target.value;
                   setStartsAt(val);
@@ -150,7 +151,7 @@ export function AddLocationForm({ existingTravelLocs }: AddLocationFormProps) {
             <div>
               <div className={fieldLabelRowClass}>
                 <label htmlFor="loc-ends" className={labelClass}>To</label>
-                <span className={fieldOptionalMarkClass}>optional</span>
+                <span className="text-[10px] text-red-400">*</span>
               </div>
               <input
                 id="loc-ends"
@@ -158,6 +159,7 @@ export function AddLocationForm({ existingTravelLocs }: AddLocationFormProps) {
                 type="date"
                 value={endsAt}
                 min={startsAt || today}
+                required
                 onChange={(e) => {
                   setEndsAt(e.target.value);
                   setLastSaved(false);

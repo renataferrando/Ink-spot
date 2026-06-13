@@ -17,6 +17,7 @@ import {
 import type { ArtistPublic } from "@/types/artist";
 import { STYLE_LABELS } from "@/types/artist";
 import { cn } from "@/lib/utils";
+import { formatCityCountry } from "@/lib/location";
 import { btnPrimaryLg, btnSecondaryLg, pageColumnClass } from "@/lib/ui/classes";
 import { ArtistQAPanel } from "@/components/ai/artist-qa-panel";
 import { toggleSave } from "@/actions/saved/toggle-save";
@@ -25,6 +26,7 @@ interface ArtistProfileProps {
   artist: ArtistPublic;
   aiSummary?: string | null;
   isSaved?: boolean;
+  isOwner?: boolean;
 }
 
 /**
@@ -38,7 +40,7 @@ interface ArtistProfileProps {
  * Stages 4.1 + 5.5.2 will populate the Style brief; Stage 5.5.3 will
  * activate the Q&A panel input + suggestion chips.
  */
-export function ArtistProfile({ artist, aiSummary, isSaved = false }: ArtistProfileProps) {
+export function ArtistProfile({ artist, aiSummary, isSaved = false, isOwner = false }: ArtistProfileProps) {
   const router = useRouter();
   const [saved, setSaved] = useState(isSaved);
   const [savedToast, setSavedToast] = useState<"saved" | "removed" | "auth" | null>(null);
@@ -68,7 +70,7 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false }: ArtistProf
   const inquireDisabledReason =
     "No public contact for this artist yet — try the Save action and check back later.";
 
-  const upcoming = artist.upcoming_locations?.[0] ?? null;
+  const upcoming = artist.next_location ?? artist.upcoming_locations?.[0] ?? null;
 
   async function handleSave() {
     const prev = saved;
@@ -177,7 +179,7 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false }: ArtistProf
                 </div>
               </div>
               <div className="mt-0.5 truncate text-[18px] leading-[1.2] text-(--text)">
-                {artist.current_location?.location_name?.split(",")[0] ?? "—"}
+                {formatCityCountry(artist.current_location?.location_name) || "—"}
               </div>
               <div className="text-dim mt-0.5 font-mono text-[10px]">
                 {artist.current_location?.studio_name ?? ""}
@@ -191,7 +193,7 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false }: ArtistProf
                 Next
               </div>
               <div className="text-text-2 mt-0.5 truncate text-[18px] leading-[1.2]">
-                {upcoming?.location_name?.split(",")[0] ?? "Open"}
+                {upcoming?.location_name ? formatCityCountry(upcoming.location_name) : "Open"}
               </div>
               <div className="text-dim mt-0.5 font-mono text-[10px]">
                 {upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : ""}
@@ -238,19 +240,21 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false }: ArtistProf
               <MapPin size={18} aria-hidden />
             </Link>
           )}
-          <button
-            type="button"
-            aria-label={saved ? "Unsave artist" : "Save artist"}
-            onClick={handleSave}
-            className={cn(
-              "flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors",
-              saved
-                ? "border-ink-spot bg-accent-soft text-ink-spot"
-                : "bg-surface-2 border-ds-border hover:bg-surface-3 text-(--text)",
-            )}
-          >
-            <Heart size={18} aria-hidden fill={saved ? "currentColor" : "none"} />
-          </button>
+          {!isOwner && (
+            <button
+              type="button"
+              aria-label={saved ? "Unsave artist" : "Save artist"}
+              onClick={handleSave}
+              className={cn(
+                "flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors",
+                saved
+                  ? "border-ink-spot bg-accent-soft text-ink-spot"
+                  : "bg-surface-2 border-ds-border hover:bg-surface-3 text-(--text)",
+              )}
+            >
+              <Heart size={18} aria-hidden fill={saved ? "currentColor" : "none"} />
+            </button>
+          )}
         </div>
 
         {/* ── Bio ───────────────────────────────────────────── */}
@@ -339,7 +343,7 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false }: ArtistProf
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] text-(--text)">
-                      {loc.location_name?.split(",")[0]}
+                      {formatCityCountry(loc.location_name)}
                     </p>
                     {loc.studio_name && (
                       <p className="text-dim text-[12px]">{loc.studio_name}</p>

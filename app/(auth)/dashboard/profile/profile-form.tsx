@@ -18,10 +18,11 @@ import {
 } from "@/actions/artist/disconnect-instagram";
 import { ALL_STYLES, STYLE_LABELS, type ArtistStyle } from "@/types/artist";
 import { cn } from "@/lib/utils";
+import { InstagramVerificationPanel } from "@/components/artist/instagram-verification-panel";
 import { InstagramConnectButton } from "@/components/onboarding/instagram-connect-button";
 import {
   btnPrimaryClass,
-  btnSecondaryClass,
+  btnPrimaryMd,
   btnSecondaryMd,
   chipClass,
   chipActiveClass,
@@ -33,6 +34,7 @@ const MAX_STYLES = 3;
 
 interface ProfileFormProps {
   oauthEnabled: boolean;
+  verificationCode?: string | null;
   artist: {
     handle: string;
     display_name: string;
@@ -56,7 +58,7 @@ interface ProfileFormProps {
 const inputClass =
   "w-full rounded-(--r-md) bg-surface-2 border border-hairline px-4 py-3.5 text-[15px] text-(--text) outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-faint focus:border-ink-spot focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-55";
 
-export function ProfileForm({ artist, oauthEnabled }: ProfileFormProps) {
+export function ProfileForm({ artist, oauthEnabled, verificationCode }: ProfileFormProps) {
   return (
     <div className="space-y-9">
       <AppearanceSection
@@ -72,6 +74,7 @@ export function ProfileForm({ artist, oauthEnabled }: ProfileFormProps) {
         oauthEnabled={oauthEnabled}
         isClaimed={artist.is_claimed}
         instagramHandle={artist.instagram_handle}
+        verificationCode={verificationCode}
         verificationMethod={artist.verification_method}
         accountType={artist.instagram_account_type}
         tokenExpiresAt={artist.instagram_token_expires_at}
@@ -88,6 +91,7 @@ function VerificationSection({
   oauthEnabled,
   isClaimed,
   instagramHandle,
+  verificationCode,
   verificationMethod,
   accountType,
   tokenExpiresAt,
@@ -95,16 +99,20 @@ function VerificationSection({
   oauthEnabled: boolean;
   isClaimed: boolean;
   instagramHandle: string;
+  verificationCode?: string | null;
   verificationMethod: "bio_code" | "instagram_oauth" | null;
   accountType: "BUSINESS" | "CREATOR" | "PERSONAL" | null;
   tokenExpiresAt: string | null;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const [state, action, pending] = useActionState<DisconnectInstagramState, FormData>(
     disconnectInstagram,
     {},
   );
 
+  const hasHandle = Boolean(instagramHandle?.trim());
   const oauthConnected = verificationMethod === "instagram_oauth" && !!tokenExpiresAt;
+  const showPanel = (hasHandle && !isClaimed) || expanded;
   const expiresLabel = tokenExpiresAt
     ? new Date(tokenExpiresAt).toLocaleDateString(undefined, {
         month: "short",
@@ -112,6 +120,73 @@ function VerificationSection({
         year: "numeric",
       })
     : null;
+
+  if (oauthConnected || (isClaimed && !oauthConnected)) {
+    return (
+      <section className="space-y-4">
+        <SectionEyebrow>Verification</SectionEyebrow>
+
+        <div className="bg-surface border-hairline space-y-3 rounded-(--r-md) border p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-[15px] font-medium">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  width={16}
+                  height={16}
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                </svg>
+                {oauthConnected ? (
+                  <span>
+                    Connected as <span className="font-mono">@{instagramHandle}</span>
+                  </span>
+                ) : (
+                  <span>Verified by bio code</span>
+                )}
+              </div>
+              <p className="text-dim mt-1 text-[13px] leading-normal">
+                {oauthConnected
+                  ? `Instagram ${accountType?.toLowerCase() ?? "business"} account. Token refreshes automatically${expiresLabel ? ` (next renewal before ${expiresLabel})` : ""}.`
+                  : "You can upgrade to a stronger Instagram Business connection to skip future re-checks."}
+              </p>
+            </div>
+            <span className="text-ink-spot font-mono text-[10px] tracking-[0.14em] uppercase">
+              {oauthConnected ? "OAuth" : "Bio code"}
+            </span>
+          </div>
+
+          {state.error && <FieldError message={state.error} />}
+
+          <div className="flex flex-wrap items-center gap-2">
+            {oauthConnected ? (
+              <form action={action}>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="text-faint inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors hover:text-(--text) disabled:opacity-55"
+                >
+                  {pending ? "Disconnecting…" : "Disconnect Instagram"}
+                </button>
+              </form>
+            ) : oauthEnabled && hasHandle ? (
+              <InstagramConnectButton
+                next="/dashboard/profile"
+                label="Upgrade to Instagram Business"
+                variant="secondary"
+              />
+            ) : null}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-4">
@@ -134,62 +209,51 @@ function VerificationSection({
                 <circle cx="12" cy="12" r="4" />
                 <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
               </svg>
-              {oauthConnected ? (
+              {hasHandle ? (
                 <span>
-                  Connected as <span className="font-mono">@{instagramHandle}</span>
+                  Verify <span className="font-mono">@{instagramHandle}</span>
                 </span>
-              ) : isClaimed ? (
-                <span>Verified by bio code</span>
               ) : (
-                <span>Not verified</span>
+                <span>No Instagram linked</span>
               )}
             </div>
             <p className="text-dim mt-1 text-[13px] leading-normal">
-              {oauthConnected
-                ? `Instagram ${accountType?.toLowerCase() ?? "business"} account. Token refreshes automatically${expiresLabel ? ` (next renewal before ${expiresLabel})` : ""}.`
-                : isClaimed
-                  ? "You can upgrade to a stronger Instagram Business connection to skip future re-checks."
-                  : "Verify ownership of your Instagram handle to claim this profile."}
+              {hasHandle
+                ? "Verify ownership of your Instagram handle to claim this profile."
+                : "Optional. Link Instagram to unlock Q&A and import your portfolio."}
             </p>
           </div>
           <span
             className={cn(
               "font-mono text-[10px] tracking-[0.14em] uppercase",
-              oauthConnected || isClaimed ? "text-ink-spot" : "text-demo",
+              hasHandle ? "text-demo" : "text-dim",
             )}
           >
-            {oauthConnected ? "OAuth" : isClaimed ? "Bio code" : "Pending"}
+            {hasHandle ? "Pending" : "Optional"}
           </span>
         </div>
 
-        {state.error && <FieldError message={state.error} />}
+        {!showPanel && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className={cn(btnPrimaryMd, "lg:w-auto lg:px-12")}
+          >
+            Add Instagram
+          </button>
+        )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          {oauthConnected ? (
-            <form action={action}>
-              <button
-                type="submit"
-                disabled={pending}
-                className="text-faint inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase transition-colors hover:text-(--text) disabled:opacity-55"
-              >
-                {pending ? "Disconnecting…" : "Disconnect Instagram"}
-              </button>
-            </form>
-          ) : oauthEnabled && instagramHandle ? (
-            <InstagramConnectButton
-              next="/dashboard/profile"
-              label={isClaimed ? "Upgrade to Instagram Business" : "Connect Instagram Business"}
-              variant="secondary"
-            />
-          ) : !isClaimed ? (
-            <a
-              href="/onboarding/verify"
-              className={cn(btnSecondaryClass, "inline-flex items-center justify-center gap-2")}
-            >
-              Verify with bio code
-            </a>
-          ) : null}
-        </div>
+        {showPanel && (
+          <InstagramVerificationPanel
+            oauthEnabled={oauthEnabled}
+            next="/dashboard/profile"
+            handle={hasHandle ? instagramHandle : null}
+            code={hasHandle ? verificationCode : null}
+            requireHandleEntry={!hasHandle}
+            verifyContinueLabel="Done — back to profile"
+            verifyRedirectTo="/dashboard/profile"
+          />
+        )}
       </div>
     </section>
   );

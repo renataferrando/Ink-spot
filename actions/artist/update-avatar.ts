@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { isInstagramCdnUrl } from "@/lib/instagram/cdn";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -87,6 +88,7 @@ export async function saveOnboardingAppearance(formData: FormData): Promise<{ er
   };
 
   const uploadFromUrl = async (url: string, basename: "avatar" | "cover") => {
+    if (!isInstagramCdnUrl(url)) throw new Error("Image URL is not from an allowed Instagram CDN.");
     const res = await fetch(url);
     if (!res.ok) throw new Error("Could not fetch image from Instagram.");
     const buffer = await res.arrayBuffer();

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
+import { ensurePendingClaim } from "@/lib/claims/pending-claim";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { instagramOAuthEnabled } from "@/lib/validations/env";
@@ -56,6 +57,16 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
     .single();
   if (!artist) redirect("/onboarding");
 
+  let verificationCode: string | null = null;
+  if (!artist.is_claimed && artist.instagram_handle) {
+    verificationCode = await ensurePendingClaim(
+      admin,
+      artist.id as string,
+      user.id,
+      artist.instagram_handle as string,
+    );
+  }
+
   return (
     <PageColumn className="py-8 lg:py-12">
       <Link
@@ -85,6 +96,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
       <ProfileForm
         oauthEnabled={instagramOAuthEnabled()}
+        verificationCode={verificationCode}
         artist={{
           handle: artist.handle as string,
           display_name: (artist.display_name as string) ?? "",

@@ -20,7 +20,9 @@ async function resolveArtistHandle(userId: string): Promise<string | null> {
   return data?.handle ?? null;
 }
 
-export async function verifyOwnership(): Promise<{ error?: string }> {
+export async function verifyOwnership(
+  redirectTo = "/onboarding/location",
+): Promise<{ error?: string }> {
   const supabase = await getSupabaseServerClient();
   const {
     data: { user },
@@ -42,7 +44,7 @@ export async function verifyOwnership(): Promise<{ error?: string }> {
 
   const { data: claim } = await admin
     .from("claims")
-    .select("id")
+    .select("id, verification_code, instagram_handle")
     .eq("artist_id", artist.id)
     .eq("status", "pending")
     .order("created_at", { ascending: false })
@@ -51,11 +53,35 @@ export async function verifyOwnership(): Promise<{ error?: string }> {
 
   if (!claim) return { error: "No pending verification found." };
 
+  // Server-side re-verification: confirm the code is still present in the bio
+  const igHandle = (claim.instagram_handle as string | null) ?? (artist.instagram_handle as string | null);
+  const code = claim.verification_code as string | null;
+  if (igHandle && code) {
+    try {
+      const res = await fetch(`https://www.instagram.com/${igHandle}/`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; InkSpot/1.0; +https://inkspot.app)",
+          Accept: "text/html",
+        },
+        signal: AbortSignal.timeout(8000),
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const html = await res.text();
+        if (!html.includes(code)) {
+          return { error: "Verification code not found in bio." };
+        }
+      }
+    } catch {
+      return { error: "Could not reach Instagram to verify. Please try again." };
+    }
+  }
+
   // Mark as claimed
   await admin.from("artists").update({ is_claimed: true }).eq("id", artist.id);
   await admin.from("claims").update({ status: "approved" }).eq("id", claim.id);
 
-  redirect("/onboarding/location");
+  redirect(redirectTo);
 }
 
 export async function submitManualReview(formData: FormData): Promise<{ error?: string }> {

@@ -10,7 +10,6 @@ export function buildArtistQAContext(artist: {
   primary_styles: string[];
   style_description: string | null;
   years_experience: number | null;
-  contact_email: string | null;
   website_url: string | null;
   current_location: string | null;
   upcoming_locations: string[];
@@ -24,7 +23,6 @@ export function buildArtistQAContext(artist: {
   if (artist.current_location) parts.push(`Ubicación actual: ${artist.current_location}`);
   if (artist.upcoming_locations.length)
     parts.push(`Próximas ubicaciones: ${artist.upcoming_locations.join(", ")}`);
-  if (artist.contact_email) parts.push(`Contacto: ${artist.contact_email}`);
   if (artist.website_url) parts.push(`Sitio web: ${artist.website_url}`);
   if (artist.portfolio_captions.length) {
     parts.push(

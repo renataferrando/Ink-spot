@@ -5,8 +5,8 @@ import { z } from "zod";
 
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { geocodeAddress } from "@/lib/geocoding/opencage";
-import { dateRangesOverlap, computeCurrentLocation } from "@/lib/location";
+import { geocodeAddress, reverseGeocode } from "@/lib/geocoding/opencage";
+import { dateRangesOverlap, computeCurrentLocation, formatCityCountry } from "@/lib/location";
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -46,7 +46,9 @@ async function resolveCoords(
   lng: number | undefined,
 ): Promise<{ lat: number; lng: number; locationName: string } | { error: string }> {
   if (lat != null && lng != null) {
-    return { lat, lng, locationName: address };
+    const geo = await reverseGeocode(lat, lng);
+    const locationName = (geo?.formatted ?? formatCityCountry(address)) || address;
+    return { lat, lng, locationName };
   }
   const geo = await geocodeAddress(address);
   if (!geo) {
@@ -183,22 +185,27 @@ export async function addLocation(
       return { error: "Please add a home base location first before adding travel dates." };
     }
 
-    if (starts_at) {
-      const todayStr = new Date().toISOString().slice(0, 10);
-      if (starts_at < todayStr) {
-        return { error: "Start date cannot be in the past." };
-      }
-      if (ends_at && ends_at < starts_at) {
-        return { error: "End date must be on or after the start date." };
-      }
+    if (!starts_at) {
+      return { error: "Start date is required for travel entries." };
+    }
+    if (!ends_at) {
+      return { error: "End date is required — the system needs to know when you return home." };
+    }
 
-      const travelLocs = existingLocs.filter((l) => l.kind !== "home_base" && l.starts_at);
-      for (const loc of travelLocs) {
-        if (dateRangesOverlap(starts_at, ends_at || null, loc.starts_at, loc.ends_at)) {
-          return {
-            error: `Dates overlap with "${loc.location_name}". Please choose different dates.`,
-          };
-        }
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (starts_at < todayStr) {
+      return { error: "Start date cannot be in the past." };
+    }
+    if (ends_at < starts_at) {
+      return { error: "End date must be on or after the start date." };
+    }
+
+    const travelLocs = existingLocs.filter((l) => l.kind !== "home_base" && l.starts_at);
+    for (const loc of travelLocs) {
+      if (dateRangesOverlap(starts_at, ends_at || null, loc.starts_at, loc.ends_at)) {
+        return {
+          error: `Dates overlap with "${loc.location_name}". Please choose different dates.`,
+        };
       }
     }
   }

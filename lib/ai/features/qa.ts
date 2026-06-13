@@ -14,7 +14,6 @@ export type ArtistQAInput = {
   primary_styles: string[];
   style_description: string | null;
   years_experience: number | null;
-  contact_email: string | null;
   website_url: string | null;
   current_location: string | null;
   upcoming_locations: string[];

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ArtistProfile } from "@/components/artist/artist-profile";
 import type { ArtistPublic } from "@/types/artist";
-import { computeCurrentLocation } from "@/lib/location";
+import { computeCurrentLocation, computeNextLocation } from "@/lib/location";
 import { getSupabaseAdminClientUntyped } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -64,6 +64,7 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
       if (!error && data) {
         const locs = Array.isArray(data.artist_locations) ? data.artist_locations : [];
         const current = computeCurrentLocation(locs);
+        const next = computeNextLocation(locs, current);
         const upcoming = locs
           .filter(
             (l: Record<string, unknown>) =>
@@ -81,6 +82,15 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
           bio: data.bio as string | null,
           current_location: current as ArtistPublic["current_location"],
           upcoming_locations: upcoming as ArtistPublic["upcoming_locations"],
+          next_location: next
+            ? {
+                location_name: next.location.location_name,
+                kind: next.location.kind,
+                starts_at: next.starts_at,
+                ends_at: next.location.kind === "home_base" ? null : next.location.ends_at ?? null,
+                studio_name: next.location.studio_name ?? null,
+              }
+            : null,
           instagram_handle: data.instagram_handle as string | null,
           profile_image_url: data.profile_image_url as string | null,
           cover_image_url: data.cover_image_url as string | null,
@@ -201,16 +211,26 @@ export default async function ArtistPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser();
 
   let isSaved = false;
+  let isOwner = false;
   if (user) {
     const admin = getSupabaseAdminClientUntyped();
-    const { data } = await admin
-      .from("saved_artists")
-      .select("artist_id")
-      .eq("user_id", user.id)
-      .eq("artist_id", artist.id)
-      .maybeSingle();
-    isSaved = !!data;
+    const [savedResult, ownerResult] = await Promise.all([
+      admin
+        .from("saved_artists")
+        .select("artist_id")
+        .eq("user_id", user.id)
+        .eq("artist_id", artist.id)
+        .maybeSingle(),
+      admin
+        .from("artists")
+        .select("id")
+        .eq("handle", handle)
+        .eq("claimed_by_user_id", user.id)
+        .maybeSingle(),
+    ]);
+    isSaved = !!savedResult.data;
+    isOwner = !!ownerResult.data;
   }
 
-  return <ArtistProfile artist={artist} aiSummary={aiSummary} isSaved={isSaved} />;
+  return <ArtistProfile artist={artist} aiSummary={aiSummary} isSaved={isSaved} isOwner={isOwner} />;
 }

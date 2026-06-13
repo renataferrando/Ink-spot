@@ -159,13 +159,16 @@ function ArrowRight({ size = 16 }: { size?: number }) {
 
 function Wordmark({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-[7px] font-bold tracking-[-0.02em] ${className}`}>
+    <Link
+      href="/"
+      className={`inline-flex items-center gap-[7px] font-bold tracking-[-0.02em] ${className}`}
+    >
       InkSpot
       <i
         className="block h-[7px] w-[7px] shrink-0 rounded-full not-italic"
         style={{ background: "var(--accent)", boxShadow: "0 0 12px var(--accent-glow)" }}
       />
-    </div>
+    </Link>
   );
 }
 

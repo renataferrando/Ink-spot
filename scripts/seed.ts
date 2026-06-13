@@ -292,9 +292,80 @@ const STUDIOS: SeedArtist[] = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function portfolioSeed(handle: string, n: number) {
+/** Real tattoo photos from Unsplash, grouped by style. Used to give demo
+ *  portfolios a believable look until real artist uploads replace them. */
+const STYLE_IMAGES: Record<StyleSlug, string[]> = {
+  blackwork: [
+    "https://images.unsplash.com/photo-1619727968062-573533bfc967",
+    "https://images.unsplash.com/photo-1604374376934-2df6fad6519b",
+    "https://images.unsplash.com/photo-1543244128-30d70d41e2a9",
+    "https://images.unsplash.com/photo-1568735264348-2e141c082d37",
+    "https://images.unsplash.com/photo-1607382007937-fe3a9d196b7a",
+    "https://images.unsplash.com/photo-1566745508112-1897e540b262",
+  ],
+  "fine-line": [
+    "https://images.unsplash.com/photo-1628969454009-843d2369e964",
+    "https://images.unsplash.com/photo-1588747020191-64c5bc8a4fd5",
+    "https://images.unsplash.com/photo-1542727365-19732a80dcfd",
+    "https://images.unsplash.com/photo-1566360897115-7c6bf96cea01",
+    "https://images.unsplash.com/photo-1659615043416-c492e7f4f8ab",
+    "https://images.unsplash.com/photo-1607382007937-fe3a9d196b7a",
+  ],
+  realism: [
+    "https://images.unsplash.com/photo-1623850575867-06e8682dfc88",
+    "https://images.unsplash.com/photo-1613505879804-bc32efd1e76d",
+  ],
+  watercolor: ["https://images.unsplash.com/photo-1752303166259-c15544181efd"],
+  traditional: [
+    "https://images.unsplash.com/photo-1585665883724-c00f3d658207",
+    "https://images.unsplash.com/photo-1479767574301-a01c78234a0c",
+    "https://images.unsplash.com/photo-1623850575867-06e8682dfc88",
+  ],
+  "neo-traditional": [
+    "https://images.unsplash.com/photo-1479767574301-a01c78234a0c",
+    "https://images.unsplash.com/photo-1665085326630-b01fea9a613d",
+    "https://images.unsplash.com/photo-1623850575867-06e8682dfc88",
+    "https://images.unsplash.com/photo-1613505879804-bc32efd1e76d",
+    "https://images.unsplash.com/photo-1610101458810-ee4d92868976",
+  ],
+  geometric: [
+    "https://images.unsplash.com/photo-1568735264348-2e141c082d37",
+    "https://images.unsplash.com/photo-1613505879804-bc32efd1e76d",
+  ],
+  minimalist: [
+    "https://images.unsplash.com/photo-1588747020191-64c5bc8a4fd5",
+    "https://images.unsplash.com/photo-1542727365-19732a80dcfd",
+    "https://images.unsplash.com/photo-1659615043416-c492e7f4f8ab",
+    "https://images.unsplash.com/photo-1752303166259-c15544181efd",
+  ],
+  japanese: [
+    "https://images.unsplash.com/photo-1585665883724-c00f3d658207",
+    "https://images.unsplash.com/photo-1665085326630-b01fea9a613d",
+    "https://images.unsplash.com/photo-1610101458810-ee4d92868976",
+  ],
+  tribal: [
+    "https://images.unsplash.com/photo-1619727968062-573533bfc967",
+    "https://images.unsplash.com/photo-1568735264348-2e141c082d37",
+  ],
+  illustrative: [
+    "https://images.unsplash.com/photo-1628969454009-843d2369e964",
+    "https://images.unsplash.com/photo-1604374376934-2df6fad6519b",
+    "https://images.unsplash.com/photo-1543244128-30d70d41e2a9",
+    "https://images.unsplash.com/photo-1665085326630-b01fea9a613d",
+    "https://images.unsplash.com/photo-1607382007937-fe3a9d196b7a",
+    "https://images.unsplash.com/photo-1566745508112-1897e540b262",
+    "https://images.unsplash.com/photo-1610101458810-ee4d92868976",
+  ],
+  dotwork: [
+    "https://images.unsplash.com/photo-1566360897115-7c6bf96cea01",
+    "https://images.unsplash.com/photo-1566745508112-1897e540b262",
+  ],
+};
+
+function portfolioSeed(handle: string, n: number, styles: StyleSlug[]) {
+  const pool = Array.from(new Set(styles.flatMap((style) => STYLE_IMAGES[style])));
   return Array.from({ length: n }, (_, i) => ({
-    image_url: `https://picsum.photos/seed/${handle}-p${i + 1}/800/800`,
+    image_url: `${pool[i % pool.length]}?auto=format&fit=crop&w=800&h=800&q=80`,
     alt_text: `Portfolio piece ${i + 1} from ${handle}`,
     is_featured: i === 0,
     sort_order: i,
@@ -369,10 +440,12 @@ async function main() {
     if (locErr) console.warn(`  location for ${studio.handle}:`, locErr.message);
 
     // 3. Insert portfolio items
-    const items = portfolioSeed(studio.handle, studio.portfolio_count).map((item) => ({
-      ...item,
-      artist_id: artist.id,
-    }));
+    const items = portfolioSeed(studio.handle, studio.portfolio_count, studio.primary_styles).map(
+      (item) => ({
+        ...item,
+        artist_id: artist.id,
+      })
+    );
     const { error: itemsErr } = await supabase.from("portfolio_items").insert(items);
     if (itemsErr) console.warn(`  portfolio for ${studio.handle}:`, itemsErr.message);
 

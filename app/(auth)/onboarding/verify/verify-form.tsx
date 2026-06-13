@@ -18,9 +18,16 @@ import { btnPrimaryClass, codeBoxClass, codeTextClass, labelClass } from "@/lib/
 interface Props {
   handle: string;
   code: string;
+  continueLabel?: string;
+  redirectTo?: string;
 }
 
-export function VerifyForm({ handle, code }: Props) {
+export function VerifyForm({
+  handle,
+  code,
+  continueLabel = "Continue → Add location",
+  redirectTo = "/onboarding/location",
+}: Props) {
   const [stage, setStage] = useState<"paste" | "checking" | "verified">("paste");
   const [copied, setCopied] = useState(false);
   const [checkError, setCheckError] = useState<string | null>(null);
@@ -63,7 +70,7 @@ export function VerifyForm({ handle, code }: Props) {
   }
 
   async function handleContinue() {
-    await verifyOwnership();
+    await verifyOwnership(redirectTo);
   }
 
   return (
@@ -97,7 +104,7 @@ export function VerifyForm({ handle, code }: Props) {
       )}
       {stage === "verified" && (
         <button className={btnPrimaryClass} type="button" onClick={handleContinue}>
-          Continue → Add location
+          {continueLabel}
         </button>
       )}
 

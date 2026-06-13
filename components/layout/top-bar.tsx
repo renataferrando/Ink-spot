@@ -19,13 +19,16 @@ export function TopBar({ isArtist = false }: { isArtist?: boolean }) {
   return (
     <header className="sticky top-0 z-5 bg-(--bg) pt-3.5 pb-2.5 lg:hidden">
       <div className={cn(pageColumnClass, pageGutterClass, "flex items-center justify-between")}>
-        <div className="flex items-baseline font-sans text-[22px] font-medium tracking-[-0.01em] text-(--text)">
+        <Link
+          href="/"
+          className="flex items-baseline font-sans text-[22px] font-medium tracking-[-0.01em] text-(--text)"
+        >
           InkSpot
           <span
             aria-hidden
             className="bg-ink-spot ml-1 inline-block size-1.5 shrink-0 -translate-y-2 rounded-full shadow-[0_0_12px_var(--accent-glow)]"
           />
-        </div>
+        </Link>
 
         {isArtist ? (
           <Link

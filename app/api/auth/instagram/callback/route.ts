@@ -110,6 +110,17 @@ export async function GET(request: Request) {
   // ── Username match ────────────────────────────────────────────────────
   const storedHandle = (artist.instagram_handle as string | null)?.toLowerCase();
   const igUsername = me.username.toLowerCase();
+  if (!storedHandle) {
+    const { data: collision } = await admin
+      .from("artists")
+      .select("id")
+      .eq("instagram_handle", igUsername)
+      .neq("id", artist.id)
+      .maybeSingle();
+    if (collision) {
+      return fallback(next, "handle_taken");
+    }
+  }
   if (storedHandle && storedHandle !== igUsername) {
     return fallback(next, "handle_mismatch");
   }

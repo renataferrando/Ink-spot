@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
         hostname: "picsum.photos",
         pathname: "/**",
       },
+      // Demo portfolio images (scripts/seed.ts) — replaced by Supabase Storage in Phase 2
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
     ],
   },
 };

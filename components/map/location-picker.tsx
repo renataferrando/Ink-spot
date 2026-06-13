@@ -11,11 +11,13 @@ import { btnPrimarySm, btnSecondarySm } from "@/lib/ui/classes";
 interface LocationPickerProps {
   /** Initial map center */
   center: { lat: number; lng: number };
+  /** Initial zoom level (default 5) */
+  zoom?: number;
   onConfirm: (location: { lat: number; lng: number; formatted: string }) => void;
   onCancel: () => void;
 }
 
-export function LocationPicker({ center, onConfirm, onCancel }: LocationPickerProps) {
+export function LocationPicker({ center, zoom = 5, onConfirm, onCancel }: LocationPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
@@ -30,7 +32,7 @@ export function LocationPicker({ center, onConfirm, onCancel }: LocationPickerPr
       container: containerRef.current,
       style: MAP_STYLE_URL,
       center: [center.lng, center.lat],
-      zoom: 5,
+      zoom,
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
@@ -66,6 +68,11 @@ export function LocationPicker({ center, onConfirm, onCancel }: LocationPickerPr
       mapRef.current = null;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    mapRef.current.flyTo({ center: [center.lng, center.lat], zoom });
+  }, [center.lat, center.lng, zoom]);
 
   function handleConfirm() {
     if (!pin) return;

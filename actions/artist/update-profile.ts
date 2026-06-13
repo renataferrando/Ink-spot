@@ -98,7 +98,13 @@ export async function updateProfile(
     primary_styles: primary_styles ?? [],
   };
   if (typeof is_active === "boolean") patch.is_active = is_active;
-  if (igChanged) patch.is_claimed = false;
+  if (igChanged) {
+    patch.is_claimed = false;
+    patch.instagram_token_encrypted = null;
+    patch.instagram_token_expires_at = null;
+    patch.instagram_user_id = null;
+    patch.verification_method = null;
+  }
 
   const { error: updateError } = await admin.from("artists").update(patch).eq("id", artist.id);
   if (updateError) {

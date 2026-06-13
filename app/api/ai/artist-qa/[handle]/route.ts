@@ -47,7 +47,7 @@ export async function POST(request: Request, { params }: Props) {
     .from("artists")
     .select(
       `id, handle, display_name, bio, primary_styles, style_description,
-       years_experience, contact_email, website_url, is_demo, is_claimed, is_active,
+       years_experience, website_url, is_demo, is_claimed, is_active,
        artist_locations(id, location_name, kind, starts_at, ends_at, is_current),
        portfolio_items(caption, is_featured, sort_order)`,
     )
@@ -96,7 +96,6 @@ export async function POST(request: Request, { params }: Props) {
       primary_styles: (artist.primary_styles as string[]) ?? [],
       style_description: (artist.style_description as string | null) ?? null,
       years_experience: (artist.years_experience as number | null) ?? null,
-      contact_email: (artist.contact_email as string | null) ?? null,
       website_url: (artist.website_url as string | null) ?? null,
       current_location: current?.location_name ?? null,
       upcoming_locations: upcoming,

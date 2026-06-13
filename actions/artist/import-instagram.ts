@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { decryptToken } from "@/lib/instagram/crypto";
+import { isInstagramCdnUrl } from "@/lib/instagram/cdn";
 import { fetchMedia } from "@/lib/instagram/oauth";
 import { classifyPortfolioItem } from "@/actions/portfolio/classify-styles";
 
@@ -112,8 +113,10 @@ export async function importInstagramItems(
 
   const toImport = selected.slice(0, slots);
   let imported = 0;
+  let runningCount = count ?? 0;
 
   for (const item of toImport) {
+    if (!isInstagramCdnUrl(item.media_url)) continue;
     let imageBuffer: ArrayBuffer;
     try {
       const res = await fetch(item.media_url);
@@ -134,12 +137,7 @@ export async function importInstagramItems(
       data: { publicUrl },
     } = admin.storage.from("portfolio").getPublicUrl(path);
 
-    const { count: currentCount } = await admin
-      .from("portfolio_items")
-      .select("id", { count: "exact", head: true })
-      .eq("artist_id", artist.id);
-
-    const isFeatured = (currentCount ?? 0) === 0;
+    const isFeatured = runningCount === 0;
 
     const { data: newItem, error: insertError } = await admin
       .from("portfolio_items")
@@ -150,7 +148,7 @@ export async function importInstagramItems(
         caption: item.caption ?? null,
         taken_at: item.timestamp ?? null,
         is_featured: isFeatured,
-        sort_order: currentCount ?? 0,
+        sort_order: runningCount,
         detected_styles: [],
       })
       .select("id")
@@ -158,6 +156,7 @@ export async function importInstagramItems(
 
     if (insertError) continue;
     imported++;
+    runningCount++;
 
     if (newItem?.id) after(() => classifyPortfolioItem(newItem.id));
 
