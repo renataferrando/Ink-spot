@@ -26,6 +26,7 @@ export function ArtistQAPanel({ handle, displayName }: ArtistQAPanelProps) {
   const [streaming, setStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
   const abortRef = useRef<AbortController | null>(null);
+  const answerRef = useRef("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   async function ask(question: string) {
@@ -56,7 +57,7 @@ export function ArtistQAPanel({ handle, displayName }: ArtistQAPanelProps) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let answer = "";
+      answerRef.current = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -71,11 +72,11 @@ export function ArtistQAPanel({ handle, displayName }: ArtistQAPanelProps) {
           try {
             const event = JSON.parse(line.slice(6)) as { type: string; text?: string };
             if (event.type === "token" && event.text) {
-              answer += event.text;
-              setStreamingText(answer);
+              answerRef.current += event.text;
+              setStreamingText(answerRef.current);
               scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
             } else if (event.type === "done") {
-              setHistory((prev) => [...prev, { role: "assistant", content: answer }]);
+              setHistory((prev) => [...prev, { role: "assistant", content: answerRef.current }]);
               setStreamingText("");
             }
           } catch {
