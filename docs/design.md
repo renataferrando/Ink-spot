@@ -61,8 +61,23 @@ Never use sky or amber for anything other than these two badges.
 
 ## 2. Two-layer styling rule
 
+**Tailwind classes first.** When styling a component, reach for Tailwind utilities
+(`flex`, `gap-3`, `text-dim`, `bg-surface`, etc.) before adding or extending CSS in
+`globals.css`. Named classes are the exception, not the default.
+
+**No React `style` prop for static styling.** Put styles on `className` (Tailwind or a named
+class), not `style={{ ... }}`. "Inline" in this doc means utilities on the JSX element via
+`className` — not inline CSS objects.
+
+Exceptions (only when Tailwind or a named class can't apply):
+
+- **Dynamic runtime values** — e.g. `style={{ width: \`${pct}%\` }}` on a progress bar.
+- **APIs that require style objects** — e.g. `ImageResponse` / `opengraph-image.tsx`.
+
 The codebase mixes two layers on purpose. Stay on the right one:
 
+- **Tailwind utilities on `className`** — default for layout, spacing, typography, colors, and
+  one-off composition on a single component.
 - **Named class in `globals.css`** when:
   - The pattern repeats in 2+ components, **and**
   - It carries bespoke geometry the token system alone can't express (multi-line gradients,
@@ -70,8 +85,6 @@ The codebase mixes two layers on purpose. Stay on the right one:
   - Examples in use: `.chip` (+ `.active`), `.btn-primary`, `.btn-secondary`, `.tab-shell`,
     `.section-head` (+ `.title`, `.count`, `.meta`), `.filter-bar`, `.label`, `.dim`, `.faint`,
     `.badge-ai`, `.badge-match`, `.demo-banner`, `.code-box`, `.steps`.
-- **Tailwind utilities inline** for everything else: layout, spacing, one-off type sizes,
-  per-component composition.
 
 Three follow-on rules:
 

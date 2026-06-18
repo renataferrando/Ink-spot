@@ -8,5 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
+  console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
   return <LandingClient />;
 }

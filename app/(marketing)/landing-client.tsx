@@ -72,8 +72,9 @@ const FLOATS = [
     bob: 0,
     w: 172,
     h: 228,
-    top: "6%",
-    right: "7%",
+    top: "calc(6% + 58vh)",
+    right: "calc(7% + 25vw)",
+    rotate: 10,
   },
   {
     src: "/landing/float-blackwork.png",
@@ -82,8 +83,9 @@ const FLOATS = [
     bob: -2,
     w: 144,
     h: 190,
-    top: "20%",
-    right: "31%",
+    top: "calc(20% + 48vh)",
+    right: "calc(31% - 14vw)",
+    rotate: -8,
   },
   {
     src: "/landing/float-dotwork.png",
@@ -92,8 +94,9 @@ const FLOATS = [
     bob: -4,
     w: 168,
     h: 222,
-    bottom: "7%",
-    right: "10%",
+    bottom: "calc(7% + 53vh)",
+    right: "calc(10% + 4vw)",
+    rotate: 12,
   },
   {
     src: "/landing/float-realism.png",
@@ -102,8 +105,9 @@ const FLOATS = [
     bob: -6,
     w: 138,
     h: 182,
-    bottom: "9%",
-    right: "33%",
+    bottom: "calc(9% + 44vh)",
+    right: "calc(33% - 10vw)",
+    rotate: -7,
   },
 ] as const;
 
@@ -139,6 +143,36 @@ const HOW_STEPS = [
     p: "Artists are nomadic. See who's near you today and who leaves Friday, then reach out before the chair fills up.",
   },
 ];
+
+// ── Parallax image ──────────────────────────────────────────────────────────
+
+function ParallaxImg({
+  src,
+  alt = "",
+  className = "",
+}: {
+  src: string;
+  alt?: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["18%", "-18%"]);
+
+  return (
+    <div ref={ref} className={`overflow-hidden ${className}`}>
+      <motion.img
+        src={src}
+        alt={alt}
+        className="h-full w-full object-cover"
+        style={{ y, scale: 1.38 }}
+      />
+    </div>
+  );
+}
 
 // ── Primitives ──────────────────────────────────────────────────────────────
 
@@ -277,6 +311,7 @@ function FloatImg({
   top,
   bottom,
   right,
+  rotate = 0,
 }: {
   src: string;
   delay?: number;
@@ -288,12 +323,21 @@ function FloatImg({
   top?: string;
   bottom?: string;
   right: string;
+  rotate?: number;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
+  const { scrollYProgress: innerProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
   const y = useTransform(scrollY, [0, 1000], [0, -(speed * 0.08)]);
+  const innerY = useTransform(innerProgress, [0, 1], ["12%", "-12%"]);
 
   return (
     <motion.div
+      ref={containerRef}
       className={`lp-float-${floatIdx} absolute overflow-hidden rounded-2xl`}
       style={{
         width: w,
@@ -305,6 +349,7 @@ function FloatImg({
         boxShadow: "0 40px 80px -24px rgba(0,0,0,0.85)",
         filter: "grayscale(1) contrast(1.06) brightness(0.82)",
         y,
+        rotate,
         zIndex: 0,
       }}
       initial={{ opacity: 0 }}
@@ -329,15 +374,17 @@ function FloatImg({
           background: "linear-gradient(180deg, transparent 45%, rgba(5,5,5,0.75))",
         }}
       />
-      {/* Bob */}
-      <motion.img
-        src={src}
-        alt=""
-        className="h-full w-full object-cover"
-        style={{ scale: 1.08 }}
-        animate={{ y: [0, -12, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: bob }}
-      />
+      {/* Inner parallax layer */}
+      <motion.div className="h-full w-full" style={{ y: innerY, scale: 1.38 }}>
+        {/* Bob layer */}
+        <motion.img
+          src={src}
+          alt=""
+          className="h-full w-full object-cover"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: bob }}
+        />
+      </motion.div>
     </motion.div>
   );
 }
@@ -482,6 +529,7 @@ function HeroSection() {
           top={"top" in f ? f.top : undefined}
           bottom={"bottom" in f ? f.bottom : undefined}
           right={f.right}
+          rotate={f.rotate}
         />
       ))}
 
@@ -1099,10 +1147,9 @@ function ShowcaseSection() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 2.5 + i * 0.15, ease: E_OUT }}
             >
-              <img
+              <ParallaxImg
                 src={artist.portfolio0}
-                alt=""
-                className="aspect-square w-full rounded-[10px] object-cover"
+                className="aspect-square w-full rounded-[10px]"
               />
               <div className="mt-3" style={{ fontSize: "16px" }}>
                 {artist.name}
@@ -1334,13 +1381,13 @@ export default function LandingClient() {
           /* CTA buttons — match app design-system h-[46px] on mobile */
           .lp-cta-btn    { height: 46px !important; }
 
-          /* How section */
+          /* How section — push content below the sticky nav (70px) */
           .lp-how-inner  { padding: 0 20px !important; }
-          .lp-how-grid   { grid-template-columns: 1fr !important; align-content: start !important; padding-top: 60px; gap: 24px !important; }
+          .lp-how-grid   { grid-template-columns: 1fr !important; align-content: start !important; padding-top: 84px; gap: 24px !important; }
           .lp-how-visual { min-height: 220px !important; height: auto !important; }
           .lp-step-min   { min-height: 160px !important; }
           .lp-step-h3    { font-size: 34px !important; }
-          .lp-how-count  { top: 16px !important; right: 20px !important; }
+          .lp-how-count  { top: 84px !important; right: 20px !important; }
 
           /* Showcase */
           .lp-showcase   { padding: 70px 20px !important; }

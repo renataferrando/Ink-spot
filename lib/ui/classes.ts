@@ -12,8 +12,8 @@ const btnSecondaryBase =
   "bg-surface-2 text-(--text) border border-ds-border rounded-full font-mono uppercase tracking-[0.12em] transition-colors duration-150 hover:bg-surface-3 disabled:opacity-55 disabled:cursor-not-allowed";
 
 const btnSizeSm = "h-8 px-3.5 text-[11px]";
-const btnSizeMd = "h-[46px] w-full text-[11px]";
-const btnSizeLg = "h-12 w-full lg:w-auto lg:px-12 text-[12px]";
+const btnSizeMd = "h-[46px] w-full px-6 text-[11px]";
+const btnSizeLg = "h-12 w-full px-7 lg:w-auto lg:px-12 text-[12px]";
 
 export const btnPrimarySm = cn(btnBase, btnPrimaryBase, btnSizeSm);
 export const btnPrimaryMd = cn(btnBase, btnPrimaryBase, btnSizeMd);

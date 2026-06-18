@@ -191,7 +191,6 @@ function AiPanel({ flush }: { flush?: boolean }) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function MobileHomeTab({ data }: { data: DashboardData }) {
-  const firstName = data.displayName.split(" ")[0];
   const flat = [0, 0, 0, 0, 0, 0, 0];
   const initials = data.displayName.slice(0, 2).toUpperCase();
 
@@ -200,7 +199,7 @@ function MobileHomeTab({ data }: { data: DashboardData }) {
       <div className="flex items-center justify-between gap-4 px-[18px] pt-5 pb-4">
         <div>
           <div className="text-[28px] leading-none font-medium tracking-tight">
-            Hola, <span className="text-ink-spot">{firstName}</span>
+            <span className="text-ink-spot">{data.displayName}</span>, here&apos;s your week on InkSpot
           </div>
           <div className="text-dim mt-[9px] font-mono text-[10px] tracking-[0.14em] uppercase">
             Here&rsquo;s your week on InkSpot

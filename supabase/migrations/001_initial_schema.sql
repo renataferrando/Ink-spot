@@ -197,22 +197,6 @@ CREATE TABLE query_embedding_cache (
 CREATE INDEX query_embedding_cache_used
   ON query_embedding_cache (last_used_at DESC);
 
--- ── ai_artist_summaries ───────────────────────────────────────────────────────
-CREATE TABLE ai_artist_summaries (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  artist_id    UUID NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
-  content      TEXT NOT NULL,
-  model        TEXT NOT NULL,
-  prompt_hash  TEXT NOT NULL,
-  is_demo      BOOLEAN DEFAULT FALSE,
-  generated_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at   TIMESTAMPTZ NOT NULL,
-  CONSTRAINT ai_artist_summaries_unique UNIQUE (artist_id)
-);
-
-CREATE INDEX ai_artist_summaries_expires ON ai_artist_summaries (expires_at);
-CREATE INDEX ai_artist_summaries_artist  ON ai_artist_summaries (artist_id);
-
 -- ── RLS ───────────────────────────────────────────────────────────────────────
 ALTER TABLE artists             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE artist_locations    ENABLE ROW LEVEL SECURITY;
@@ -222,7 +206,6 @@ ALTER TABLE claims              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE search_queries      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_artists       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE query_embedding_cache ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ai_artist_summaries ENABLE ROW LEVEL SECURITY;
 
 -- artists: public read active
 CREATE POLICY "artists_select_public" ON artists FOR SELECT USING (is_active = TRUE);
@@ -267,5 +250,3 @@ CREATE POLICY "search_queries_insert" ON search_queries FOR INSERT WITH CHECK (T
 CREATE POLICY "saved_artists_own" ON saved_artists FOR ALL USING (user_id = auth.uid());
 
 -- query_embedding_cache: service role only (no public policies)
--- ai_artist_summaries: public read for non-demo
-CREATE POLICY "ai_summaries_public_read" ON ai_artist_summaries FOR SELECT USING (is_demo = FALSE);

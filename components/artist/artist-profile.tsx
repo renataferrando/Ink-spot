@@ -17,7 +17,7 @@ import {
 import type { ArtistPublic } from "@/types/artist";
 import { STYLE_LABELS } from "@/types/artist";
 import { cn } from "@/lib/utils";
-import { formatCityCountry } from "@/lib/location";
+import { formatCityCountry, splitCityCountry } from "@/lib/location";
 import { btnPrimaryLg, btnSecondaryLg, pageColumnClass } from "@/lib/ui/classes";
 import { ArtistQAPanel } from "@/components/ai/artist-qa-panel";
 import { toggleSave } from "@/actions/saved/toggle-save";
@@ -71,6 +71,8 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false, isOwner = fa
     "No public contact for this artist yet — try the Save action and check back later.";
 
   const upcoming = artist.next_location ?? artist.upcoming_locations?.[0] ?? null;
+  const nowLoc = splitCityCountry(artist.current_location?.location_name);
+  const nextLoc = splitCityCountry(upcoming?.location_name);
 
   async function handleSave() {
     const prev = saved;
@@ -179,10 +181,12 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false, isOwner = fa
                 </div>
               </div>
               <div className="mt-0.5 truncate text-[18px] leading-[1.2] text-(--text)">
-                {formatCityCountry(artist.current_location?.location_name) || "—"}
+                {nowLoc.city || "—"}
               </div>
-              <div className="text-dim mt-0.5 font-mono text-[10px]">
-                {artist.current_location?.studio_name ?? ""}
+              <div className="text-dim mt-0.5 truncate font-mono text-[10px]">
+                {[nowLoc.country, artist.current_location?.studio_name]
+                  .filter(Boolean)
+                  .join(" · ")}
               </div>
             </div>
             <div aria-hidden className="text-faint flex shrink-0 items-center">
@@ -193,10 +197,15 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false, isOwner = fa
                 Next
               </div>
               <div className="text-text-2 mt-0.5 truncate text-[18px] leading-[1.2]">
-                {upcoming?.location_name ? formatCityCountry(upcoming.location_name) : "Open"}
+                {upcoming?.location_name ? nextLoc.city || "—" : "Open"}
               </div>
-              <div className="text-dim mt-0.5 font-mono text-[10px]">
-                {upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : ""}
+              <div className="text-dim mt-0.5 truncate font-mono text-[10px]">
+                {[
+                  nextLoc.country,
+                  upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </div>
             </div>
           </div>

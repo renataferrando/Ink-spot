@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -8,7 +9,7 @@ import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/s
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { OnboardingHeading } from "@/components/onboarding/onboarding-heading";
 import { InstagramVerificationPanel } from "@/components/artist/instagram-verification-panel";
-import { accentWordClass } from "@/lib/ui/field-classes";
+import { accentWordClass, ghostTextButtonClass } from "@/lib/ui/field-classes";
 import { instagramOAuthEnabled } from "@/lib/validations/env";
 
 export const dynamic = "force-dynamic";
@@ -99,6 +100,12 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
           code={code}
           errorMessage={errorMessage}
         />
+
+        <div className="mt-6 text-center">
+          <Link href="/onboarding/location" className={ghostTextButtonClass}>
+            Skip for now →
+          </Link>
+        </div>
       </div>
     </OnboardingShell>
   );
