@@ -7,7 +7,7 @@ import { computeCurrentLocation, computeNextLocation } from "@/lib/location";
 import { getSupabaseAdminClientUntyped } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 type Props = { params: Promise<{ handle: string }> };
 

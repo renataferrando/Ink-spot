@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   motion,
   useScroll,
@@ -11,138 +12,15 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import Lenis from "lenis";
-
-// ── Constants ───────────────────────────────────────────────────────────────
-
-const TEAL = "#27b7a5";
-const TEAL_GLOW = "rgba(39, 183, 165, 0.42)";
-const TEAL_SOFT = "rgba(39, 183, 165, 0.12)";
-const E_OUT: [number, number, number, number] = [0.2, 0.7, 0.2, 1];
-
-const PORTFOLIO_IMGS: Record<string, string> = {
-  "luna-1": "https://images.unsplash.com/photo-1555427688-34f53f812abb",
-  "kai-1": "https://images.unsplash.com/photo-1570877037877-d3c5f05d09a0",
-  "kai-2": "https://images.unsplash.com/photo-1590403823825-8dbc090b8e95",
-  "tomas-1": "https://images.unsplash.com/photo-1533158326339-7f3cf2404354",
-  "mari-2": "https://images.unsplash.com/photo-1548690596-f1b6d71b9ba7",
-  "luna-avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
-  "kai-avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-  "tomas-avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d",
-};
-
-const img = (seed: string, w = 600, h = 600) => {
-  const base = PORTFOLIO_IMGS[seed];
-  return base
-    ? `${base}?auto=format&fit=crop&w=${w}&h=${h}&q=80`
-    : `https://picsum.photos/seed/inkspot-${seed}/${w}/${h}`;
-};
-
-const ARTISTS_MOCK = [
-  {
-    name: "Luna Vargas",
-    avatar: img("luna-avatar", 200, 200),
-    portfolio0: img("luna-1", 600, 800),
-    styles: "Fine Line · Minimalist",
-  },
-  {
-    name: "Kai Mendoza",
-    avatar: img("kai-avatar", 200, 200),
-    portfolio0: img("kai-1", 600, 800),
-    styles: "Blackwork · Geometric",
-  },
-  {
-    name: "Tomas Reyes",
-    avatar: img("tomas-avatar", 200, 200),
-    portfolio0: img("tomas-1", 600, 800),
-    styles: "Dotwork · Geometric",
-  },
-];
-
-const SHOWCASE_CARDS = [
-  { artist: ARTISTS_MOCK[0], pct: 96, style: "Fine Line" },
-  { artist: ARTISTS_MOCK[1], pct: 91, style: "Blackwork" },
-  { artist: ARTISTS_MOCK[2], pct: 84, style: "Dotwork" },
-];
-
-const FLOATS = [
-  {
-    src: "/landing/float-fine-line.png",
-    speed: 80,
-    delay: 0.45,
-    bob: 0,
-    w: 172,
-    h: 228,
-    top: "calc(6% + 58vh)",
-    right: "calc(7% + 25vw)",
-    rotate: 10,
-  },
-  {
-    src: "/landing/float-blackwork.png",
-    speed: 152,
-    delay: 0.6,
-    bob: -2,
-    w: 144,
-    h: 190,
-    top: "calc(20% + 48vh)",
-    right: "calc(31% - 14vw)",
-    rotate: -8,
-  },
-  {
-    src: "/landing/float-dotwork.png",
-    speed: 224,
-    delay: 0.75,
-    bob: -4,
-    w: 168,
-    h: 222,
-    bottom: "calc(7% + 53vh)",
-    right: "calc(10% + 4vw)",
-    rotate: 12,
-  },
-  {
-    src: "/landing/float-realism.png",
-    speed: 296,
-    delay: 0.9,
-    bob: -6,
-    w: 138,
-    h: 182,
-    bottom: "calc(9% + 44vh)",
-    right: "calc(33% - 10vw)",
-    rotate: -7,
-  },
-] as const;
-
-const ROTOR_WORDS = ["blackwork", "fine line", "dotwork", "realism", "watercolor"];
-
-const MARQUEE = [
-  "Blackwork",
-  "Fine Line",
-  "Dotwork",
-  "Realism",
-  "Watercolor",
-  "Geometric",
-  "Japanese",
-  "Sacred",
-  "Minimalist",
-  "Traditional",
-];
-
-const HOW_STEPS = [
-  {
-    k: "Search",
-    h: "Describe it. Snap it. Say it.",
-    p: "Type a vibe, drop a reference photo, or use your voice. InkSpot reads the style of the work itself — not just hashtags.",
-  },
-  {
-    k: "Match",
-    h: "Style meets proximity.",
-    p: "Every artist is ranked 60% on how closely their work matches yours and 40% on how near they are right now. The best fit rises to the top.",
-  },
-  {
-    k: "Book",
-    h: "Catch them while they're in town.",
-    p: "Artists are nomadic. See who's near you today and who leaves Friday, then reach out before the chair fills up.",
-  },
-];
+import {
+  E_OUT,
+  ARTISTS_MOCK,
+  SHOWCASE_CARDS,
+  FLOATS,
+  ROTOR_WORDS,
+  MARQUEE,
+  HOW_STEPS,
+} from "@/lib/landing/constants";
 
 // ── Parallax image ──────────────────────────────────────────────────────────
 
@@ -163,13 +41,11 @@ function ParallaxImg({
   const y = useTransform(scrollYProgress, [0, 1], ["18%", "-18%"]);
 
   return (
-    <div ref={ref} className={`overflow-hidden ${className}`}>
-      <motion.img
-        src={src}
-        alt={alt}
-        className="h-full w-full object-cover"
-        style={{ y, scale: 1.38 }}
-      />
+    <div ref={ref} className={`relative overflow-hidden ${className}`}>
+      {/* scale stays in style: paired with motion value y on a motion element */}
+      <motion.div className="relative h-full w-full" style={{ y, scale: 1.38 }}>
+        <Image src={src} alt={alt} fill sizes="(max-width: 768px) 50vw, 200px" className="object-cover" />
+      </motion.div>
     </div>
   );
 }
@@ -198,10 +74,7 @@ function Wordmark({ className = "" }: { className?: string }) {
       className={`inline-flex items-center gap-[7px] font-bold tracking-[-0.02em] ${className}`}
     >
       InkSpot
-      <i
-        className="block h-[7px] w-[7px] shrink-0 rounded-full not-italic"
-        style={{ background: "var(--accent)", boxShadow: "0 0 12px var(--accent-glow)" }}
-      />
+      <i className="bg-ink-spot block h-[7px] w-[7px] shrink-0 rounded-full not-italic shadow-[0_0_12px_var(--accent-glow)]" />
     </Link>
   );
 }
@@ -210,15 +83,7 @@ function Wordmark({ className = "" }: { className?: string }) {
 
 function LandingNav({ scrollTo }: { scrollTo: (id: string) => void }) {
   return (
-    <header
-      className="lp-nav sticky top-0 z-30 flex items-center justify-between"
-      style={{
-        padding: "0 40px",
-        height: 70,
-        background: "linear-gradient(180deg, rgba(5,5,5,0.86) 0%, rgba(5,5,5,0) 100%)",
-        backdropFilter: "blur(4px)",
-      }}
-    >
+    <header className="lp-nav sticky top-0 z-30 flex h-[70px] items-center justify-between bg-[linear-gradient(180deg,rgba(5,5,5,0.86)_0%,rgba(5,5,5,0)_100%)] px-10 backdrop-blur-[4px]">
       <Wordmark className="text-[22px]" />
 
       <nav className="hidden gap-1 sm:flex">
@@ -229,16 +94,14 @@ function LandingNav({ scrollTo }: { scrollTo: (id: string) => void }) {
           <button
             key={id}
             onClick={() => scrollTo(id)}
-            className="cursor-pointer rounded-full px-[14px] py-2 text-[11px] tracking-[0.12em] uppercase transition-colors hover:bg-white/5 hover:text-white"
-            style={{ fontFamily: "var(--mono)", color: "var(--text-2)" }}
+            className="text-text-2 cursor-pointer rounded-full px-[14px] py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors hover:bg-white/5 hover:text-white"
           >
             {label}
           </button>
         ))}
         <Link
           href="/login"
-          className="rounded-full px-[14px] py-2 text-[11px] tracking-[0.12em] uppercase transition-colors hover:bg-white/5 hover:text-white"
-          style={{ fontFamily: "var(--mono)", color: "var(--text-2)" }}
+          className="text-text-2 rounded-full px-[14px] py-2 font-mono text-[11px] tracking-[0.12em] uppercase transition-colors hover:bg-white/5 hover:text-white"
         >
           For artists
         </Link>
@@ -246,8 +109,7 @@ function LandingNav({ scrollTo }: { scrollTo: (id: string) => void }) {
 
       <Link
         href="/explore"
-        className="inline-flex h-[38px] items-center gap-2 rounded-full px-[18px] text-[11px] font-semibold tracking-[0.12em] uppercase transition-all hover:-translate-y-px hover:shadow-[0_8px_30px_rgba(255,255,255,0.18)]"
-        style={{ fontFamily: "var(--mono)", background: "var(--text)", color: "#050505" }}
+        className="inline-flex h-[38px] items-center gap-2 rounded-full bg-[var(--text)] px-[18px] font-mono text-[11px] font-semibold tracking-[0.12em] text-[#050505] uppercase transition-all hover:-translate-y-px hover:shadow-[0_8px_30px_rgba(255,255,255,0.18)]"
       >
         Open app <ArrowRight size={14} />
       </Link>
@@ -266,20 +128,9 @@ function RotorWord() {
   }, []);
 
   return (
-    <div
-      className="mt-7 flex items-center gap-3"
-      style={{
-        fontFamily: "var(--mono)",
-        fontSize: "clamp(14px, 1.4vw, 19px)",
-        letterSpacing: "0.08em",
-        textTransform: "uppercase",
-      }}
-    >
-      <span style={{ color: "var(--text-2)", whiteSpace: "nowrap" }}>matched for</span>
-      <div
-        className="relative overflow-hidden"
-        style={{ height: "1.5em", minWidth: "13.5ch", color: TEAL, lineHeight: "1.5em" }}
-      >
+    <div className="mt-7 flex items-center gap-3 font-mono text-[clamp(14px,1.4vw,19px)] tracking-[0.08em] uppercase">
+      <span className="text-text-2 whitespace-nowrap">matched for</span>
+      <div className="relative h-[1.5em] min-w-[13.5ch] overflow-hidden leading-[1.5em] text-[#27b7a5]">
         <AnimatePresence mode="wait">
           <motion.b
             key={ROTOR_WORDS[idx]}
@@ -287,8 +138,7 @@ function RotorWord() {
             animate={{ y: "0%", opacity: 1 }}
             exit={{ y: "-70%", opacity: 0 }}
             transition={{ duration: 0.55, ease: E_OUT }}
-            className="absolute top-0 left-0 font-semibold"
-            style={{ lineHeight: "1.5em" }}
+            className="absolute top-0 left-0 leading-[1.5em] font-semibold"
           >
             {ROTOR_WORDS[idx]}
           </motion.b>
@@ -338,52 +188,25 @@ function FloatImg({
   return (
     <motion.div
       ref={containerRef}
-      className={`lp-float-${floatIdx} absolute overflow-hidden rounded-2xl`}
-      style={{
-        width: w,
-        height: h,
-        top,
-        bottom,
-        right,
-        border: "1px solid var(--hairline)",
-        boxShadow: "0 40px 80px -24px rgba(0,0,0,0.85)",
-        filter: "grayscale(1) contrast(1.06) brightness(0.82)",
-        y,
-        rotate,
-        zIndex: 0,
-      }}
+      className={`lp-float-${floatIdx} border-hairline absolute z-0 overflow-hidden rounded-2xl border shadow-[0_40px_80px_-24px_rgba(0,0,0,0.85)] brightness-[0.82] contrast-[1.06] grayscale`}
+      style={{ width: w, height: h, top, bottom, right, y, rotate }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1.2, delay, ease: E_OUT }}
     >
       {/* Duotone tint */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          zIndex: 2,
-          background: `linear-gradient(150deg, var(--accent) 0%, transparent 55%), ${TEAL_SOFT}`,
-          mixBlendMode: "soft-light",
-          opacity: 0.7,
-        }}
-      />
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(150deg,var(--accent)_0%,transparent_55%),rgba(39,183,165,0.12)] opacity-70 mix-blend-soft-light" />
       {/* Scrim */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          zIndex: 2,
-          background: "linear-gradient(180deg, transparent 45%, rgba(5,5,5,0.75))",
-        }}
-      />
-      {/* Inner parallax layer */}
-      <motion.div className="h-full w-full" style={{ y: innerY, scale: 1.38 }}>
-        {/* Bob layer */}
-        <motion.img
-          src={src}
-          alt=""
-          className="h-full w-full object-cover"
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(180deg,transparent_45%,rgba(5,5,5,0.75))]" />
+      {/* Inner parallax layer — scale paired with motion value, stays in style */}
+      <motion.div className="relative h-full w-full" style={{ y: innerY, scale: 1.38 }}>
+        <motion.div
+          className="relative h-full w-full"
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: bob }}
-        />
+        >
+          <Image src={src} alt="" fill sizes="280px" className="object-cover" />
+        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -397,15 +220,7 @@ function HeroSection() {
     { text: "tattoo", delay: 0.14 },
     {
       text: (
-        <em
-          style={{
-            fontStyle: "normal",
-            background: `linear-gradient(100deg, var(--accent), ${TEAL})`,
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
+        <em className="bg-[linear-gradient(100deg,var(--accent),#27b7a5)] bg-clip-text text-transparent not-italic">
           artist
         </em>
       ),
@@ -413,42 +228,31 @@ function HeroSection() {
     },
   ];
 
+  const isDesktop = useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia("(min-width: 640px)");
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia("(min-width: 640px)").matches,
+    () => false,
+  );
+
   return (
-    <section
-      className="lp-hero relative flex flex-col justify-center overflow-hidden"
-      style={{ minHeight: "100vh", padding: "80px 40px 150px" }}
-    >
+    <section className="lp-hero relative flex min-h-screen flex-col justify-center overflow-hidden px-10 pt-20 pb-[150px]">
       {/* Kicker */}
       <motion.div
-        className="mb-7 flex items-center gap-3"
-        style={{
-          fontFamily: "var(--mono)",
-          fontSize: "11px",
-          letterSpacing: "0.28em",
-          textTransform: "uppercase",
-          color: "var(--text-2)",
-        }}
+        className="text-text-2 mb-7 flex items-center gap-3 font-mono text-[11px] tracking-[0.28em] uppercase"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: E_OUT }}
       >
-        <span
-          className="h-px w-7 shrink-0"
-          style={{ background: "var(--accent)", boxShadow: "0 0 10px var(--accent-glow)" }}
-        />
+        <span className="bg-ink-spot h-px w-7 shrink-0 shadow-[0_0_10px_var(--accent-glow)]" />
         Style-matched · Geolocated · Wherever you are
       </motion.div>
 
       {/* Headline */}
-      <h1
-        className="lp-headline font-bold uppercase"
-        style={{
-          fontSize: "clamp(48px, 7.8vw, 138px)",
-          lineHeight: 0.86,
-          letterSpacing: "-0.04em",
-          maxWidth: "min(52%, 680px)",
-        }}
-      >
+      <h1 className="lp-headline max-w-[min(52%,680px)] text-[clamp(48px,7.8vw,138px)] leading-[0.86] font-bold tracking-[-0.04em] uppercase">
         {headLines.map(({ text, delay }, i) => (
           <span key={i} className="block overflow-hidden pb-[0.04em]">
             <motion.span
@@ -474,8 +278,7 @@ function HeroSection() {
 
       {/* Sub */}
       <motion.p
-        className="mt-9 max-w-[46ch] leading-[1.55]"
-        style={{ fontSize: "clamp(15px, 1.5vw, 19px)", color: "var(--text-2)" }}
+        className="text-text-2 mt-9 max-w-[46ch] text-[clamp(15px,1.5vw,19px)] leading-[1.55]"
         initial={{ opacity: 0, y: 26 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.5, ease: E_OUT }}
@@ -493,30 +296,20 @@ function HeroSection() {
       >
         <Link
           href="/explore"
-          className="lp-cta-btn inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full px-7 text-xs font-semibold tracking-[0.12em] text-white uppercase transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_var(--accent-glow)] sm:justify-start"
-          style={{
-            fontFamily: "var(--mono)",
-            background: "var(--accent)",
-            boxShadow: "0 10px 40px -8px var(--accent-glow)",
-          }}
+          className="lp-cta-btn bg-ink-spot inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full px-7 font-mono text-xs font-semibold tracking-[0.12em] text-white uppercase shadow-[0_10px_40px_-8px_var(--accent-glow)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_var(--accent-glow)] sm:justify-start"
         >
           Find an artist <ArrowRight size={16} />
         </Link>
         <Link
           href="/login"
-          className="lp-cta-btn inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full px-7 text-xs font-semibold tracking-[0.12em] uppercase transition-all hover:-translate-y-0.5 hover:border-[#27b7a5] hover:text-[#27b7a5] sm:justify-start"
-          style={{
-            fontFamily: "var(--mono)",
-            color: "var(--text)",
-            border: "1px solid var(--border-ds)",
-          }}
+          className="lp-cta-btn border-ds-border inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full border px-7 font-mono text-xs font-semibold tracking-[0.12em] text-(--text) uppercase transition-all hover:-translate-y-0.5 hover:border-[#27b7a5] hover:text-[#27b7a5] sm:justify-start"
         >
           Join as an artist
         </Link>
       </motion.div>
 
       {/* Floating images (desktop only) */}
-      {FLOATS.map((f, i) => (
+      {isDesktop && FLOATS.map((f, i) => (
         <FloatImg
           key={i}
           floatIdx={i}
@@ -534,23 +327,10 @@ function HeroSection() {
       ))}
 
       {/* Scroll cue */}
-      <div
-        className="lp-scroll-cue absolute bottom-9 left-10 flex items-center gap-3"
-        style={{
-          fontFamily: "var(--mono)",
-          fontSize: "10px",
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "var(--faint)",
-        }}
-      >
-        <div
-          className="relative h-10 w-px overflow-hidden"
-          style={{ background: "var(--border-ds)" }}
-        >
+      <div className="lp-scroll-cue text-faint absolute bottom-9 left-10 flex items-center gap-3 font-mono text-[10px] tracking-[0.22em] uppercase">
+        <div className="bg-ds-border relative h-10 w-px overflow-hidden">
           <motion.div
-            className="absolute left-0 w-px"
-            style={{ height: "40%", background: TEAL, boxShadow: `0 0 8px ${TEAL_GLOW}` }}
+            className="absolute left-0 h-[40%] w-px bg-[#27b7a5] shadow-[0_0_8px_rgba(39,183,165,0.42)]"
             animate={{ top: ["-40%", "100%"] }}
             transition={{ duration: 1.9, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -567,15 +347,7 @@ function MarqueeSection() {
   const items = [...MARQUEE, ...MARQUEE];
 
   return (
-    <div
-      className="overflow-hidden py-6"
-      style={{
-        borderTop: "1px solid var(--hairline)",
-        borderBottom: "1px solid var(--hairline)",
-        WebkitMaskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)",
-        maskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)",
-      }}
-    >
+    <div className="border-hairline overflow-hidden border-y [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)] py-6">
       <motion.div
         className="inline-flex whitespace-nowrap"
         animate={{ x: ["0%", "-50%"] }}
@@ -584,18 +356,10 @@ function MarqueeSection() {
         {items.map((s, i) => (
           <span
             key={i}
-            className="lp-marquee-item inline-flex items-center gap-[26px] px-[26px]"
-            style={{
-              fontSize: "30px",
-              letterSpacing: "-0.01em",
-              color: i % 3 === 1 ? "var(--faint)" : "var(--text)",
-            }}
+            className={`lp-marquee-item inline-flex items-center gap-[26px] px-[26px] text-[30px] tracking-[-0.01em] ${i % 3 === 1 ? "text-faint" : "text-(--text)"}`}
           >
             {s}
-            <span
-              className="block h-[7px] w-[7px] shrink-0 rounded-full"
-              style={{ background: TEAL, boxShadow: `0 0 10px ${TEAL_GLOW}` }}
-            />
+            <span className="block h-[7px] w-[7px] shrink-0 rounded-full bg-[#27b7a5] shadow-[0_0_10px_rgba(39,183,165,0.42)]" />
           </span>
         ))}
       </motion.div>
@@ -607,14 +371,7 @@ function MarqueeSection() {
 
 function MockCard({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="w-full max-w-[620px] rounded-[20px] p-6"
-      style={{
-        background: "var(--surface)",
-        border: "1px solid var(--hairline)",
-        boxShadow: "0 40px 90px -30px rgba(0,0,0,0.9)",
-      }}
-    >
+    <div className="bg-surface border-hairline w-full max-w-[620px] rounded-[20px] border p-6 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.9)]">
       {children}
     </div>
   );
@@ -622,16 +379,7 @@ function MockCard({ children }: { children: React.ReactNode }) {
 
 function MockLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="mb-4"
-      style={{
-        fontFamily: "var(--mono)",
-        fontSize: "10px",
-        letterSpacing: "0.16em",
-        textTransform: "uppercase",
-        color: "var(--faint)",
-      }}
-    >
+    <div className="text-faint mb-4 font-mono text-[10px] tracking-[0.16em] uppercase">
       {children}
     </div>
   );
@@ -639,16 +387,7 @@ function MockLabel({ children }: { children: React.ReactNode }) {
 
 function MockGoBtn({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="inline-flex h-[38px] items-center gap-[6px] rounded-full px-4 text-white"
-      style={{
-        background: "var(--accent)",
-        fontFamily: "var(--mono)",
-        fontSize: "11px",
-        letterSpacing: "0.12em",
-        textTransform: "uppercase",
-      }}
-    >
+    <div className="bg-ink-spot inline-flex h-[38px] items-center gap-[6px] rounded-full px-4 font-mono text-[11px] tracking-[0.12em] text-white uppercase">
       {children}
     </div>
   );
@@ -658,7 +397,7 @@ function HowMockSearch() {
   return (
     <MockCard>
       <MockLabel>New search</MockLabel>
-      <div style={{ fontSize: "22px", lineHeight: 1.3, color: "var(--text)" }}>
+      <div className="text-[22px] leading-[1.3] text-(--text)">
         fine line botanical, ribcage, palm-sized
       </div>
       <div className="mt-5 flex gap-2">
@@ -690,12 +429,7 @@ function HowMockSearch() {
         ].map((icon, j) => (
           <div
             key={j}
-            className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px]"
-            style={{
-              border: "1px solid var(--hairline)",
-              background: "var(--surface-2)",
-              color: "var(--dim)",
-            }}
+            className="border-hairline bg-surface-2 text-dim flex h-[38px] w-[38px] items-center justify-center rounded-[10px] border"
           >
             {icon}
           </div>
@@ -717,41 +451,20 @@ function HowMockMatch() {
       {ARTISTS_MOCK.map((a, i) => (
         <div key={i}>
           <div
-            className="flex items-center gap-3 py-3"
-            style={{ borderTop: i === 0 ? "none" : "1px solid var(--hairline)" }}
+            className={`flex items-center gap-3 py-3 ${i !== 0 ? "border-hairline border-t" : ""}`}
           >
-            <img src={a.avatar} alt="" className="h-11 w-11 shrink-0 rounded-full object-cover" />
+            <Image src={a.avatar} alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded-full object-cover" />
             <div>
-              <div style={{ fontSize: "18px" }}>{a.name}</div>
-              <div
-                style={{
-                  fontFamily: "var(--mono)",
-                  fontSize: "10px",
-                  color: "var(--dim)",
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  marginTop: 2,
-                }}
-              >
+              <div className="text-[18px]">{a.name}</div>
+              <div className="text-dim mt-[2px] font-mono text-[10px] tracking-[0.06em] uppercase">
                 {a.styles}
               </div>
             </div>
-            <div
-              className="ml-auto"
-              style={{ fontFamily: "var(--mono)", fontSize: "15px", color: TEAL }}
-            >
-              {[96, 91, 84][i]}%
-            </div>
+            <div className="ml-auto font-mono text-[15px] text-[#27b7a5]">{[96, 91, 84][i]}%</div>
           </div>
           {i === 0 && (
-            <div
-              className="mt-2.5 mb-1 h-1 overflow-hidden rounded-sm"
-              style={{ background: "var(--surface-3)" }}
-            >
-              <div
-                className="h-full w-[96%] rounded-sm"
-                style={{ background: `linear-gradient(90deg, var(--accent), ${TEAL})` }}
-              />
+            <div className="bg-surface-3 mt-2.5 mb-1 h-1 overflow-hidden rounded-sm">
+              <div className="h-full w-[96%] rounded-sm bg-[linear-gradient(90deg,var(--accent),#27b7a5)]" />
             </div>
           )}
         </div>
@@ -766,46 +479,24 @@ function HowMockBook() {
       <MockLabel>Luna Vargas · @luna.ink</MockLabel>
       <div className="flex items-center gap-4">
         <div className="flex-1">
-          <div
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: "9px",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: TEAL,
-            }}
-          >
+          <div className="font-mono text-[9px] tracking-[0.14em] text-[#27b7a5] uppercase">
             ● Now
           </div>
-          <div style={{ fontSize: "20px", marginTop: 4 }}>Santa Teresa</div>
+          <div className="mt-1 text-[20px]">Santa Teresa</div>
         </div>
-        <div style={{ color: "var(--faint)" }}>
+        <div className="text-faint">
           <ArrowRight size={18} />
         </div>
         <div className="flex-1">
-          <div
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: "9px",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--faint)",
-            }}
-          >
-            Next
-          </div>
-          <div style={{ fontSize: "20px", marginTop: 4 }}>Tamarindo</div>
+          <div className="text-faint font-mono text-[9px] tracking-[0.14em] uppercase">Next</div>
+          <div className="mt-1 text-[20px]">Tamarindo</div>
         </div>
       </div>
       <div className="mt-4 flex gap-1.5">
         {[true, true, false, false, false].map((on, i) => (
           <div
             key={i}
-            className="h-[5px] flex-1 rounded-full"
-            style={{
-              background: on ? TEAL : "var(--surface-3)",
-              boxShadow: on ? `0 0 10px ${TEAL_GLOW}` : "none",
-            }}
+            className={`h-[5px] flex-1 rounded-full ${on ? "bg-[#27b7a5] shadow-[0_0_10px_rgba(39,183,165,0.42)]" : "bg-surface-3"}`}
           />
         ))}
       </div>
@@ -837,20 +528,9 @@ function HowSection() {
 
   return (
     <section className="relative h-[calc(210vh)] lg:ml-[30px]" ref={sectionRef} id="how">
-      <div
-        className="lp-how-inner sticky top-0 overflow-hidden"
-        style={{ height: "100vh", padding: "0 40px" }}
-      >
+      <div className="lp-how-inner sticky top-0 h-screen overflow-hidden px-10">
         {/* Step counter */}
-        <div
-          className="lp-how-count absolute top-10 right-10 flex gap-2.5"
-          style={{
-            fontFamily: "var(--mono)",
-            fontSize: "11px",
-            letterSpacing: "0.2em",
-            color: "var(--faint)",
-          }}
-        >
+        <div className="lp-how-count text-faint absolute top-10 right-10 flex gap-2.5 font-mono text-[11px] tracking-[0.2em]">
           <span>STEP</span>
           <span>
             <AnimatePresence mode="wait">
@@ -860,8 +540,7 @@ function HowSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.3, ease: E_OUT }}
-                className="inline-block font-medium"
-                style={{ color: "var(--text)" }}
+                className="inline-block font-medium text-(--text)"
               >
                 0{activeStep + 1}
               </motion.b>
@@ -870,40 +549,22 @@ function HowSection() {
           </span>
         </div>
 
-        <div
-          className="lp-how-grid grid h-full items-center gap-2"
-          style={{ gridTemplateColumns: "1fr 1fr" }}
-        >
+        <div className="lp-how-grid grid h-full grid-cols-2 items-center gap-2">
           {/* Left: text */}
           <div className="relative">
             {/* Progress rail */}
-            <div
-              className="absolute top-2 bottom-2 -left-6 w-[2px] overflow-hidden rounded-sm"
-              style={{ background: "var(--hairline)" }}
-            >
+            <div className="bg-hairline absolute top-2 bottom-2 -left-6 w-[2px] overflow-hidden rounded-sm">
               <motion.div
-                className="absolute inset-x-0 top-0 h-full origin-top"
-                style={{
-                  background: `linear-gradient(180deg, var(--accent), ${TEAL})`,
-                  scaleY: railScaleY,
-                }}
+                className="absolute inset-x-0 top-0 h-full origin-top bg-[linear-gradient(180deg,var(--accent),#27b7a5)]"
+                style={{ scaleY: railScaleY }}
               />
             </div>
 
-            <div
-              style={{
-                fontFamily: "var(--mono)",
-                fontSize: "11px",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "var(--dim)",
-                marginBottom: 36,
-              }}
-            >
+            <div className="text-dim mb-9 font-mono text-[11px] tracking-[0.2em] uppercase">
               How InkSpot works
             </div>
 
-            <div className="lp-step-min relative" style={{ minHeight: 280 }}>
+            <div className="lp-step-min relative min-h-[280px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeStep}
@@ -912,38 +573,14 @@ function HowSection() {
                   exit={{ opacity: 0, y: -22 }}
                   transition={{ duration: 0.5, ease: E_OUT }}
                 >
-                  <div
-                    style={{
-                      fontFamily: "var(--mono)",
-                      fontSize: "13px",
-                      letterSpacing: "0.2em",
-                      color: TEAL,
-                      marginBottom: 18,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    <b style={{ color: "var(--faint)", fontWeight: 400 }}>0{activeStep + 1}</b> / 03
-                    &nbsp; {HOW_STEPS[activeStep].k}
+                  <div className="mb-[18px] font-mono text-[13px] tracking-[0.2em] text-[#27b7a5] uppercase">
+                    <b className="text-faint font-normal">0{activeStep + 1}</b> / 03 &nbsp;{" "}
+                    {HOW_STEPS[activeStep].k}
                   </div>
-                  <h3
-                    className="lp-step-h3 font-medium"
-                    style={{
-                      fontSize: "clamp(36px, 4.6vw, 68px)",
-                      lineHeight: 0.98,
-                      letterSpacing: "-0.02em",
-                      margin: "0 0 20px",
-                    }}
-                  >
+                  <h3 className="lp-step-h3 mb-5 text-[clamp(36px,4.6vw,68px)] leading-[0.98] font-medium tracking-[-0.02em]">
                     {HOW_STEPS[activeStep].h}
                   </h3>
-                  <p
-                    style={{
-                      fontSize: "clamp(15px, 1.4vw, 18px)",
-                      lineHeight: 1.55,
-                      color: "var(--text-2)",
-                      maxWidth: "38ch",
-                    }}
-                  >
+                  <p className="text-text-2 max-w-[38ch] text-[clamp(15px,1.4vw,18px)] leading-[1.55]">
                     {HOW_STEPS[activeStep].p}
                   </p>
                 </motion.div>
@@ -982,67 +619,35 @@ function ShowcaseSection() {
     <section
       ref={ref}
       id="showcase"
-      className="lp-showcase relative flex flex-col items-center text-center"
-      style={{ padding: "140px 40px" }}
+      className="lp-showcase relative flex flex-col items-center px-10 py-[140px] text-center"
     >
       {/* Eyebrow */}
       <motion.div
-        className="inline-flex items-center gap-[9px]"
-        style={{
-          fontFamily: "var(--mono)",
-          fontSize: "11px",
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          color: TEAL,
-        }}
+        className="inline-flex items-center gap-[9px] font-mono text-[11px] tracking-[0.2em] text-[#27b7a5] uppercase"
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, ease: E_OUT }}
       >
-        <span
-          className="block h-[6px] w-[6px] rounded-full"
-          style={{ background: TEAL, boxShadow: `0 0 10px ${TEAL_GLOW}` }}
-        />
+        <span className="block h-[6px] w-[6px] rounded-full bg-[#27b7a5] shadow-[0_0_10px_rgba(39,183,165,0.42)]" />
         The search moment
       </motion.div>
 
       {/* Heading */}
       <motion.h2
-        className="font-medium"
-        style={{
-          fontSize: "clamp(34px, 5vw, 76px)",
-          lineHeight: 1.0,
-          letterSpacing: "-0.02em",
-          margin: "22px 0 0",
-          maxWidth: "18ch",
-        }}
+        className="mt-[22px] max-w-[18ch] text-[clamp(34px,5vw,76px)] leading-none font-medium tracking-[-0.02em]"
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, delay: 0.1, ease: E_OUT }}
       >
         It reads the work, then{" "}
-        <em
-          style={{
-            fontStyle: "normal",
-            background: `linear-gradient(100deg, var(--accent), ${TEAL})`,
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
+        <em className="bg-[linear-gradient(100deg,var(--accent),#27b7a5)] bg-clip-text text-transparent not-italic">
           finds your match.
         </em>
       </motion.h2>
 
       {/* Sub */}
       <motion.p
-        className="mt-5"
-        style={{
-          maxWidth: "50ch",
-          color: "var(--text-2)",
-          fontSize: "clamp(15px, 1.4vw, 18px)",
-          lineHeight: 1.55,
-        }}
+        className="text-text-2 mt-5 max-w-[50ch] text-[clamp(15px,1.4vw,18px)] leading-[1.55]"
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, delay: 0.2, ease: E_OUT }}
@@ -1052,36 +657,18 @@ function ShowcaseSection() {
       </motion.p>
 
       {/* Stage */}
-      <div className="mt-16 flex w-full flex-col gap-4" style={{ maxWidth: 600 }}>
+      <div className="mt-16 flex w-full max-w-[600px] flex-col gap-4">
         {/* Search input */}
         <motion.div
-          className="rounded-[18px] text-left"
-          style={{
-            padding: "20px 22px",
-            background: "var(--surface)",
-            border: "1px solid var(--hairline)",
-            boxShadow: "0 40px 90px -36px rgba(0,0,0,0.9)",
-          }}
+          className="bg-surface border-hairline rounded-[18px] border px-[22px] py-5 text-left shadow-[0_40px_90px_-36px_rgba(0,0,0,0.9)]"
           initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.3, ease: E_OUT }}
         >
-          <div
-            className="mb-3"
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: "10px",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--faint)",
-            }}
-          >
+          <div className="text-faint mb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
             You searched
           </div>
-          <div
-            className="overflow-hidden"
-            style={{ fontSize: "clamp(20px, 2.4vw, 28px)", lineHeight: 1.4, color: "var(--text)" }}
-          >
+          <div className="overflow-hidden text-[clamp(20px,2.4vw,28px)] leading-[1.4] text-(--text)">
             <motion.span
               className="inline"
               initial={{ clipPath: "inset(0 100% 0 0)" }}
@@ -1091,8 +678,7 @@ function ShowcaseSection() {
               fine line botanical, ribcage, palm-sized
             </motion.span>
             <motion.span
-              className="ml-[2px] inline-block w-[3px] align-text-bottom"
-              style={{ height: "1.05em", background: TEAL, boxShadow: `0 0 10px ${TEAL_GLOW}` }}
+              className="ml-[2px] inline-block h-[1.05em] w-[3px] bg-[#27b7a5] align-text-bottom shadow-[0_0_10px_rgba(39,183,165,0.42)]"
               animate={{ opacity: [1, 0, 1] }}
               transition={{ duration: 0.9, repeat: Infinity, ease: [1, 0, 0, 1] }}
             />
@@ -1101,38 +687,19 @@ function ShowcaseSection() {
 
         {/* AI answer */}
         <motion.div
-          className="rounded-[18px] text-left"
-          style={{
-            padding: "18px 22px",
-            background: `linear-gradient(180deg, ${TEAL_SOFT}, transparent)`,
-            border: "1px solid var(--hairline)",
-          }}
+          className="border-hairline rounded-[18px] border bg-[linear-gradient(180deg,rgba(39,183,165,0.12),transparent)] px-[22px] py-[18px] text-left"
           initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 2.0, ease: E_OUT }}
         >
-          <div
-            className="mb-2.5 flex items-center gap-[7px]"
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: "10px",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: TEAL,
-            }}
-          >
-            <span
-              className="block h-[5px] w-[5px] rounded-full"
-              style={{ background: TEAL, boxShadow: `0 0 8px ${TEAL_GLOW}` }}
-            />
+          <div className="mb-2.5 flex items-center gap-[7px] font-mono text-[10px] tracking-[0.16em] text-[#27b7a5] uppercase">
+            <span className="block h-[5px] w-[5px] rounded-full bg-[#27b7a5] shadow-[0_0_8px_rgba(39,183,165,0.42)]" />
             InkSpot AI
           </div>
-          <div
-            style={{ fontSize: "clamp(16px, 1.6vw, 19px)", lineHeight: 1.45, color: "var(--text)" }}
-          >
-            Three artists near <span style={{ color: TEAL }}>your location</span> work in delicate
-            single-needle botanicals. <span style={{ color: TEAL }}>Luna Vargas</span> is the
-            closest match — and she&apos;s in town until the 22nd.
+          <div className="text-[clamp(16px,1.6vw,19px)] leading-[1.45] text-(--text)">
+            Three artists near <span className="text-[#27b7a5]">your location</span> work in
+            delicate single-needle botanicals. <span className="text-[#27b7a5]">Luna Vargas</span>{" "}
+            is the closest match — and she&apos;s in town until the 22nd.
           </div>
         </motion.div>
 
@@ -1141,8 +708,7 @@ function ShowcaseSection() {
           {SHOWCASE_CARDS.map(({ artist, pct, style }, i) => (
             <motion.div
               key={i}
-              className="rounded-2xl p-4 text-left"
-              style={{ background: "var(--surface)", border: "1px solid var(--hairline)" }}
+              className="bg-surface border-hairline rounded-2xl border p-4 text-left"
               initial={{ opacity: 0, y: 22 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 2.5 + i * 0.15, ease: E_OUT }}
@@ -1151,26 +717,12 @@ function ShowcaseSection() {
                 src={artist.portfolio0}
                 className="aspect-square w-full rounded-[10px]"
               />
-              <div className="mt-3" style={{ fontSize: "16px" }}>
-                {artist.name}
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--mono)",
-                  fontSize: "9px",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--dim)",
-                  marginTop: 3,
-                }}
-              >
+              <div className="mt-3 text-[16px]">{artist.name}</div>
+              <div className="text-dim mt-[3px] font-mono text-[9px] tracking-[0.08em] uppercase">
                 {style}
               </div>
-              <div
-                className="mt-2 flex items-center gap-1.5"
-                style={{ fontFamily: "var(--mono)", fontSize: "13px", color: TEAL }}
-              >
-                <span className="block h-[5px] w-[5px] rounded-full" style={{ background: TEAL }} />
+              <div className="mt-2 flex items-center gap-1.5 font-mono text-[13px] text-[#27b7a5]">
+                <span className="block h-[5px] w-[5px] rounded-full bg-[#27b7a5]" />
                 {pct}% match
               </div>
             </motion.div>
@@ -1193,15 +745,7 @@ function FooterCTA() {
       text: (
         <>
           piece is{" "}
-          <em
-            style={{
-              fontStyle: "normal",
-              background: `linear-gradient(100deg, var(--accent), ${TEAL})`,
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
+          <em className="bg-[linear-gradient(100deg,var(--accent),#27b7a5)] bg-clip-text text-transparent not-italic">
             out there.
           </em>
         </>
@@ -1213,18 +757,10 @@ function FooterCTA() {
   return (
     <section
       ref={ref}
-      className="lp-foot relative overflow-hidden"
-      style={{ padding: "130px 40px 48px", borderTop: "1px solid var(--hairline)" }}
+      className="lp-foot border-hairline relative overflow-hidden border-t px-10 pt-[130px] pb-12"
     >
       {/* Big headline */}
-      <h2
-        className="font-bold uppercase"
-        style={{
-          fontSize: "clamp(56px, 12vw, 200px)",
-          lineHeight: 0.84,
-          letterSpacing: "-0.045em",
-        }}
-      >
+      <h2 className="text-[clamp(56px,12vw,200px)] leading-[0.84] font-bold tracking-[-0.045em] uppercase">
         {footLines.map(({ text, delay }, i) => (
           <span key={i} className="block overflow-hidden pb-[0.04em]">
             <motion.span
@@ -1248,33 +784,20 @@ function FooterCTA() {
       >
         <Link
           href="/explore"
-          className="lp-foot-cta inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full px-7 text-xs font-semibold tracking-[0.12em] text-white uppercase transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_var(--accent-glow)] sm:justify-start"
-          style={{
-            fontFamily: "var(--mono)",
-            background: "var(--accent)",
-            boxShadow: "0 10px 40px -8px var(--accent-glow)",
-          }}
+          className="lp-foot-cta bg-ink-spot inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full px-7 font-mono text-xs font-semibold tracking-[0.12em] text-white uppercase shadow-[0_10px_40px_-8px_var(--accent-glow)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_var(--accent-glow)] sm:justify-start"
         >
           Find an artist <ArrowRight size={16} />
         </Link>
         <Link
           href="/login"
-          className="lp-foot-cta inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full px-7 text-xs font-semibold tracking-[0.12em] uppercase transition-all hover:-translate-y-0.5 hover:border-[#27b7a5] hover:text-[#27b7a5] sm:justify-start"
-          style={{
-            fontFamily: "var(--mono)",
-            color: "var(--text)",
-            border: "1px solid var(--border-ds)",
-          }}
+          className="lp-foot-cta border-ds-border inline-flex h-[54px] items-center justify-center gap-[10px] rounded-full border px-7 font-mono text-xs font-semibold tracking-[0.12em] text-(--text) uppercase transition-all hover:-translate-y-0.5 hover:border-[#27b7a5] hover:text-[#27b7a5] sm:justify-start"
         >
           Join as an artist <ArrowRight size={16} />
         </Link>
       </motion.div>
 
       {/* Bottom bar */}
-      <div
-        className="lp-foot-bottom mt-28 flex flex-wrap items-center justify-between gap-5 pt-7"
-        style={{ borderTop: "1px solid var(--hairline)" }}
-      >
+      <div className="lp-foot-bottom border-hairline mt-28 flex flex-wrap items-center justify-between gap-5 border-t pt-7">
         <Wordmark className="text-[18px]" />
         <div className="flex flex-wrap gap-[18px]">
           {[
@@ -1286,28 +809,13 @@ function FooterCTA() {
             <Link
               key={label}
               href={href}
-              className="transition-colors hover:text-white"
-              style={{
-                fontFamily: "var(--mono)",
-                fontSize: "10px",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--dim)",
-              }}
+              className="text-dim font-mono text-[10px] tracking-[0.14em] uppercase transition-colors hover:text-white"
             >
               {label}
             </Link>
           ))}
         </div>
-        <div
-          style={{
-            fontFamily: "var(--mono)",
-            fontSize: "10px",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--faint)",
-          }}
-        >
+        <div className="text-faint font-mono text-[10px] tracking-[0.14em] uppercase">
           © InkSpot 2026 · The needle travels
         </div>
       </div>
@@ -1346,94 +854,18 @@ export default function LandingClient() {
   };
 
   return (
-    <>
-      {/* Global keyframes + mobile overrides */}
-      <style>{`
-        @keyframes lp-blink { 50% { opacity: 0; } }
+    <div className="relative bg-[#050505] text-(--text)">
+      {/* Ambient gradient glows */}
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(60%_50%_at_12%_6%,rgba(100,103,242,0.45),transparent_60%),radial-gradient(55%_45%_at_92%_96%,rgba(39,183,165,0.42),transparent_62%)] opacity-[0.28]" />
 
-        @media (min-width: 1440px) {
-          .lp-float-0 { width: clamp(172px, 13vw, 300px) !important; height: clamp(228px, 17vw, 400px) !important; }
-          .lp-float-1 { width: clamp(144px, 11vw, 240px) !important; height: clamp(190px, 14vw, 310px) !important; }
-          .lp-float-2 { width: clamp(168px, 12vw, 280px) !important; height: clamp(222px, 16vw, 370px) !important; }
-          .lp-float-3 { width: clamp(138px, 10vw, 220px) !important; height: clamp(182px, 13vw, 290px) !important; }
-        }
-
-        @media (max-width: 639px) {
-          /* Nav */
-          .lp-nav        { padding: 0 20px !important; }
-
-          /* Hero */
-          .lp-hero       { padding: 24px 20px 90px !important; }
-          .lp-headline   { max-width: 100% !important; font-size: 60px !important; line-height: 0.88 !important; }
-
-          /* Hide all float images — they overlap content on small screens */
-          .lp-float-0,
-          .lp-float-1,
-          .lp-float-2,
-          .lp-float-3    { display: none !important; }
-
-          /* Scroll cue */
-          .lp-scroll-cue { left: 20px !important; }
-
-          /* Marquee */
-          .lp-marquee-item { font-size: 20px !important; padding: 0 14px !important; gap: 14px !important; }
-
-          /* CTA buttons — match app design-system h-[46px] on mobile */
-          .lp-cta-btn    { height: 46px !important; }
-
-          /* How section — push content below the sticky nav (70px) */
-          .lp-how-inner  { padding: 0 20px !important; }
-          .lp-how-grid   { grid-template-columns: 1fr !important; align-content: start !important; padding-top: 84px; gap: 24px !important; }
-          .lp-how-visual { min-height: 220px !important; height: auto !important; }
-          .lp-step-min   { min-height: 160px !important; }
-          .lp-step-h3    { font-size: 34px !important; }
-          .lp-how-count  { top: 84px !important; right: 20px !important; }
-
-          /* Showcase */
-          .lp-showcase   { padding: 70px 20px !important; }
-
-          /* Footer */
-          .lp-foot       { padding: 60px 20px 32px !important; }
-          .lp-foot-ctas  { flex-direction: column !important; margin-top: 28px !important; }
-          .lp-foot-cta   { width: 100% !important; justify-content: center !important; height: 46px !important; }
-          .lp-foot-bottom { flex-direction: column !important; align-items: flex-start !important; margin-top: 52px !important; gap: 14px !important; }
-        }
-      `}</style>
-
-      <div className="relative" style={{ background: "#050505", color: "var(--text)" }}>
-        {/* Film grain */}
-        <div
-          className="pointer-events-none fixed inset-0"
-          style={{
-            zIndex: 40,
-            opacity: 0.05,
-            mixBlendMode: "overlay",
-            backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
-          }}
-        />
-
-        {/* Ambient gradient glows */}
-        <div
-          className="pointer-events-none fixed inset-0"
-          style={{
-            zIndex: 0,
-            opacity: 0.28,
-            background: `
-              radial-gradient(60% 50% at 12% 6%, rgba(100, 103, 242, 0.45), transparent 60%),
-              radial-gradient(55% 45% at 92% 96%, rgba(39, 183, 165, 0.42), transparent 62%)
-            `,
-          }}
-        />
-
-        <div className="relative" style={{ zIndex: 1 }}>
-          <LandingNav scrollTo={scrollTo} />
-          <HeroSection />
-          <MarqueeSection />
-          <HowSection />
-          <ShowcaseSection />
-          <FooterCTA />
-        </div>
+      <div className="relative z-[1]">
+        <LandingNav scrollTo={scrollTo} />
+        <HeroSection />
+        <MarqueeSection />
+        <HowSection />
+        <ShowcaseSection />
+        <FooterCTA />
       </div>
-    </>
+    </div>
   );
 }

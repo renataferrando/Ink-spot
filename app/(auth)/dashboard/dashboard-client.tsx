@@ -167,10 +167,9 @@ function AiPanel({ flush }: { flush?: boolean }) {
   return (
     <div
       className={cn(
-        "border-hairline rounded-[18px] border p-[18px]",
+        "border-hairline rounded-[18px] border p-[18px] bg-[linear-gradient(180deg,var(--accent-soft)_0%,transparent_72%)]",
         flush && "rounded-none border-0 border-b",
       )}
-      style={{ background: "linear-gradient(180deg, var(--accent-soft) 0%, transparent 72%)" }}
     >
       <div className="text-ink-spot flex items-center gap-1.5 font-mono text-[10px] tracking-[0.14em] uppercase">
         <AccentDot size={5} />
@@ -385,13 +384,7 @@ function MobileBottomNav({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }
   ];
   return (
     <nav
-      className="border-hairline z-10 grid shrink-0 grid-cols-4 border-t"
-      style={{
-        background: "rgba(0,0,0,0.85)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
-      }}
+      className="border-hairline z-10 grid shrink-0 grid-cols-4 border-t bg-[rgba(0,0,0,0.85)] backdrop-blur-[14px] pb-[max(28px,env(safe-area-inset-bottom,28px))]"
     >
       {tabs.map(({ id, Icon, label }) => (
         <button
@@ -433,8 +426,7 @@ function DesktopTopBar({
   ];
   return (
     <header
-      className="border-hairline sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b bg-[rgba(8,8,8,0.85)] px-8"
-      style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+      className="border-hairline sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b bg-[rgba(8,8,8,0.85)] px-8 backdrop-blur-[20px]"
     >
       {/* Left: wordmark + tabs */}
       <div className="flex items-center gap-9">
@@ -442,8 +434,7 @@ function DesktopTopBar({
           <Link href="/" className="inline-flex items-center gap-1">
             InkSpot
             <span
-              className="bg-ink-spot ml-0.5 inline-block size-2 -translate-y-2 rounded-full"
-              style={{ boxShadow: "0 0 12px var(--accent-glow)" }}
+              className="bg-ink-spot ml-0.5 inline-block size-2 -translate-y-2 rounded-full shadow-[0_0_12px_var(--accent-glow)]"
             />
           </Link>
         </div>
@@ -756,8 +747,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           >
             InkSpot
             <span
-              className="bg-ink-spot ml-[3px] inline-block size-[6px] -translate-y-2 rounded-full"
-              style={{ boxShadow: "0 0 12px var(--accent-glow)" }}
+              className="bg-ink-spot ml-[3px] inline-block size-[6px] -translate-y-2 rounded-full shadow-[0_0_12px_var(--accent-glow)]"
             />
           </Link>
           <Link
