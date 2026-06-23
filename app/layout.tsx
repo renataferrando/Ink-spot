@@ -15,10 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: {
     template: "%s · InkSpot",
-    default: "InkSpot — Find tattoo artists in Costa Rica",
+    default: "InkSpot — Find tattoo artists worldwide",
   },
-  description:
-    "Discover verified studios, styles, and locations for your next tattoo.",
+  description: "Discover verified studios, styles, and locations for your next tattoo.",
 };
 
 export default function RootLayout({
@@ -31,9 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`dark ${GeistSans.variable} ${GeistMono.variable} ${jetbrainsMono.variable} h-full scroll-smooth`}
     >
-      <body className="flex min-h-full flex-col font-sans">
-        {children}
-      </body>
+      <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );
 }

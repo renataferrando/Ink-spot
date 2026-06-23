@@ -16,13 +16,13 @@ export function StyleBadges({ styles, max = 3, className }: StyleBadgesProps) {
       {visible.map((s) => (
         <span
           key={s}
-          className="inline-flex items-center rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+          className="border-border bg-secondary text-muted-foreground inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium"
         >
           {STYLE_LABELS[s]}
         </span>
       ))}
       {overflow > 0 && (
-        <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground/60">
+        <span className="border-border text-muted-foreground/60 inline-flex items-center rounded-full border px-2 py-0.5 text-[11px]">
           +{overflow}
         </span>
       )}

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "InkSpot — Tattoo artists in Santa Teresa",
+    name: "InkSpot",
     short_name: "InkSpot",
     description: "Find the right tattoo artist by style.",
     start_url: "/explore",

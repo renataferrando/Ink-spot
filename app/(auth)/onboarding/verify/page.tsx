@@ -1,103 +1,111 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { ensurePendingClaim } from "@/lib/claims/pending-claim";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClientUntyped as getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
+import { OnboardingHeading } from "@/components/onboarding/onboarding-heading";
+import { InstagramVerificationPanel } from "@/components/artist/instagram-verification-panel";
+import { accentWordClass, ghostTextButtonClass } from "@/lib/ui/field-classes";
+import { instagramOAuthEnabled } from "@/lib/validations/env";
 
-import { VerifyForm } from "./verify-form";
-
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Verify your Instagram" };
 
-function generateCode() {
-  // Format: INK-{4 uppercase hex} e.g. INK-9F2A
-  return (
-    "INK-" +
-    Array.from(crypto.getRandomValues(new Uint8Array(2)))
-      .map((b) => b.toString(16).padStart(2, "0").toUpperCase())
-      .join("")
-  );
+interface VerifyPageProps {
+  searchParams: Promise<{ error?: string }>;
 }
 
-export default async function VerifyPage() {
+const ERROR_COPY: Record<string, string> = {
+  state_mismatch: "Verification expired. Please try connecting Instagram again.",
+  state_malformed: "Verification expired. Please try connecting Instagram again.",
+  exchange_failed: "Instagram rejected our request. Please try again.",
+  ig_already_connected: "Instagram re-authentication failed. Your account is already connected — no action needed.",
+  personal_account:
+    "That Instagram account is set to Personal. Switch it to Business or Creator in the Instagram app, or use the bio-code option below.",
+  handle_mismatch:
+    "That Instagram account doesn't match the handle on your InkSpot profile. Update your handle in Edit profile, then try again.",
+  no_artist: "We couldn't find your artist profile.",
+  persist_failed: "Something went wrong saving your verification. Please try again.",
+  ig_user_denied: "You declined the Instagram permission. You can try again or use the bio-code option below.",
+  ig_not_configured: "Instagram OAuth isn't available right now. Please use the bio-code option below.",
+  missing_code: "Instagram didn't return an authorization code. Please try again.",
+};
+
+export default async function VerifyPage({ searchParams }: VerifyPageProps) {
+  const { error: errorCode } = await searchParams;
+  const errorMessage = errorCode ? (ERROR_COPY[errorCode] ?? "Instagram verification failed.") : null;
+
   const supabase = await getSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();
-  const handle = cookieStore.get("inkspot_handle")?.value;
-  if (!handle) redirect("/onboarding");
+  const cookieHandle = cookieStore.get("inkspot_handle")?.value;
 
   const admin = getSupabaseAdminClient();
-  const { data: artist } = await admin
-    .from("artists")
-    .select("id, instagram_handle, is_claimed")
-    .eq("handle", handle)
-    .single();
+
+  const { data: artist } = cookieHandle
+    ? await admin
+        .from("artists")
+        .select("id, instagram_handle, is_claimed")
+        .eq("handle", cookieHandle)
+        .single()
+    : await admin
+        .from("artists")
+        .select("id, instagram_handle, is_claimed")
+        .eq("claimed_by_user_id", user.id)
+        .maybeSingle();
 
   if (!artist) redirect("/onboarding");
   if (artist.is_claimed) redirect("/onboarding/location");
-  if (!artist.instagram_handle) redirect("/onboarding/location");
+  if (!artist.instagram_handle) redirect("/dashboard/profile");
 
-  // Get or create a pending claim with a verification code
-  const { data: existing } = await admin
-    .from("claims")
-    .select("id, verification_code")
-    .eq("artist_id", artist.id)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const code = await ensurePendingClaim(
+    admin,
+    artist.id,
+    user.id,
+    artist.instagram_handle as string,
+  );
 
-  let code = existing?.verification_code;
-
-  if (!existing) {
-    code = generateCode();
-    await admin.from("claims").insert({
-      artist_id:         artist.id,
-      instagram_user_id: user.id,
-      instagram_handle:  artist.instagram_handle,
-      status:            "pending",
-      verification_code: code,
-    });
-  }
+  const oauthEnabled = instagramOAuthEnabled();
 
   return (
     <OnboardingShell step={3} backHref="/onboarding">
       <div className="space-y-5">
-        <div className="space-y-2">
-          <h1
-            style={{
-              fontFamily: "var(--font-sans, ui-sans-serif)",
-              fontSize: 32,
-              fontWeight: 500,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              color: "var(--text)",
-              margin: 0,
-            }}
-          >
-            Verify your{" "}
-            <span style={{ color: "var(--accent)" }}>handle</span>.
-          </h1>
-          <p
-            style={{
-              fontSize: 14,
-              color: "var(--dim)",
-              lineHeight: 1.55,
-              margin: 0,
-            }}
-          >
-            Paste this code anywhere in your Instagram bio. We&apos;ll fetch
-            the page and confirm. You can remove it 60&nbsp;seconds later.
-          </p>
-        </div>
-
-        <VerifyForm
-          handle={artist.instagram_handle}
-          code={code ?? ""}
+        <OnboardingHeading
+          title={
+            <>
+              Verify your <span className={accentWordClass}>handle</span>.
+            </>
+          }
+          lead={
+            <>
+              Two ways to verify ownership of{" "}
+              <span className="text-text-2 font-mono">@{artist.instagram_handle}</span>. Pick whichever
+              works for your account.
+            </>
+          }
         />
+
+        <InstagramVerificationPanel
+          oauthEnabled={oauthEnabled}
+          next="/onboarding/verify"
+          handle={artist.instagram_handle as string}
+          code={code}
+          errorMessage={errorMessage}
+        />
+
+        <div className="mt-6 text-center">
+          <Link href="/onboarding/location" className={ghostTextButtonClass}>
+            Skip for now →
+          </Link>
+        </div>
       </div>
     </OnboardingShell>
   );

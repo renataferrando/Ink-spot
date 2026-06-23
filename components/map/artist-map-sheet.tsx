@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { btnPrimaryMd } from "@/lib/ui/classes";
 import {
   Drawer,
   DrawerContent,
@@ -30,10 +30,10 @@ export function ArtistMapSheet({ artist, onClose }: ArtistMapSheetProps) {
   return (
     <Drawer open={artist != null} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md px-4 pb-8 pt-2">
+        <div className="mx-auto w-full max-w-md px-4 pt-2 pb-8">
           <DrawerHeader className="px-0">
             <div className="flex items-center gap-3">
-              <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-muted">
+              <div className="bg-muted relative size-12 shrink-0 overflow-hidden rounded-full">
                 {artist?.profile_image_url ? (
                   <Image
                     src={artist.profile_image_url}
@@ -43,15 +43,13 @@ export function ArtistMapSheet({ artist, onClose }: ArtistMapSheetProps) {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-sm font-bold text-muted-foreground">
+                  <div className="text-muted-foreground flex h-full items-center justify-center text-sm font-bold">
                     {artist?.display_name?.slice(0, 2).toUpperCase()}
                   </div>
                 )}
               </div>
               <div className="min-w-0">
-                <DrawerTitle className="truncate text-base">
-                  {artist?.display_name}
-                </DrawerTitle>
+                <DrawerTitle className="truncate text-base">{artist?.display_name}</DrawerTitle>
                 <DrawerDescription className="truncate text-xs">
                   {artist?.current_location?.location_name}
                 </DrawerDescription>
@@ -62,12 +60,10 @@ export function ArtistMapSheet({ artist, onClose }: ArtistMapSheetProps) {
           {artist && (
             <div className="space-y-4">
               <StyleBadges styles={artist.primary_styles} max={4} />
-              <Button className="w-full" asChild>
-                <Link href={`/artist/${artist.handle}`}>
-                  View full profile
-                  <ArrowRight className="ml-2 size-4" aria-hidden />
-                </Link>
-              </Button>
+              <Link href={`/artist/${artist.handle}`} className={btnPrimaryMd}>
+                View full profile
+                <ArrowRight size={16} aria-hidden />
+              </Link>
             </div>
           )}
         </div>

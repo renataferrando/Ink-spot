@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('deps:', pkg.dependencies['@anthropic-ai/sdk']\\); console.log\\('devDeps:', pkg.devDependencies['@anthropic-ai/sdk']\\);\")",
+      "Bash(npm uninstall *)",
+      "Bash(npm test *)",
+      "Read(//Users/renataferrando/.claude/**)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); mcps=d.get\\('mcpServers',{}\\); [print\\(k\\) for k in mcps]\")",
+      "Bash(log stream *)",
+      "Bash(sudo log stream --pid 1294)",
+      "Read(//private/tmp/**)",
+      "Read(//Users/renataferrando/**)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(kill 24886)",
+      "Bash(npx playwright *)",
+      "Bash(npx --yes playwright@1.60.0 --version)"
+    ]
+  }
+}

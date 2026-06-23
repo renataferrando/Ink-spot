@@ -35,9 +35,18 @@ const serverSchema = z.object({
   OPENCAGE_API_KEY: z.string().min(1).optional(),
   ADMIN_USER_ID: z.preprocess(
     (v) => (v === "" || v === undefined ? undefined : v),
-    z.string().uuid().optional()
+    z.string().uuid().optional(),
   ),
   CRON_SECRET: z.string().min(32).optional(),
+  // Upstash Redis — required for rate limiting in production
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+  // Instagram OAuth (ADR 015). All four are required together — the
+  // instagramOAuthEnabled() helper gates the UI/routes when any is missing.
+  INSTAGRAM_APP_ID: z.string().min(1).optional(),
+  INSTAGRAM_APP_SECRET: z.string().min(1).optional(),
+  INSTAGRAM_REDIRECT_URI: z.string().url().optional(),
+  TOKEN_ENCRYPTION_KEY: z.string().min(1).optional(),
 });
 
 const clientRuntimeEnv = {
@@ -77,3 +86,17 @@ export const env = {
 } as z.infer<typeof clientSchema> & Partial<z.infer<typeof serverSchema>>;
 
 export type Env = typeof env;
+
+/**
+ * True iff every env var the Instagram Business OAuth flow needs is set.
+ * The UI uses this to decide whether to surface the "Connect Instagram"
+ * button vs. render it disabled.
+ */
+export function instagramOAuthEnabled(): boolean {
+  return Boolean(
+    env.INSTAGRAM_APP_ID &&
+      env.INSTAGRAM_APP_SECRET &&
+      env.INSTAGRAM_REDIRECT_URI &&
+      env.TOKEN_ENCRYPTION_KEY,
+  );
+}

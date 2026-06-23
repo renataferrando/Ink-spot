@@ -6,19 +6,27 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   ArrowRight,
-  ArrowUp,
   Calendar,
   ChevronLeft,
   Heart,
+  MapPin,
   MessageSquare,
   Share2,
 } from "lucide-react";
 
 import type { ArtistPublic } from "@/types/artist";
 import { STYLE_LABELS } from "@/types/artist";
+import { cn } from "@/lib/utils";
+import { formatCityCountry, splitCityCountry } from "@/lib/location";
+import { btnPrimaryLg, btnSecondaryLg, pageColumnClass } from "@/lib/ui/classes";
+import { ArtistQAPanel } from "@/components/ai/artist-qa-panel";
+import { toggleSave } from "@/actions/saved/toggle-save";
 
 interface ArtistProfileProps {
   artist: ArtistPublic;
+  aiSummary?: string | null;
+  isSaved?: boolean;
+  isOwner?: boolean;
 }
 
 /**
@@ -32,9 +40,10 @@ interface ArtistProfileProps {
  * Stages 4.1 + 5.5.2 will populate the Style brief; Stage 5.5.3 will
  * activate the Q&A panel input + suggestion chips.
  */
-export function ArtistProfile({ artist }: ArtistProfileProps) {
+export function ArtistProfile({ artist, aiSummary, isSaved = false, isOwner = false }: ArtistProfileProps) {
   const router = useRouter();
-  const [savedToast, setSavedToast] = useState(false);
+  const [saved, setSaved] = useState(isSaved);
+  const [savedToast, setSavedToast] = useState<"saved" | "removed" | "auth" | null>(null);
 
   const initials = artist.display_name.slice(0, 2).toUpperCase();
   const firstPortfolioImage = artist.portfolio_items[0]?.image_url ?? null;
@@ -61,12 +70,26 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
   const inquireDisabledReason =
     "No public contact for this artist yet — try the Save action and check back later.";
 
-  const upcoming = artist.upcoming_locations?.[0] ?? null;
-  const styleBreakdown = buildStyleBreakdownStub();
+  const upcoming = artist.next_location ?? artist.upcoming_locations?.[0] ?? null;
+  const nowLoc = splitCityCountry(artist.current_location?.location_name);
+  const nextLoc = splitCityCountry(upcoming?.location_name);
 
-  function showSaveToast() {
-    setSavedToast(true);
-    window.setTimeout(() => setSavedToast(false), 3500);
+  async function handleSave() {
+    const prev = saved;
+    setSaved(!prev);
+    try {
+      const result = await toggleSave(artist.id);
+      if ("requiresAuth" in result) {
+        setSaved(prev);
+        setSavedToast("auth");
+      } else {
+        setSaved(result.saved);
+        setSavedToast(result.saved ? "saved" : "removed");
+      }
+    } catch {
+      setSaved(prev);
+    }
+    window.setTimeout(() => setSavedToast(null), 3000);
   }
 
   function handleShare() {
@@ -82,271 +105,313 @@ export function ArtistProfile({ artist }: ArtistProfileProps) {
   return (
     <>
       {/* ── Cover ─────────────────────────────────────────── */}
-      <div className="cover">
+      <div className="bg-surface-2 relative h-[300px] w-full overflow-hidden after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.15)_0%,rgba(0,0,0,0)_28%,rgba(0,0,0,0.9)_100%)] after:content-['']">
         {coverSrc ? (
-          <Image
-            src={coverSrc}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            className="object-cover"
-          />
+          <Image src={coverSrc} alt="" fill sizes="100vw" priority className="object-cover" />
         ) : (
-          <div className="initials-fallback" aria-hidden>
+          <div
+            aria-hidden
+            className="text-faint absolute inset-0 flex items-center justify-center font-mono text-[64px] tracking-[0.04em] uppercase"
+          >
             {initials}
           </div>
         )}
         <button
           type="button"
-          className="back-btn"
           aria-label="Back"
           onClick={() => router.back()}
+          className="absolute top-3.5 left-3.5 z-5 flex size-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white backdrop-blur-[10px] transition-colors hover:bg-black/70"
         >
           <ChevronLeft size={18} aria-hidden />
         </button>
         <button
           type="button"
-          className="share-btn"
           aria-label="Share profile"
           onClick={handleShare}
+          className="absolute top-3.5 right-3.5 z-5 flex size-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white backdrop-blur-[10px] transition-colors hover:bg-black/70"
         >
           <Share2 size={16} aria-hidden />
         </button>
         {artist.is_demo && (
-          <div className="demo-banner">
-            <span className="dot" />
+          <div className="border-hairline text-text-2 absolute top-[54px] left-3.5 z-4 flex items-center gap-1.5 rounded-full border bg-black/70 px-2.5 py-1.5 font-mono text-[10px] tracking-widest uppercase backdrop-blur-[10px]">
+            <span className="size-1.5 rounded-full bg-[#ffb340]" />
             Demo profile · unclaimed
           </div>
         )}
       </div>
 
-      {/* ── Profile head ──────────────────────────────────── */}
-      <div className="profile-head">
-        {artist.instagram_handle && (
-          <div className="handle">@{artist.instagram_handle}</div>
-        )}
-        <h1 className="name">
-          {displayFirst}
-          {displayRest && <> <em>{displayRest}</em></>}
-        </h1>
-        <div className="meta">
-          {artist.years_experience != null && (
-            <span>{artist.years_experience}&nbsp;yrs</span>
+      <div className={cn(pageColumnClass, "w-full")}>
+        {/* ── Profile head ──────────────────────────────────── */}
+        <div className="relative z-5 -mt-12 px-[18px] pt-2">
+          {artist.instagram_handle && (
+            <div className="text-text-2 mb-2 font-mono text-[12px]">@{artist.instagram_handle}</div>
           )}
-          {artist.years_experience != null && artist.primary_styles.length > 0 && (
-            <span className="sep">·</span>
-          )}
-          {artist.primary_styles.length > 0 && (
-            <span>
-              {artist.primary_styles
-                .slice(0, 2)
-                .map((s) => STYLE_LABELS[s])
-                .join(" / ")}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* ── Location bar (Now → Next) ─────────────────────── */}
-      {(artist.current_location || upcoming) && (
-        <div className="location-bar" id="travel">
-          <div className="col now">
-            <div className="lbl">Now</div>
-            <div className="val">
-              {artist.current_location?.location_name?.split(",")[0] ?? "—"}
-            </div>
-            <div className="sub">
-              {artist.current_location?.studio_name ?? ""}
-            </div>
-          </div>
-          <div className="arrow" aria-hidden>
-            <ArrowRight size={14} />
-          </div>
-          <div className="col next">
-            <div className="lbl">Next</div>
-            <div className="val">
-              {upcoming?.location_name?.split(",")[0] ?? "Open"}
-            </div>
-            <div className="sub">
-              {upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : ""}
-            </div>
+          <h1 className="mb-2 text-[44px] leading-[0.95] font-medium tracking-[-0.02em]">
+            {displayFirst}
+            {displayRest && (
+              <>
+                {" "}
+                <em className="text-ink-spot not-italic">{displayRest}</em>
+              </>
+            )}
+          </h1>
+          <div className="text-text-2 mt-2 flex items-center gap-3 text-[13px]">
+            {artist.years_experience != null && <span>{artist.years_experience}&nbsp;yrs</span>}
+            {artist.years_experience != null && artist.primary_styles.length > 0 && (
+              <span className="text-faint">·</span>
+            )}
+            {artist.primary_styles.length > 0 && (
+              <span>
+                {artist.primary_styles
+                  .slice(0, 2)
+                  .map((s) => STYLE_LABELS[s])
+                  .join(" / ")}
+              </span>
+            )}
           </div>
         </div>
-      )}
 
-      {/* ── CTA row ───────────────────────────────────────── */}
-      <div className="cta-row">
-        {inquireHref ? (
-          <a
-            className="btn-primary"
-            href={inquireHref}
-            target={inquireHref.startsWith("http") ? "_blank" : undefined}
-            rel={inquireHref.startsWith("http") ? "noopener noreferrer" : undefined}
+        {/* ── Location bar (Now → Next) ─────────────────────── */}
+        {(artist.current_location || upcoming) && (
+          <div
+            id="travel"
+            className="bg-surface border-hairline mx-[18px] mt-5 mb-0 flex min-w-0 items-center gap-3.5 rounded-[14px] border px-4 py-4"
           >
-            <MessageSquare size={14} aria-hidden />
-            {inquireLabel}
-          </a>
-        ) : (
-          <button
-            type="button"
-            className="btn-primary"
-            disabled
-            title={inquireDisabledReason}
-          >
-            <MessageSquare size={14} aria-hidden />
-            Inquire
-          </button>
-        )}
-        <a className="btn-secondary" href="#travel">
-          <Calendar size={14} aria-hidden />
-          Travel dates
-        </a>
-        <button
-          type="button"
-          className="btn-icon"
-          aria-label="Save artist"
-          onClick={showSaveToast}
-        >
-          <Heart size={18} aria-hidden />
-        </button>
-      </div>
-
-      {/* ── Bio ───────────────────────────────────────────── */}
-      {artist.bio && <div className="bio">{artist.bio}</div>}
-
-      {/* ── Style brief (only when AI summary + style_confidence exist) ── */}
-      {styleBreakdown && (
-        <div className="section">
-          <div className="head">
-            <div className="title">Style brief</div>
-            <div className="ai-tag">AI · Auto-generated</div>
-          </div>
-          {artist.style_description && (
-            <p className="summary-body">{artist.style_description}</p>
-          )}
-          <div style={{ height: 18 }} />
-          <div className="style-breakdown">
-            {styleBreakdown.map(([name, pct]) => (
-              <div className="style-row" key={name}>
-                <div className="name">{name}</div>
-                <div className="bar">
-                  <div className="fill" style={{ width: `${pct}%` }} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-faint font-mono text-[9px] tracking-[0.14em] uppercase">
+                  <span className="bg-ink-spot mr-1.5 inline-block size-1.5 rounded-full align-middle shadow-[0_0_8px_var(--accent-glow)]" />
+                  Now
                 </div>
-                <div className="pct">{pct}%</div>
               </div>
-            ))}
+              <div className="mt-0.5 truncate text-[18px] leading-[1.2] text-(--text)">
+                {nowLoc.city || "—"}
+              </div>
+              <div className="text-dim mt-0.5 truncate font-mono text-[10px]">
+                {[nowLoc.country, artist.current_location?.studio_name]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+            </div>
+            <div aria-hidden className="text-faint flex shrink-0 items-center">
+              <ArrowRight size={14} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-faint font-mono text-[9px] tracking-[0.14em] uppercase">
+                Next
+              </div>
+              <div className="text-text-2 mt-0.5 truncate text-[18px] leading-[1.2]">
+                {upcoming?.location_name ? nextLoc.city || "—" : "Open"}
+              </div>
+              <div className="text-dim mt-0.5 truncate font-mono text-[10px]">
+                {[
+                  nextLoc.country,
+                  upcoming?.starts_at ? formatDateRange(upcoming.starts_at, upcoming.ends_at) : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Portfolio masonry ─────────────────────────────── */}
-      <div className="section">
-        <div className="head">
-          <div className="title">Portfolio · {artist.portfolio_items.length}</div>
-          {artist.portfolio_items.length > 0 && (
-            <div className="ai-tag dim">Filter</div>
+        {/* ── CTA row ───────────────────────────────────────── */}
+        <div className="mt-4 flex min-w-0 justify-end gap-2 px-[18px]">
+          {inquireHref ? (
+            <a
+              className={cn(btnPrimaryLg, "w-auto!")}
+              href={inquireHref}
+              target={inquireHref.startsWith("http") ? "_blank" : undefined}
+              rel={inquireHref.startsWith("http") ? "noopener noreferrer" : undefined}
+            >
+              <MessageSquare size={14} aria-hidden />
+              {inquireLabel}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className={cn(btnPrimaryLg, "w-auto!")}
+              disabled
+              title={inquireDisabledReason}
+            >
+              <MessageSquare size={14} aria-hidden />
+              Inquire
+            </button>
+          )}
+          {(artist.upcoming_locations?.length ?? 0) > 0 && (
+            <a className={cn(btnSecondaryLg, "w-auto!")} href="#upcoming-travel">
+              <Calendar size={14} aria-hidden />
+              Travel dates
+            </a>
+          )}
+          {artist.current_location && (
+            <Link
+              href={`/explore?artist=${artist.handle}`}
+              aria-label="View on map"
+              className="bg-surface-2 border-ds-border hover:bg-surface-3 flex size-12 shrink-0 items-center justify-center rounded-full border text-(--text) transition-colors"
+            >
+              <MapPin size={18} aria-hidden />
+            </Link>
+          )}
+          {!isOwner && (
+            <button
+              type="button"
+              aria-label={saved ? "Unsave artist" : "Save artist"}
+              onClick={handleSave}
+              className={cn(
+                "flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors",
+                saved
+                  ? "border-ink-spot bg-accent-soft text-ink-spot"
+                  : "bg-surface-2 border-ds-border hover:bg-surface-3 text-(--text)",
+              )}
+            >
+              <Heart size={18} aria-hidden fill={saved ? "currentColor" : "none"} />
+            </button>
           )}
         </div>
-        {artist.portfolio_items.length > 0 ? (
-          <div className="portfolio-grid" style={{ marginLeft: -18, marginRight: -18 }}>
-            {artist.portfolio_items.map((item, i) => {
-              const tagStyle = item.detected_styles[0] ?? artist.primary_styles[0];
-              return (
-                <div
-                  key={item.id}
-                  className={"tile" + (i % 3 === 0 ? " tall" : "")}
-                >
-                  <Image
-                    src={item.image_url}
-                    alt={item.alt_text ?? `Tattoo by ${artist.display_name}`}
-                    fill
-                    sizes="(max-width: 640px) 50vw, 320px"
-                    className="object-cover"
-                    loading={i < 2 ? "eager" : "lazy"}
-                  />
-                  {tagStyle && (
-                    <div className="overlay">
-                      <div className="style-tag">{STYLE_LABELS[tagStyle]}</div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+
+        {/* ── Bio ───────────────────────────────────────────── */}
+        {artist.bio && (
+          <div className="text-text-2 px-[18px] pt-6 pb-2 text-[18px] leading-relaxed">
+            {artist.bio}
           </div>
-        ) : (
-          <div className="portfolio-empty">No portfolio uploaded yet</div>
         )}
-      </div>
 
-      {/* ── Q&A panel shell (Stage 5.5.3 wires this) ─────── */}
-      {!artist.is_demo && (
-        <div className="qa-panel">
-          <div className="qa-head">
-            <div className="lhs">
-              <div className="glow" />
-              <div className="ttl">Ask about {displayFirst}</div>
+        {/* ── Style brief (AI summary — populated by Phase 5.5 cron) ── */}
+        {aiSummary && (
+          <div className="border-hairline mt-8 border-t px-[18px] pt-7 pb-6">
+            <div className="mb-3.5 flex items-baseline justify-between">
+              <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
+                Style brief
+              </div>
+              <div className="text-ink-spot before:bg-ink-spot inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:content-['']">
+                AI · Auto-generated
+              </div>
             </div>
-            <div className="pill">AI · Coming soon</div>
+            <p className="text-[19px] leading-[1.45] text-pretty text-(--text)">{aiSummary}</p>
           </div>
-          <div className="qa-body placeholder">
-            Conversational Q&amp;A unlocks in Phase 5.5
-          </div>
-          <div className="qa-suggested">
-            {QA_SUGGESTIONS.map((q) => (
-              <button key={q} type="button" disabled>
-                {q}
-              </button>
-            ))}
-          </div>
-          <div className="qa-input">
-            <input
-              placeholder={`Ask about ${displayFirst}'s work, style, availability…`}
-              disabled
-            />
-            <button className="send" type="button" disabled aria-label="Send">
-              <ArrowUp size={14} aria-hidden />
-            </button>
-          </div>
-        </div>
-      )}
+        )}
 
-      {/* ── URL footer ────────────────────────────────────── */}
-      <div className="profile-footer">
-        inkspot.cr · /artist/{artist.handle}
+        {/* ── Portfolio masonry ─────────────────────────────── */}
+        <div className="border-hairline mt-8 border-t px-[18px] pt-7 pb-6">
+          <div className="mb-3.5 flex items-baseline justify-between">
+            <div className="text-dim font-mono text-[10px] tracking-[0.16em] uppercase">
+              Portfolio · {artist.portfolio_items.length}
+            </div>
+            {artist.portfolio_items.length > 0 && (
+              <div className="text-dim before:bg-dim inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.14em] uppercase before:size-1 before:rounded-full before:content-['']">
+                Filter
+              </div>
+            )}
+          </div>
+          {artist.portfolio_items.length > 0 ? (
+            <div className="mx-[-18px] grid grid-cols-2 gap-1 px-1">
+              {artist.portfolio_items.map((item, i) => {
+                const tagStyle = item.detected_styles[0] ?? artist.primary_styles[0];
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-surface-2 group relative aspect-square cursor-pointer overflow-hidden"
+                  >
+                    <Image
+                      src={item.image_url}
+                      alt={item.alt_text ?? `Tattoo by ${artist.display_name}`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, 320px"
+                      className="object-cover transition-transform duration-400 ease-(--e-out) group-hover:scale-105"
+                      loading={i < 2 ? "eager" : "lazy"}
+                    />
+                    {tagStyle && (
+                      <div className="pointer-events-none absolute right-0 bottom-0 left-0 bg-linear-to-b from-transparent to-black/85 p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <div className="font-mono text-[9px] tracking-[0.12em] text-white uppercase">
+                          {STYLE_LABELS[tagStyle]}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="border-hairline text-dim mx-[18px] rounded-[14px] border border-dashed px-[18px] py-8 text-center font-mono text-[11px] tracking-[0.08em] uppercase">
+              No portfolio uploaded yet
+            </div>
+          )}
+        </div>
+
+        {/* ── Upcoming travel ───────────────────────────────── */}
+        {(artist.upcoming_locations?.length ?? 0) > 0 && (
+          <div
+            id="upcoming-travel"
+            className="border-hairline mt-8 border-t px-[18px] pt-7 pb-6"
+          >
+            <div className="text-dim mb-3.5 font-mono text-[10px] tracking-[0.16em] uppercase">
+              Travel dates
+            </div>
+            <div className="flex flex-col gap-2">
+              {artist.upcoming_locations!.map((loc) => (
+                <div
+                  key={loc.id}
+                  className="bg-surface border-hairline flex items-center gap-3 rounded-xl border px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] text-(--text)">
+                      {formatCityCountry(loc.location_name)}
+                    </p>
+                    {loc.studio_name && (
+                      <p className="text-dim text-[12px]">{loc.studio_name}</p>
+                    )}
+                    {loc.starts_at && (
+                      <p className="text-dim text-[12px]">
+                        {formatDateRange(loc.starts_at, loc.ends_at)}
+                      </p>
+                    )}
+                  </div>
+                  <span className="border-hairline text-dim shrink-0 rounded-full border px-2 py-0.5 font-mono text-[10px] capitalize">
+                    {loc.kind === "guest_spot" ? "Guest spot" : "Traveling"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Q&A panel (Phase 5.5 — claimed non-demo only) ─── */}
+        {!artist.is_demo && artist.is_claimed && (
+          <ArtistQAPanel handle={artist.handle} displayName={artist.display_name} />
+        )}
+
+        {/* ── URL footer ────────────────────────────────────── */}
+        <div className="text-faint px-[18px] pb-8 text-center font-mono text-[10px] tracking-[0.14em] uppercase">
+          inkspot.cr · /artist/{artist.handle}
+        </div>
       </div>
 
-      {/* ── Save toast (pre-Stage 5.3) ────────────────────── */}
+      {/* ── Save toast ───────────────────────────────────── */}
       {savedToast && (
-        <div className="save-toast" role="status" aria-live="polite">
-          <Heart size={14} aria-hidden />
-          <span>Sign in to save</span>
-          <Link href="/login">Log in</Link>
+        <div
+          role="status"
+          aria-live="polite"
+          className="bg-surface border-ink-spot fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 animate-[toast-in_0.18s_var(--e-out)] items-center gap-2.5 rounded-full border px-4 py-3 text-[13px] text-(--text) shadow-[0_12px_30px_rgba(0,0,0,0.5)]"
+        >
+          <Heart size={14} aria-hidden fill={savedToast === "saved" ? "currentColor" : "none"} />
+          {savedToast === "auth" ? (
+            <>
+              <span>Sign in to save</span>
+              <Link href="/login" className="text-ink-spot font-mono text-[11px] tracking-widest uppercase">
+                Log in
+              </Link>
+            </>
+          ) : (
+            <span>{savedToast === "saved" ? "Saved" : "Removed"}</span>
+          )}
         </div>
       )}
     </>
   );
 }
 
-const QA_SUGGESTIONS = [
-  "Does she travel for clients?",
-  "Availability this month?",
-  "Cover-up work?",
-  "Pricing range",
-];
 
-/**
- * Style breakdown stub.
- *
- * Pre-Phase-4 we don't have `portfolio_items.style_confidence` populated and
- * we don't have an `ai_artist_summaries` row, so the section stays hidden.
- * Once Stage 4.1 lands the per-item confidence and Stage 5.5.2 generates the
- * narrative summary, this helper will be replaced by a real aggregation that
- * accepts the artist (already documented in PLAN Stage 4.1 + 5.5.2).
- */
-function buildStyleBreakdownStub(): Array<[string, number]> | null {
-  return null;
-}
 
 function formatDateRange(start: string, end?: string | null) {
   try {

@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_ENV: development
+      NEXT_PUBLIC_MAP_TILES_URL: https://tiles.openfreemap.org/styles/liberty
+      NEXT_PUBLIC_SUPABASE_URL: https://ylwzguregzsuruyjwony.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_CgoVWe-nGe-854KmF37gdg_BQDQR6ax
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run type-check
+      - run: npm run test
+      - run: npm run build

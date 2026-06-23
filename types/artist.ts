@@ -65,6 +65,8 @@ export interface Artist {
   current_location?: ArtistLocation | null;
   /** Upcoming guest_spot / traveling entries (future start_at) */
   upcoming_locations?: ArtistLocation[];
+  /** Chronological next stop (may be home base between trips). */
+  next_location?: Pick<ArtistLocation, "location_name" | "kind" | "starts_at" | "ends_at" | "studio_name"> | null;
   instagram_handle?: string | null;
   profile_image_url?: string | null;
   cover_image_url?: string | null;

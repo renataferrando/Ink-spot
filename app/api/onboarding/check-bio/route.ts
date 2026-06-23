@@ -5,7 +5,7 @@
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const handle = searchParams.get("handle");
-  const code   = searchParams.get("code");
+  const code = searchParams.get("code");
 
   if (!handle || !code) {
     return Response.json({ verified: false, error: "Missing parameters" }, { status: 400 });
@@ -14,8 +14,7 @@ export async function GET(request: Request) {
   try {
     const res = await fetch(`https://www.instagram.com/${handle}/`, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; InkSpot/1.0; +https://inkspot.app)",
+        "User-Agent": "Mozilla/5.0 (compatible; InkSpot/1.0; +https://inkspot.app)",
         Accept: "text/html",
       },
       signal: AbortSignal.timeout(8000),

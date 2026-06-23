@@ -1,74 +1,54 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { pageColumnClass, pageGutterClass } from "@/lib/ui/classes";
 
 const TAGS: Record<string, string> = {
-  "/explore": "SANTA TERESA · 12 KM",
-  "/search":  "SEARCH",
-  "/saved":   "SAVED",
+  "/explore": "NEARBY",
+  "/search": "SEARCH",
+  "/saved": "SAVED",
   "/account": "ACCOUNT",
 };
 
-export function TopBar() {
+export function TopBar({ isArtist = false }: { isArtist?: boolean }) {
   const pathname = usePathname();
   const tag = TAGS[pathname] ?? "";
 
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "14px 18px 10px",
-        position: "sticky",
-        top: 0,
-        zIndex: 5,
-        background: "var(--bg)",
-      }}
-    >
-      {/* Wordmark */}
-      <div
-        style={{
-          fontFamily: "var(--font-geist-sans, ui-sans-serif)",
-          fontSize: 22,
-          fontWeight: 500,
-          letterSpacing: "-0.01em",
-          color: "var(--text)",
-          display: "flex",
-          alignItems: "baseline",
-          gap: 0,
-        }}
-      >
-        InkSpot
-        <span
-          style={{
-            display: "inline-block",
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "var(--accent)",
-            boxShadow: "0 0 12px var(--accent-glow)",
-            marginLeft: 4,
-            transform: "translateY(-8px)",
-            flexShrink: 0,
-          }}
-        />
-      </div>
-
-      {/* Tag */}
-      {tag && (
-        <span
-          style={{
-            fontFamily: "var(--font-jetbrains, ui-monospace)",
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            color: "var(--dim)",
-            textTransform: "uppercase",
-          }}
+    <header className="sticky top-0 z-5 bg-(--bg) pt-3.5 pb-2.5 lg:hidden">
+      <div className={cn(pageColumnClass, pageGutterClass, "flex items-center justify-between")}>
+        <Link
+          href="/"
+          className="flex items-baseline font-sans text-[22px] font-medium tracking-[-0.01em] text-(--text)"
         >
-          {tag}
-        </span>
-      )}
+          InkSpot
+          <span
+            aria-hidden
+            className="bg-ink-spot ml-1 inline-block size-1.5 shrink-0 -translate-y-2 rounded-full shadow-[0_0_12px_var(--accent-glow)]"
+          />
+        </Link>
+
+        {isArtist ? (
+          <Link
+            href="/dashboard"
+            className="border-hairline flex items-center gap-2 rounded-full border px-[11px] py-1.5 transition-colors hover:bg-surface"
+          >
+            <span
+              aria-hidden
+              className="bg-ink-spot inline-block size-[5px] shrink-0 rounded-full shadow-[0_0_8px_var(--accent-glow)]"
+            />
+            <span className="text-text-2 font-mono text-[10px] tracking-[0.12em] uppercase">
+              Artist dashboard
+            </span>
+          </Link>
+        ) : (
+          tag && (
+            <span className="text-dim font-mono text-[10px] tracking-[0.14em] uppercase">{tag}</span>
+          )
+        )}
+      </div>
     </header>
   );
 }

@@ -24,9 +24,18 @@ const supabase = createClient(url, key, {
 // ── Seed data ─────────────────────────────────────────────────────────────────
 
 type StyleSlug =
-  | "blackwork" | "fine-line" | "realism" | "watercolor" | "traditional"
-  | "neo-traditional" | "geometric" | "minimalist" | "japanese"
-  | "tribal" | "illustrative" | "dotwork";
+  | "blackwork"
+  | "fine-line"
+  | "realism"
+  | "watercolor"
+  | "traditional"
+  | "neo-traditional"
+  | "geometric"
+  | "minimalist"
+  | "japanese"
+  | "tribal"
+  | "illustrative"
+  | "dotwork";
 
 interface SeedArtist {
   handle: string;
@@ -42,6 +51,21 @@ interface SeedArtist {
   portfolio_count: number;
 }
 
+/** Verified town centers — pins jitter ±~300 m so studios don't stack. */
+const CLUSTERS = {
+  santaTeresa: { lat: 9.640056, lng: -85.162548, label: "Santa Teresa, Puntarenas" },
+  malPais: { lat: 9.614536, lng: -85.143002, label: "Mal País, Puntarenas" },
+} as const;
+
+function coord(cluster: keyof typeof CLUSTERS, dLat: number, dLng: number) {
+  const c = CLUSTERS[cluster];
+  return {
+    lat: +(c.lat + dLat).toFixed(6),
+    lng: +(c.lng + dLng).toFixed(6),
+    location_name: c.label,
+  };
+}
+
 const STUDIOS: SeedArtist[] = [
   {
     handle: "luna-negra",
@@ -51,7 +75,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["blackwork", "dotwork"],
     style_description: "Dark blackwork with geometric influences and meticulous dot stippling.",
     years_experience: 8,
-    lat: 9.638, lng: -85.1702, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.002, -0.0015),
     portfolio_count: 8,
   },
   {
@@ -62,7 +86,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["fine-line", "minimalist"],
     style_description: "Light fine line and botanical minimalism with Pacific coast influence.",
     years_experience: 5,
-    lat: 9.6365, lng: -85.169, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.0035, -0.002),
     portfolio_count: 6,
   },
   {
@@ -73,7 +97,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["geometric", "illustrative"],
     style_description: "Sacred geometry with narrative illustrations inspired by tropical fauna.",
     years_experience: 6,
-    lat: 9.635, lng: -85.1715, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.005, -0.003),
     portfolio_count: 9,
   },
   {
@@ -84,7 +108,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["traditional", "neo-traditional"],
     style_description: "American traditional flash with tropical color and a neo-traditional edge.",
     years_experience: 10,
-    lat: 9.6395, lng: -85.1685, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.0005, -0.001),
     portfolio_count: 10,
   },
   {
@@ -95,7 +119,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["watercolor", "realism"],
     style_description: "Vivid watercolors and hyperrealism from Costa Rica's South Pacific.",
     years_experience: 7,
-    lat: 9.6372, lng: -85.1698, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.0028, -0.0022),
     portfolio_count: 8,
   },
   {
@@ -104,9 +128,10 @@ const STUDIOS: SeedArtist[] = [
     bio: "Demo studio focused on Japanese and traditional tattoos. Folklore-inspired imagery with bold linework.",
     instagram_handle: "punta_verde_demo",
     primary_styles: ["japanese", "traditional"],
-    style_description: "Japanese folklore and botanical motifs with traditional American influence.",
+    style_description:
+      "Japanese folklore and botanical motifs with traditional American influence.",
     years_experience: 9,
-    lat: 9.634, lng: -85.172, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.006, -0.004),
     portfolio_count: 7,
   },
   {
@@ -117,7 +142,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["blackwork", "geometric"],
     style_description: "Architectural blackwork with precise geometric construction.",
     years_experience: 4,
-    lat: 9.64, lng: -85.167, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", 0.0002, 0.0005),
     portfolio_count: 6,
   },
   {
@@ -128,7 +153,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["fine-line", "realism"],
     style_description: "Fine line portraiture and photorealistic botanical work.",
     years_experience: 6,
-    lat: 9.636, lng: -85.173, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.004, -0.0035),
     portfolio_count: 8,
   },
   {
@@ -139,7 +164,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["tribal", "illustrative"],
     style_description: "Pacific Islander tribal patterns and Pre-Columbian illustrative motifs.",
     years_experience: 11,
-    lat: 9.633, lng: -85.169, location_name: "Mal País, Puntarenas",
+    ...coord("malPais", 0.002, -0.001),
     portfolio_count: 7,
   },
   {
@@ -150,7 +175,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["watercolor", "minimalist"],
     style_description: "Abstract watercolor washes combined with minimalist linework.",
     years_experience: 5,
-    lat: 9.641, lng: -85.171, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", 0.001, -0.0008),
     portfolio_count: 6,
   },
   {
@@ -161,7 +186,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["dotwork", "blackwork"],
     style_description: "Meticulous stipple work and heavy blackwork compositions.",
     years_experience: 7,
-    lat: 9.642, lng: -85.17, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", 0.0018, -0.0012),
     portfolio_count: 7,
   },
   {
@@ -172,7 +197,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["traditional", "neo-traditional"],
     style_description: "Costa Rican-themed traditional tattoos with neo-traditional colour depth.",
     years_experience: 8,
-    lat: 9.632, lng: -85.168, location_name: "Mal País, Puntarenas",
+    ...coord("malPais", -0.001, 0.0015),
     portfolio_count: 9,
   },
   {
@@ -183,7 +208,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["geometric", "japanese"],
     style_description: "Japanese-inspired geometric compositions with decorative fill.",
     years_experience: 5,
-    lat: 9.637, lng: -85.174, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.003, -0.0045),
     portfolio_count: 6,
   },
   {
@@ -194,7 +219,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["fine-line", "minimalist"],
     style_description: "Coastal minimalist linework — waves, flora, fauna rendered with precision.",
     years_experience: 4,
-    lat: 9.644, lng: -85.166, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", 0.0035, 0.001),
     portfolio_count: 6,
   },
   {
@@ -205,7 +230,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["realism", "illustrative"],
     style_description: "Painterly realism with illustrative narrative elements.",
     years_experience: 9,
-    lat: 9.631, lng: -85.172, location_name: "Mal País, Puntarenas",
+    ...coord("malPais", 0.003, -0.002),
     portfolio_count: 8,
   },
   {
@@ -216,7 +241,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["blackwork", "dotwork"],
     style_description: "Dry forest flora rendered in heavy blackwork and stipple.",
     years_experience: 6,
-    lat: 9.638, lng: -85.165, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.0015, 0.002),
     portfolio_count: 7,
   },
   {
@@ -227,7 +252,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["fine-line", "realism"],
     style_description: "Nicoya Peninsula cultural motifs in fine line and photorealism.",
     years_experience: 5,
-    lat: 9.633, lng: -85.175, location_name: "Mal País, Puntarenas",
+    ...coord("malPais", -0.0025, -0.003),
     portfolio_count: 6,
   },
   {
@@ -238,7 +263,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["traditional", "illustrative"],
     style_description: "Costa Rican biodiversity rendered in traditional and illustrative styles.",
     years_experience: 7,
-    lat: 9.646, lng: -85.169, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", 0.004, -0.0025),
     portfolio_count: 8,
   },
   {
@@ -249,7 +274,7 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["watercolor", "geometric"],
     style_description: "Tropical watercolour palette constrained by geometric scaffolding.",
     years_experience: 4,
-    lat: 9.629, lng: -85.171, location_name: "Mal País, Puntarenas",
+    ...coord("malPais", 0.001, 0.002),
     portfolio_count: 6,
   },
   {
@@ -260,16 +285,87 @@ const STUDIOS: SeedArtist[] = [
     primary_styles: ["blackwork", "geometric"],
     style_description: "Tropical flora deconstructed into heavy black geometry.",
     years_experience: 5,
-    lat: 9.635, lng: -85.163, location_name: "Santa Teresa, Puntarenas",
+    ...coord("santaTeresa", -0.0055, 0.0005),
     portfolio_count: 6,
   },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function portfolioSeed(handle: string, n: number) {
+/** Real tattoo photos from Unsplash, grouped by style. Used to give demo
+ *  portfolios a believable look until real artist uploads replace them. */
+const STYLE_IMAGES: Record<StyleSlug, string[]> = {
+  blackwork: [
+    "https://images.unsplash.com/photo-1619727968062-573533bfc967",
+    "https://images.unsplash.com/photo-1604374376934-2df6fad6519b",
+    "https://images.unsplash.com/photo-1543244128-30d70d41e2a9",
+    "https://images.unsplash.com/photo-1568735264348-2e141c082d37",
+    "https://images.unsplash.com/photo-1607382007937-fe3a9d196b7a",
+    "https://images.unsplash.com/photo-1566745508112-1897e540b262",
+  ],
+  "fine-line": [
+    "https://images.unsplash.com/photo-1628969454009-843d2369e964",
+    "https://images.unsplash.com/photo-1588747020191-64c5bc8a4fd5",
+    "https://images.unsplash.com/photo-1542727365-19732a80dcfd",
+    "https://images.unsplash.com/photo-1566360897115-7c6bf96cea01",
+    "https://images.unsplash.com/photo-1659615043416-c492e7f4f8ab",
+    "https://images.unsplash.com/photo-1607382007937-fe3a9d196b7a",
+  ],
+  realism: [
+    "https://images.unsplash.com/photo-1623850575867-06e8682dfc88",
+    "https://images.unsplash.com/photo-1613505879804-bc32efd1e76d",
+  ],
+  watercolor: ["https://images.unsplash.com/photo-1752303166259-c15544181efd"],
+  traditional: [
+    "https://images.unsplash.com/photo-1585665883724-c00f3d658207",
+    "https://images.unsplash.com/photo-1479767574301-a01c78234a0c",
+    "https://images.unsplash.com/photo-1623850575867-06e8682dfc88",
+  ],
+  "neo-traditional": [
+    "https://images.unsplash.com/photo-1479767574301-a01c78234a0c",
+    "https://images.unsplash.com/photo-1665085326630-b01fea9a613d",
+    "https://images.unsplash.com/photo-1623850575867-06e8682dfc88",
+    "https://images.unsplash.com/photo-1613505879804-bc32efd1e76d",
+    "https://images.unsplash.com/photo-1610101458810-ee4d92868976",
+  ],
+  geometric: [
+    "https://images.unsplash.com/photo-1568735264348-2e141c082d37",
+    "https://images.unsplash.com/photo-1613505879804-bc32efd1e76d",
+  ],
+  minimalist: [
+    "https://images.unsplash.com/photo-1588747020191-64c5bc8a4fd5",
+    "https://images.unsplash.com/photo-1542727365-19732a80dcfd",
+    "https://images.unsplash.com/photo-1659615043416-c492e7f4f8ab",
+    "https://images.unsplash.com/photo-1752303166259-c15544181efd",
+  ],
+  japanese: [
+    "https://images.unsplash.com/photo-1585665883724-c00f3d658207",
+    "https://images.unsplash.com/photo-1665085326630-b01fea9a613d",
+    "https://images.unsplash.com/photo-1610101458810-ee4d92868976",
+  ],
+  tribal: [
+    "https://images.unsplash.com/photo-1619727968062-573533bfc967",
+    "https://images.unsplash.com/photo-1568735264348-2e141c082d37",
+  ],
+  illustrative: [
+    "https://images.unsplash.com/photo-1628969454009-843d2369e964",
+    "https://images.unsplash.com/photo-1604374376934-2df6fad6519b",
+    "https://images.unsplash.com/photo-1543244128-30d70d41e2a9",
+    "https://images.unsplash.com/photo-1665085326630-b01fea9a613d",
+    "https://images.unsplash.com/photo-1607382007937-fe3a9d196b7a",
+    "https://images.unsplash.com/photo-1566745508112-1897e540b262",
+    "https://images.unsplash.com/photo-1610101458810-ee4d92868976",
+  ],
+  dotwork: [
+    "https://images.unsplash.com/photo-1566360897115-7c6bf96cea01",
+    "https://images.unsplash.com/photo-1566745508112-1897e540b262",
+  ],
+};
+
+function portfolioSeed(handle: string, n: number, styles: StyleSlug[]) {
+  const pool = Array.from(new Set(styles.flatMap((style) => STYLE_IMAGES[style])));
   return Array.from({ length: n }, (_, i) => ({
-    image_url: `https://picsum.photos/seed/${handle}-p${i + 1}/800/800`,
+    image_url: `${pool[i % pool.length]}?auto=format&fit=crop&w=800&h=800&q=80`,
     alt_text: `Portfolio piece ${i + 1} from ${handle}`,
     is_featured: i === 0,
     sort_order: i,
@@ -301,10 +397,7 @@ async function main() {
     .neq("artist_id", "00000000-0000-0000-0000-000000000000");
   if (asErr) console.warn("artist_styles:", asErr.message);
 
-  const { error: aErr } = await supabase
-    .from("artists")
-    .delete()
-    .eq("is_demo", true);
+  const { error: aErr } = await supabase.from("artists").delete().eq("is_demo", true);
   if (aErr) console.warn("artists:", aErr.message);
 
   console.log("🌱 Seeding 20 demo studios…");
@@ -347,12 +440,13 @@ async function main() {
     if (locErr) console.warn(`  location for ${studio.handle}:`, locErr.message);
 
     // 3. Insert portfolio items
-    const items = portfolioSeed(studio.handle, studio.portfolio_count).map(
-      (item) => ({ ...item, artist_id: artist.id }),
+    const items = portfolioSeed(studio.handle, studio.portfolio_count, studio.primary_styles).map(
+      (item) => ({
+        ...item,
+        artist_id: artist.id,
+      })
     );
-    const { error: itemsErr } = await supabase
-      .from("portfolio_items")
-      .insert(items);
+    const { error: itemsErr } = await supabase.from("portfolio_items").insert(items);
     if (itemsErr) console.warn(`  portfolio for ${studio.handle}:`, itemsErr.message);
 
     console.log(`  ✓ ${studio.display_name} (${studio.portfolio_count} portfolio items)`);

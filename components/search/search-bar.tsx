@@ -3,8 +3,8 @@
 import { Image as ImageIcon, Mic, Search, X } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { btnPrimarySm } from "@/lib/ui/classes";
 import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
@@ -39,7 +39,7 @@ export function SearchBar({ onSearch, loading, className }: SearchBarProps) {
     >
       <div className="relative flex-1">
         <Search
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
           aria-hidden
         />
         <Input
@@ -57,7 +57,7 @@ export function SearchBar({ onSearch, loading, className }: SearchBarProps) {
             <button
               type="button"
               onClick={handleClear}
-              className="rounded p-0.5 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground rounded p-0.5"
               aria-label="Clear search"
             >
               <X className="size-3.5" />
@@ -65,7 +65,7 @@ export function SearchBar({ onSearch, loading, className }: SearchBarProps) {
           )}
           <button
             type="button"
-            className="rounded p-0.5 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground rounded p-0.5"
             aria-label="Search by image"
           >
             <ImageIcon className="size-3.5" aria-hidden />
@@ -73,7 +73,7 @@ export function SearchBar({ onSearch, loading, className }: SearchBarProps) {
           {voiceSupported && (
             <button
               type="button"
-              className="rounded p-0.5 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground rounded p-0.5"
               aria-label="Search by voice"
             >
               <Mic className="size-3.5" aria-hidden />
@@ -81,9 +81,9 @@ export function SearchBar({ onSearch, loading, className }: SearchBarProps) {
           )}
         </div>
       </div>
-      <Button type="submit" size="sm" disabled={loading || !value.trim()}>
+      <button type="submit" className={btnPrimarySm} disabled={loading || !value.trim()}>
         Search
-      </Button>
+      </button>
     </form>
   );
 }
