@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { ArtistPublic } from "@/types/artist";
+import { ARTIST_WITH_RELATIONS_SELECT, mapArtistRow } from "@/lib/data/artist-queries";
 
 export const revalidate = 60;
 
@@ -53,27 +54,7 @@ export async function GET(request: Request) {
     // Fetch artists joined with all locations + portfolio items
     let query = supabase
       .from("artists")
-      .select(
-        `
-        id, handle, display_name, bio,
-        instagram_handle, profile_image_url, cover_image_url,
-        website_url, contact_email, years_experience,
-        primary_styles, style_description,
-        is_demo, is_claimed, is_active,
-        created_at, updated_at,
-        artist_locations(
-          id, artist_id, lat, lng, location_name,
-          kind, starts_at, ends_at, is_current,
-          studio_name, notes
-        ),
-        portfolio_items(
-          id, artist_id, image_url, caption, alt_text,
-          detected_styles, is_featured, sort_order,
-          width, height
-        )
-      `,
-        { count: "exact" },
-      )
+      .select(ARTIST_WITH_RELATIONS_SELECT, { count: "exact" })
       .eq("is_active", true)
       .range(offset, offset + limit - 1);
 
@@ -92,46 +73,7 @@ export async function GET(request: Request) {
     }
     if (data) {
       // Reshape into ArtistPublic (split artist_locations → current + upcoming)
-      const now = Date.now();
-      const artists: ArtistPublic[] = data.map((row) => {
-        const locs = Array.isArray(row.artist_locations) ? row.artist_locations : [];
-        const current = locs.find((l: Record<string, unknown>) => l.is_current) ?? locs[0] ?? null;
-        const upcoming = locs
-          .filter((l: Record<string, unknown>) => {
-            if (l.is_current) return false;
-            const start = l.starts_at as string | null | undefined;
-            if (!start) return false;
-            return new Date(start).getTime() > now;
-          })
-          .sort(
-            (a: Record<string, unknown>, b: Record<string, unknown>) =>
-              new Date(a.starts_at as string).getTime() - new Date(b.starts_at as string).getTime(),
-          );
-        const items = Array.isArray(row.portfolio_items) ? row.portfolio_items : [];
-        return {
-          id: row.id as string,
-          handle: row.handle as string,
-          display_name: row.display_name as string,
-          bio: row.bio as string | null,
-          current_location: current as ArtistPublic["current_location"],
-          upcoming_locations: upcoming as ArtistPublic["upcoming_locations"],
-          instagram_handle: row.instagram_handle as string | null,
-          profile_image_url: row.profile_image_url as string | null,
-          cover_image_url: row.cover_image_url as string | null,
-          website_url: row.website_url as string | null,
-          contact_email: row.contact_email as string | null,
-          years_experience: row.years_experience as number | null,
-          primary_styles: (row.primary_styles ?? []) as ArtistPublic["primary_styles"],
-          style_description: row.style_description as string | null,
-          is_demo: row.is_demo as boolean,
-          is_claimed: row.is_claimed as boolean,
-          is_active: row.is_active as boolean,
-          portfolio_items: items as ArtistPublic["portfolio_items"],
-          created_at: row.created_at as string,
-          updated_at: row.updated_at as string,
-        };
-      });
-
+      const artists: ArtistPublic[] = data.map((row) => mapArtistRow(row));
       return buildResponse(artists, count ?? artists.length, limit, offset);
     }
   }

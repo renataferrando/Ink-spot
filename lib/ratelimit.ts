@@ -6,7 +6,14 @@ import { Redis } from "@upstash/redis";
 function buildRedis(): Redis | null {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
+  if (!url || !token) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn(
+        "rate limiting disabled in production: UPSTASH_REDIS_REST_URL/UPSTASH_REDIS_REST_TOKEN are not set",
+      );
+    }
+    return null;
+  }
   return new Redis({ url, token });
 }
 

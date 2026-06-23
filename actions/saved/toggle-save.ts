@@ -17,38 +17,40 @@ export async function toggleSave(artistId: string): Promise<ToggleSaveResult> {
   const admin = getSupabaseAdminClientUntyped();
 
   // Check if already saved
-  const { data: existing } = await admin
+  const { data: existing, error: selectError } = await admin
     .from("saved_artists")
     .select("artist_id")
     .eq("user_id", user.id)
     .eq("artist_id", artistId)
     .maybeSingle();
 
+  if (selectError) {
+    throw new Error(`Failed to look up saved artist: ${selectError.message}`);
+  }
+
   if (existing) {
-    await admin
+    const { error: deleteError } = await admin
       .from("saved_artists")
       .delete()
       .eq("user_id", user.id)
       .eq("artist_id", artistId);
 
+    if (deleteError) {
+      throw new Error(`Failed to unsave artist: ${deleteError.message}`);
+    }
+
     revalidatePath("/saved");
     return { saved: false };
   }
 
-  await admin
+  const { error: insertError } = await admin
     .from("saved_artists")
     .insert({ user_id: user.id, artist_id: artistId });
 
+  if (insertError) {
+    throw new Error(`Failed to save artist: ${insertError.message}`);
+  }
+
   revalidatePath("/saved");
   return { saved: true };
-}
-
-export async function getSavedArtistIds(userId: string): Promise<string[]> {
-  const admin = getSupabaseAdminClientUntyped();
-  const { data } = await admin
-    .from("saved_artists")
-    .select("artist_id")
-    .eq("user_id", userId);
-
-  return (data ?? []).map((r: { artist_id: string }) => r.artist_id);
 }

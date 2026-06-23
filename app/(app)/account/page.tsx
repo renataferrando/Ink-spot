@@ -88,11 +88,12 @@ export default async function AccountPage() {
 
   // ── Authenticated — check for artist row ──────────
   const admin = getSupabaseAdminClient();
-  const { data: artist } = await admin
+  const { data: artist, error } = await admin
     .from("artists")
     .select("handle, display_name, is_claimed, is_active, primary_styles")
     .eq("claimed_by_user_id", user.id)
     .maybeSingle();
+  if (error) console.error("AccountPage: failed to look up artist", error);
 
   // ── Authenticated, no artist ──────────────────────
   if (!artist) {

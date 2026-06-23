@@ -77,13 +77,17 @@ export function ArtistProfile({ artist, aiSummary, isSaved = false, isOwner = fa
   async function handleSave() {
     const prev = saved;
     setSaved(!prev);
-    const result = await toggleSave(artist.id);
-    if ("requiresAuth" in result) {
+    try {
+      const result = await toggleSave(artist.id);
+      if ("requiresAuth" in result) {
+        setSaved(prev);
+        setSavedToast("auth");
+      } else {
+        setSaved(result.saved);
+        setSavedToast(result.saved ? "saved" : "removed");
+      }
+    } catch {
       setSaved(prev);
-      setSavedToast("auth");
-    } else {
-      setSaved(result.saved);
-      setSavedToast(result.saved ? "saved" : "removed");
     }
     window.setTimeout(() => setSavedToast(null), 3000);
   }

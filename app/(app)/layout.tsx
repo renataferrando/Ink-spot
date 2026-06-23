@@ -13,11 +13,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   let showDashboard = false;
   if (user) {
     const admin = getSupabaseAdminClient();
-    const { data } = await admin
+    const { data, error } = await admin
       .from("artists")
       .select("id")
       .eq("claimed_by_user_id", user.id)
       .maybeSingle();
+    if (error) console.error("AppLayout: failed to look up artist for nav", error);
     showDashboard = Boolean(data);
   }
 

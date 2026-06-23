@@ -17,7 +17,7 @@ export async function ensurePendingClaim(
   userId: string,
   instagramHandle: string,
 ): Promise<string> {
-  const { data: existing } = await admin
+  const { data: existing, error: selectError } = await admin
     .from("claims")
     .select("id, verification_code")
     .eq("artist_id", artistId)
@@ -26,18 +26,26 @@ export async function ensurePendingClaim(
     .limit(1)
     .maybeSingle();
 
+  if (selectError) {
+    throw new Error(`Failed to look up pending claim: ${selectError.message}`);
+  }
+
   if (existing?.verification_code) {
     return existing.verification_code as string;
   }
 
   const code = generateVerificationCode();
-  await admin.from("claims").insert({
+  const { error: insertError } = await admin.from("claims").insert({
     artist_id: artistId,
     instagram_user_id: userId,
     instagram_handle: instagramHandle,
     status: "pending",
     verification_code: code,
   });
+
+  if (insertError) {
+    throw new Error(`Failed to create pending claim: ${insertError.message}`);
+  }
 
   return code;
 }

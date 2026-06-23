@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ArtistProfile } from "@/components/artist/artist-profile";
 import type { ArtistPublic } from "@/types/artist";
-import { computeCurrentLocation, computeNextLocation } from "@/lib/location";
+import { ARTIST_WITH_RELATIONS_SELECT, mapArtistRow } from "@/lib/data/artist-queries";
 import { getSupabaseAdminClientUntyped } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -38,76 +38,14 @@ async function getArtist(handle: string): Promise<ArtistPublic | null> {
 
       const { data, error } = await supabase
         .from("artists")
-        .select(
-          `
-          id, handle, display_name, bio,
-          instagram_handle, profile_image_url, cover_image_url,
-          website_url, contact_email, years_experience,
-          primary_styles, style_description,
-          is_demo, is_claimed, is_active,
-          created_at, updated_at,
-          artist_locations(
-            id, artist_id, lat, lng, location_name,
-            kind, starts_at, ends_at, is_current, studio_name, notes
-          ),
-          portfolio_items(
-            id, artist_id, image_url, caption, alt_text,
-            detected_styles, is_featured, sort_order, width, height
-          )
-        `,
-        )
+        .select(ARTIST_WITH_RELATIONS_SELECT)
         .eq("handle", handle)
         .eq("is_active", true)
         .single()
         .returns<Record<string, unknown>>();
 
       if (!error && data) {
-        const locs = Array.isArray(data.artist_locations) ? data.artist_locations : [];
-        const current = computeCurrentLocation(locs);
-        const next = computeNextLocation(locs, current);
-        const upcoming = locs
-          .filter(
-            (l: Record<string, unknown>) =>
-              l.id !== current?.id && l.starts_at && new Date(l.starts_at as string) > new Date(),
-          )
-          .sort(
-            (a, b) =>
-              new Date(a.starts_at as string).getTime() -
-              new Date(b.starts_at as string).getTime(),
-          );
-        return {
-          id: data.id as string,
-          handle: data.handle as string,
-          display_name: data.display_name as string,
-          bio: data.bio as string | null,
-          current_location: current as ArtistPublic["current_location"],
-          upcoming_locations: upcoming as ArtistPublic["upcoming_locations"],
-          next_location: next
-            ? {
-                location_name: next.location.location_name,
-                kind: next.location.kind,
-                starts_at: next.starts_at,
-                ends_at: next.location.kind === "home_base" ? null : next.location.ends_at ?? null,
-                studio_name: next.location.studio_name ?? null,
-              }
-            : null,
-          instagram_handle: data.instagram_handle as string | null,
-          profile_image_url: data.profile_image_url as string | null,
-          cover_image_url: data.cover_image_url as string | null,
-          website_url: data.website_url as string | null,
-          contact_email: data.contact_email as string | null,
-          years_experience: data.years_experience as number | null,
-          primary_styles: (data.primary_styles ?? []) as ArtistPublic["primary_styles"],
-          style_description: data.style_description as string | null,
-          is_demo: data.is_demo as boolean,
-          is_claimed: data.is_claimed as boolean,
-          is_active: data.is_active as boolean,
-          portfolio_items: (Array.isArray(data.portfolio_items)
-            ? data.portfolio_items
-            : []) as ArtistPublic["portfolio_items"],
-          created_at: data.created_at as string,
-          updated_at: data.updated_at as string,
-        } satisfies ArtistPublic;
+        return mapArtistRow(data);
       }
     } catch {
       return null;

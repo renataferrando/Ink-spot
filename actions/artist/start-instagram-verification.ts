@@ -78,7 +78,12 @@ export async function startInstagramVerification(
       .eq("status", "pending");
   }
 
-  const code = await ensurePendingClaim(admin, artist.id, user.id, handle);
+  let code: string;
+  try {
+    code = await ensurePendingClaim(admin, artist.id, user.id, handle);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to start verification." };
+  }
 
   revalidatePath("/dashboard/profile");
   revalidatePath("/dashboard");
