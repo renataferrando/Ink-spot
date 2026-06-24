@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Calendar,
@@ -25,8 +25,6 @@ import { toggleSave } from "@/actions/saved/toggle-save";
 interface ArtistProfileProps {
   artist: ArtistPublic;
   aiSummary?: string | null;
-  isSaved?: boolean;
-  isOwner?: boolean;
 }
 
 /**
@@ -40,10 +38,28 @@ interface ArtistProfileProps {
  * Stages 4.1 + 5.5.2 will populate the Style brief; Stage 5.5.3 will
  * activate the Q&A panel input + suggestion chips.
  */
-export function ArtistProfile({ artist, aiSummary, isSaved = false, isOwner = false }: ArtistProfileProps) {
+export function ArtistProfile({ artist, aiSummary }: ArtistProfileProps) {
   const router = useRouter();
-  const [saved, setSaved] = useState(isSaved);
+  const [saved, setSaved] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [savedToast, setSavedToast] = useState<"saved" | "removed" | "auth" | null>(null);
+
+  // Saved/owner state is per-viewer, so it's fetched client-side rather than
+  // baked into the (revalidate-cached) server render — see app/(artist)/artist/[handle]/page.tsx.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/artists/${artist.handle}/viewer-state`) // [id] segment doubles as the handle, see route.ts
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { isSaved: boolean; isOwner: boolean } | null) => {
+        if (cancelled || !data) return;
+        setSaved(data.isSaved);
+        setIsOwner(data.isOwner);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [artist.handle]);
 
   const initials = artist.display_name.slice(0, 2).toUpperCase();
   const firstPortfolioImage = artist.portfolio_items[0]?.image_url ?? null;
