@@ -5,85 +5,48 @@ import { ArtistProfile } from "@/components/artist/artist-profile";
 import type { ArtistPublic } from "@/types/artist";
 import { ARTIST_WITH_RELATIONS_SELECT, mapArtistRow } from "@/lib/data/artist-queries";
 import { getSupabaseAdminClientUntyped } from "@/lib/supabase/admin";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabasePublicClient } from "@/lib/supabase/public";
 
 export const revalidate = 60;
 
 type Props = { params: Promise<{ handle: string }> };
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
+// Uses the cookie-free public client deliberately: this page is time-cached
+// (revalidate = 60) and combining that with a cookie-bound client makes Next.js
+// flip the route to dynamic mid-flight ("Page changed from static to dynamic at
+// runtime, reason: cookies"), which 500s on every regeneration. Per-user state
+// (saved/owner) is fetched client-side instead — see ArtistProfile.
 
 async function getArtist(handle: string): Promise<ArtistPublic | null> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  try {
+    const supabase = getSupabasePublicClient();
+    const { data, error } = await supabase
+      .from("artists")
+      .select(ARTIST_WITH_RELATIONS_SELECT)
+      .eq("handle", handle)
+      .eq("is_active", true)
+      .single()
+      .returns<Record<string, unknown>>();
 
-  if (supabaseUrl && supabaseKey) {
-    try {
-      const { createServerClient } = await import("@supabase/ssr");
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-
-      const supabase = createServerClient(supabaseUrl, supabaseKey, {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet: Array<{ name: string; value: string; options?: object }>) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options ?? {}),
-            );
-          },
-        },
-      });
-
-      const { data, error } = await supabase
-        .from("artists")
-        .select(ARTIST_WITH_RELATIONS_SELECT)
-        .eq("handle", handle)
-        .eq("is_active", true)
-        .single()
-        .returns<Record<string, unknown>>();
-
-      if (!error && data) {
-        return mapArtistRow(data);
-      }
-    } catch {
-      return null;
+    if (!error && data) {
+      return mapArtistRow(data);
     }
+  } catch {
+    return null;
   }
 
   return null;
 }
 
 async function getAllHandles(): Promise<string[]> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  try {
+    const supabase = getSupabasePublicClient();
+    const { data } = await supabase.from("artists").select("handle").eq("is_active", true);
 
-  if (supabaseUrl && supabaseKey) {
-    try {
-      const { createServerClient } = await import("@supabase/ssr");
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-
-      const supabase = createServerClient(supabaseUrl, supabaseKey, {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet: Array<{ name: string; value: string; options?: object }>) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options ?? {}),
-            );
-          },
-        },
-      });
-
-      const { data } = await supabase.from("artists").select("handle").eq("is_active", true);
-
-      if (data) return data.map((r: { handle: string }) => r.handle);
-    } catch {
-      return [];
-    }
+    if (data) return data.map((r: { handle: string }) => r.handle);
+  } catch {
+    return [];
   }
 
   return [];
@@ -141,34 +104,10 @@ export default async function ArtistPage({ params }: Props) {
   const artist = await getArtist(handle);
   if (!artist) notFound();
 
-  const [aiSummary, supabase] = await Promise.all([
-    artist.is_demo ? Promise.resolve(null) : getAiSummary(artist.id),
-    getSupabaseServerClient(),
-  ]);
+  const aiSummary = artist.is_demo ? null : await getAiSummary(artist.id);
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  let isSaved = false;
-  let isOwner = false;
-  if (user) {
-    const admin = getSupabaseAdminClientUntyped();
-    const [savedResult, ownerResult] = await Promise.all([
-      admin
-        .from("saved_artists")
-        .select("artist_id")
-        .eq("user_id", user.id)
-        .eq("artist_id", artist.id)
-        .maybeSingle(),
-      admin
-        .from("artists")
-        .select("id")
-        .eq("handle", handle)
-        .eq("claimed_by_user_id", user.id)
-        .maybeSingle(),
-    ]);
-    isSaved = !!savedResult.data;
-    isOwner = !!ownerResult.data;
-  }
-
-  return <ArtistProfile artist={artist} aiSummary={aiSummary} isSaved={isSaved} isOwner={isOwner} />;
+  // Saved/owner state is per-viewer and fetched client-side (see ArtistProfile)
+  // rather than here — reading cookies() in this revalidate-cached page would
+  // reintroduce the static/dynamic conflict this route was built to avoid.
+  return <ArtistProfile artist={artist} aiSummary={aiSummary} />;
 }
